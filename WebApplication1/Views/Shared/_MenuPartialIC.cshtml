@@ -1,0 +1,67 @@
+﻿@using WebApplication1.Models;
+@{
+    var session = Session["SessionUser"] as SessionModels;
+}
+<link href="~/Content/styles/cardscss.css" rel="stylesheet" />
+<div class="main" id="facade">
+    <div class="container" style="margin-left: 60%; max-width:1440px; width:800px">
+        <div class="card float-right" style="width:153%">
+            <div class="row" style="margin-top: -5% !important;">
+                @*<div class="col-sm-5" style="padding-right: 0 !important;padding-left: 0 !important;">
+                    <img class="d-block w-100" src="~/Content/Images/datamart.jpg" alt="" style="height: 100%;border-radius: .28571429rem;z-index: -1;position: unset;" />
+                </div>*@
+                <div class="col-sm-7">
+                    <div class="card-block">
+                        <div style="background-color: #112F4A !important; height: 48px; text-align: center; border-radius: .28571429rem; width: 123%; margin-left: -5%;">
+                            <h5 class="card-title" style="color: #55be5a;margin-left: -13%;padding-top: 10px;">Equipos de Izaje de cargas</h5>
+                        </div>
+                        <div>
+
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("IndexEquipmentIzage", "Izage")')" style="color: #aaaaaa !important;font-size: smaller;">Equipos - Página Inicial</a></th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("CreateEquipmentIzage", "Izage")')" style="color: #aaaaaa !important;font-size: smaller;">Equipos - Crear Nuevo</a></th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("IndexInspectionIzaje", "InspectionIzaje")')" style="color: #aaaaaa !important;font-size: smaller;">Inspecciones - Página Inicial</a></th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("CreateInspectionIzaje", "InspectionIzaje",new { @id=0})')" style="color: #aaaaaa !important;font-size: smaller;">Inspecciones - Crear Nuevo</a></th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="field">
+
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("IndexFactoresIzaje", "FactoresIzaje")')" style="color: #aaaaaa !important;font-size: smaller;">Factores de Inspección - Página Inicial</a></th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("CreateFactoresIzaje", "FactoresIzaje")')" style="color: #aaaaaa !important;font-size: smaller;">Categorias/Factores - Crear Nuevo</a></th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("Index", "CronogramaIzaje")')" style="color: #aaaaaa !important;font-size: smaller;">Cronogramas de Inspecciones</a></th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("Index", "FindingIzaje")')" style="color: #aaaaaa !important;font-size: smaller;">Administración de Hallazgos - Página Inicial</a></th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+           
+        </div>
+
+    </div>
+
+

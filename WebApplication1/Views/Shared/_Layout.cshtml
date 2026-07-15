@@ -1,0 +1,296 @@
+﻿
+@using WebApplication1.Models;
+@{
+    var session = Session["SessionUser"] as SessionModels;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Viajes Country- Datamart</title>
+    @Styles.Render("~/Content/SemanticUi/semantic.css")
+    @Styles.Render("~/Content/Site.css")
+    @Styles.Render("~/Content/font-awesome-4.7.0/css/font-awesome.css")
+    <link href="~/Content/facade.css" rel="stylesheet" />
+
+    <link href="~/Content/SemanticUI/semantic.css" rel="stylesheet" />
+    <link href="~/Scripts/tables/jquery.dynatable.css" rel="stylesheet" />
+    <link href="~/Content/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Scripts/calendar/calendar.min.css" rel="stylesheet" />
+    <link href="~/Content/toastr.css" rel="stylesheet" />
+    @Scripts.Render("~/bundles/jqueryJs")
+    @Scripts.Render("~/bundles/semanticJs")
+    @Scripts.Render("~/bundles/loadingOverlayJs")
+    @Scripts.Render("~/bundles/jqueryUnobstriveJs")
+    <script type="text/javascript" src="~/Scripts/tables/jquery.dynatable.js"></script>
+    <script src="~/Scripts/calendar/calendar.min.js"></script>
+    <link href="~/Scripts/calendar/calendar.min.css" rel="stylesheet" />
+
+    <script src="~/Scripts/toastr.js"></script>
+    <script src="~/Scripts/dropzone/dropzone.min.js"></script>
+    <link href="~/Scripts/dropzone/dropzone.min.css" rel="stylesheet" />
+    <script src="~/Scripts/chartJs/Chart.bundle.min.js"></script>
+    <script src="~/Scripts/chartJs/Chart.min.js"></script>
+    <link href="~/Content/menuNew.css" rel="stylesheet" />
+
+    @Styles.Render("~/Content/SemanticUi/semantic.css")
+    @Styles.Render("~/Content/Site.css")
+    @Styles.Render("~/Content/font-awesome-4.7.0/css/font-awesome.css")
+    @*<link href="~/Content/facade.css" rel="stylesheet" />*@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+    <style>
+        body {
+            background-image: url('@Url.Content("~/Content/Images/robotica-dighe_1200x630.jpeg")');
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .card-header .fa {
+            transition: .3s transform ease-in-out;
+        }
+
+        .card-header .collapsed .fa {
+            transform: rotate(90deg);
+        }
+
+        .card-bdy {
+            background: linear-gradient(to bottom, #ddefe0,#54c4a4);
+        }
+        .btn-bdy {
+            color: #00B5AD !important;
+            font-size: 16px;
+            font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+    @*<div class="ui very text container segment" id="segmentLogin" style="margin-top:0%;height: 139px;">
+            <img class="ui centered medium image" src="@Url.Content("~/Content/Images/Logo.png")">
+            <h2 style="text-align:center;color: #1cac84;" id="titulo1" class="ui teal">PPROTECC 2.0</h2>
+
+
+
+        </div>*@
+    <img class="ui centered image" src="@Url.Content("~/Content/Images/Logo.png")" style="border-radius: 0px 0px 20px 20px; width: 5%; margin-top: -1%;">
+    <div class="main">
+
+        <div class="ui equal width form" style="margin-top:-6%;">
+
+
+            <div class="fields">
+                <div class="field">
+                    <button class="ui primary button" id="menuP"  style="display: none; background-color: #112F4A !important" onclick="mostrarMenu()">DataMart - Menú</button>
+                </div>
+                <div class="field">
+
+                </div>
+                <div class="field">
+
+                </div>
+                <div class="field">
+
+                </div>
+                <div class="field">
+                    @if (session.Idioma == "italiano")
+                    {
+                    <a class="menu__link" href="@Url.Action("LoginFacade", "Account")" data-finish="true" style="font-size: larger;background-color: #55BE5A;color: white;">
+                        <i class="fa fa-home" aria-hidden="true"></i> Torna a Moduli
+                    </a>
+                    }
+                    else if (session.Idioma == "spain")
+                    {
+                <a class="menu__link" href="@Url.Action("LoginFacade", "Account")" data-finish="true" style="font-size: larger; background-color: #112F4A !important; color: white;">
+                    <i class="fa fa-home" aria-hidden="true"></i> Regresar a Módulos
+                </a>
+                    }
+                    else if (session.Idioma == "english")
+                    {
+                <a class="menu__link" href="@Url.Action("LoginFacade", "Account")" data-finish="true" style="font-size: larger;background-color: #55BE5A;color: white;">
+                    <i class="fa fa-home" aria-hidden="true"></i> Back to Modules
+                </a>
+                    }
+                </div>
+                <div class="field">
+                    @if (session.Idioma == "italiano")
+                    {
+                        <a class="menu__link" href="@Url.Action("LogOff", "Account")" data-finish="true" style="font-size: larger;background-color: #55BE5A;color: white;">
+                            <i class="fa fa-home" aria-hidden="true"></i> Lasciare
+                        </a>
+                    }
+                    else if (session.Idioma == "spain")
+                    {
+                        <a class="menu__link" href="@Url.Action("LogOff", "Account")" data-finish="true" style="font-size: larger; background-color: #112F4A !important; color: white;">
+                            <i class="fa fa-home" aria-hidden="true"></i> Salir
+                        </a>
+                    }
+                    else if (session.Idioma == "english")
+                    {
+                        <a class="menu__link" href="@Url.Action("LogOff", "Account")" data-finish="true" style="font-size: larger;background-color: #55BE5A;color: white;">
+                            <i class="fa fa-home" aria-hidden="true"></i> Exit
+                        </a>
+                    }
+                </div>
+            </div>
+
+
+
+            <div class="fields" style="margin-top: -5%;">
+
+                @if (session.Idioma == "italiano")
+                {
+                    if (session.ModuloSeleccionado == "WH")
+                    {
+                        @Html.Partial("_MenuPartialWHIT")
+                    }
+                    else
+                    {
+                        @Html.Partial("_MenuPartialICIT")
+                    }
+                }
+                else if (session.Idioma == "spain")
+                {
+                    if (session.ModuloSeleccionado == "WH")
+                    {
+                        @Html.Partial("_MenuPartialWHU")
+                    }
+                    else
+                    {
+                        @Html.Partial("_MenuPartialIC")
+                    }
+                }
+                else if (session.Idioma == "english")
+                {
+                    if (session.ModuloSeleccionado == "WH")
+                    {
+                        @Html.Partial("_MenuPartialWHEN")
+                    }
+                    else
+                    {
+                        @Html.Partial("_MenuPartialICEN")
+                    }
+                }
+
+            </div>
+        </div>
+
+
+        <div class="field">
+            <div class="ui segment overflow-auto" id="renderPages" style="min-height:250px !important;background-color: transparent;border:none;height:650px !important">
+                @RenderBody()
+            </div>
+            
+            <div class="ui segment overflow-auto" id="renderPagesOculto" style="min-height:250px !important;background-color: transparent;border:none;height:650px !important">
+               
+            </div>
+        </div>
+
+    </div>
+    @Scripts.Render("~/bundles/jqueryJs")
+    @Scripts.Render("~/bundles/semanticJs")
+    @Scripts.Render("~/Content/LoadingOverlay/src/loadingoverlay.min.js")
+    @Scripts.Render("~/bundles/jqueryUnobstriveJs")
+    @RenderSection("scripts", required: false)
+    <script type="text/javascript">
+
+
+        function mostrarMenu() {
+            $('#facade').show();
+            $('#menuP').hide();
+            $('#renderPages').html('');
+            $('#renderPages').hide();
+        };
+
+        function loadDummyData(hrefURL) {
+            cargarElement(hrefURL);
+        };
+        function cargarElement(url) {
+            $('#menuP').show();
+            $('#renderPages').show();
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#renderPages').html('').addClass("loading");
+                
+               
+                /*$('#renderPages').html('').addClass("loading").css("height", 500);*/
+            },
+            success: function (data) {
+                $('#renderPages').html(data);
+                $('.titlesPages').html('@ViewBag.ApplicationName | ' + $('.titlesPages').html());
+                $('#renderPages').css("background-color", "white");
+            },
+            complete: function () {
+                $('#renderPages').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#renderPages');
+                /*        $("#menuPartial").hide();*/
+               
+            }
+        })
+          
+    }
+    function LoadElementsDefaultPartial(element) {
+        $(element).find($('.ui.dropdown').dropdown());
+        $(element).find($('.ui.checkbox').checkbox());
+        $('#renderPages').focus();
+        $('#facade').hide();
+
+        }
+
+
+    toastr.options = {
+    "closeButton": false,
+    "debug": false,
+    "newestOnTop": false,
+    "progressBar": true,
+    "positionClass": "toast-bottom-right",
+    "preventDuplicates": false,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "0",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+    }
+    $.fn.noop = function () { return this; };
+    toastr.options.hideMethod = 'noop';
+    @*$.ajax({
+            url: '@Url.Action("GetMissions", "Mission")',
+            type: 'POST',
+            success: function (data) {
+                toastr.info("Próximas Misiones");
+                if (data.result) {
+                    $.each(data.mission, function (index, value) {
+                        toastr.success("Fecha: " + value.date + " - " + value.city + '<br/> ' + value.description, value.name);
+                    });
+                }
+
+            }
+        });*@
+    function LoadElementsDefault() {
+    $('.ui.dropdown').dropdown();
+    }
+    $(function () {
+    LoadElementsDefault();
+    });
+    function LoadTables() {
+    $(function () {
+    $('.tablesInitial').dynatable();
+    });
+    }
+    $('#renderPages').on('click', function () {
+    $("#menuPartial").hide();
+    });
+    </script>
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

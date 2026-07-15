@@ -1,0 +1,524 @@
+﻿<h3 class="titlesPages">
+    CREAR INSPECCIÓN
+</h3>
+@using (Ajax.BeginForm("ProcessCreateInspections", "Inspections", null, new AjaxOptions()
+{
+    HttpMethod = "POST",
+    OnBegin = "return onBeginProcessCreateInspections()",
+    OnSuccess = "onSuccessProcessCreateInspections(data)",
+    OnFailure = "onFailureProcessCreateInspections()",
+}, new { @id = "formProcessCreateInspections" }))
+{
+    <input type="hidden" name="id" value="" id="id" />
+    <div class="ui equal width form">
+        <div class="fields">
+            <div class="field">
+                <label>Sede</label>
+                @Html.DropDownList("cbxHeadquarter", (SelectList)ViewBag.HeadquarterDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown" })
+            </div>
+            <div class="field">
+                <label>Elemento</label>
+                @Html.DropDownList("cbxElement", (SelectList)ViewBag.ElementDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="fields">
+            <div class="four wide field">
+            </div>
+            <div class="eight wide field">
+                <label>TAG</label>
+                <input type="text" id="rfid" name="rfid" placeholder="TAG" autocomplete="off" maxlength="50" style="font-size:24px!important;text-align:center!important">
+            </div>
+            <div class="four wide field">
+            </div>
+        </div>
+        <div class="fields">
+            <div class="four wide field">
+            </div>
+            <div class="eight wide field">
+                <label>SERIAL</label>
+                <input type="text" id="serialID" name="serialID" placeholder="Serial" autocomplete="off" maxlength="50" style="font-size:24px!important;text-align:center!important">
+            </div>
+            <div class="four wide field">
+            </div>
+        </div>
+        <div class="fields">
+            <div class="four wide field">
+            </div>
+            <div class="eight wide field">
+                <label>PRECINTO</label>
+                <input type="text" id="precintoID" name="precintoID" placeholder="Precinto" autocomplete="off" maxlength="50" style="font-size:24px!important;text-align:center!important">
+            </div>
+            <div class="four wide field">
+            </div>
+        </div>
+        <div class="fields">
+            <div>
+                <h3 class="titlesPagesDescription">Encabezado</h3>
+            </div>
+        </div>
+
+        <div class="fields">
+            <div class="field">
+                <label>Modelo</label>
+                <input type="text" id="model" name="model" placeholder="Modelo" autocomplete="off" maxlength="50" readonly>
+            </div>
+
+
+        </div>
+
+        <div class="fields">
+            <div class="field">
+                <label>Ubicación</label>
+                @Html.DropDownList("cbxLocation", (SelectList)ViewBag.LocationDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown" })
+            </div>
+            <div class="field">
+                <label>Material</label>
+                <input type="text" id="material" name="material" placeholder="Material" autocomplete="off" maxlength="50" readonly>
+            </div>
+            <div class="field">
+                <label>Fecha Fabricación</label>
+                <input type="text" id="fabricationDate" placeholder="Fecha Fabricación" autocomplete="off" maxlength="50" readonly>
+            </div>
+        </div>
+        <div class="fields">
+            <div class="field">
+                <label>Marca</label>
+                <input type="text" id="mark" name="mark" placeholder="Marca" autocomplete="off" maxlength="50" readonly>
+            </div>
+            <div class="field">
+                <label>Serial</label>
+                <input type="text" id="serial" name="serial" placeholder="Serial" autocomplete="off" maxlength="50" readonly>
+            </div>
+
+            <div class="field">
+                <label>Fecha de Compra</label>
+                <input type="text" id="purchaseDate" placeholder="Fecha de Compra" autocomplete="off" maxlength="50" readonly>
+            </div>
+
+        </div>
+        <div class="fields">
+            <div class="field">
+                <label>Lote</label>
+                <input type="text" id="lot" name="lot" placeholder="Lote" autocomplete="off" maxlength="50" readonly>
+            </div>
+        </div>
+        <div class="fields">
+            <div>
+                <h3 class="titlesPagesDescription">Factores inspeccionados</h3>
+            </div>
+        </div>
+        <div class="fields">
+            <div class="field" id="detail">
+
+            </div>
+        </div>
+        <div class="fields">
+            <div>
+                <h3 class="titlesPagesDescription">Disposición General</h3>
+            </div>
+        </div>
+        <div class="fields">
+            <table class="ui selectable celled table ui center aligned">
+                <thead>
+                    <tr>
+                        <th>Aceptado/Rechazado</th>
+                        <th>Accion a Tomar</th>
+                        <th>Inspeccionado Por</th>
+                        <th>Fecha de inspección</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Html.DropDownList("cbxFinalState", (SelectList)ViewBag.FinalStateDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown" })</td>
+                        <td>@Html.DropDownList("cbxActionResult", (SelectList)ViewBag.ActionResultDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown" })</td>
+                        <td>@Html.DropDownList("cbxInspector", (SelectList)ViewBag.InspectorDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown" })</td>
+                        <td>
+                            Fecha última inspección
+                            <input type="text" id="fechaultima" name="fechaultima" placeholder="Fecha última inspección" autocomplete="off" width="100px" maxlength="15" readonly>
+                            <div class="ui calendar calendarPicker" id="inspectionDate">
+                                <div class="ui input left icon">
+                                    <i class="calendar icon"></i>
+                                    <input type="text" placeholder="Fecha Inspección">
+                                </div>
+                            </div>
+                            <input type="hidden" name="cinspectionDate" id="cinspectionDate" autocomplete="off">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button class="ui primary button" id="btnGuardar" type="button">
+            Guardar
+        </button>
+    </div>
+    <div class="ui floating warning message" style="width:50%;margin-left:25%;margin-right:25%;text-align:center;display:none" id="messageCreateInspections">
+        <div class="header">
+            Atención
+        </div>
+        <p id="textmessageCreateInspections"></p>
+    </div>
+}
+
+<script type="text/javascript">
+    $(function () {
+        var headquarterId = '@ViewBag.headquarterId';
+        var RFID = '@ViewBag.RFID';
+        if (headquarterId && RFID) {
+            $('#cbxHeadquarter').dropdown('set selected', headquarterId);
+            $('#rfid').val(RFID);
+            var rfid = RFID;
+            var headquarterid = headquarterId;
+            if (headquarterid != "" && headquarterid != null) {
+                var html = ' value =';
+                $.ajax({
+                    url: '@Url.Action("GetDataElementByRFID", "Inspections")',
+                    data: { rfid: rfid, headquaterid: headquarterid },
+                    type: 'POST',
+                    success: function (data) {
+                        if (data.result) {
+                            var element = data.data;
+                            if (element.length > 0) {
+                                $('#id').val(element[0]);
+                                $('#model').val(element[3]);
+                                $('#material').val(element[4]);
+                                $('#mark').val(element[6]);
+                                $('#serial').val(element[2]);
+                                $('#serialID').val(element[2]);
+                                $('#precintoID').val(element[30]);
+                                $('#lot').val(element[7]);
+                                $('#cbxElement').dropdown('set selected', element[8]);
+                                $('#cbxLocation').val(element[30]);
+                                $('#fabricationDate').val(element[21]);
+                                $('#purchaseDate').val(element[23]);
+                                $('#cbxFinalState').dropdown('set selected', element[24]);
+                                $('#cbxActionResult').dropdown('set selected', element[25]);
+                                $('#fechaultima').val(element[26]);
+                                $('#cbxInspector').dropdown('set selected', element[27]);
+                            };
+                        }
+                    }
+                });
+            }
+        }
+    });
+    LoadElementsDefault();
+
+
+    $("#rfid").blur(function () {
+        var rfid = document.getElementById("rfid").value;
+        var headquarterid = $("#cbxHeadquarter").val();
+        if (headquarterid != "" && headquarterid != null) {
+            var html = ' value =';
+            $.ajax({
+                url: '@Url.Action("GetDataElementByRFID", "Inspections")',
+                data: { rfid: rfid, headquaterid: headquarterid },
+                type: 'POST',
+                success: function (data) {
+                    if (data.result) {
+                        var element = data.data;
+                        if (element.length > 0) {
+                            $('#id').val(element[0]);
+                            $('#model').val(element[3]);
+                            $('#material').val(element[4]);
+                            $('#mark').val(element[6]);
+                            $('#serial').val(element[2]);
+                            $('#serialID').val(element[2]);
+                            $('#precintoID').val(element[30]);
+                            $('#lot').val(element[7]);
+                            $('#cbxElement').dropdown('set selected', element[8]);
+                            $('#cbxLocation').val(element[30]);
+                            $('#fabricationDate').val(element[21]);
+                            $('#purchaseDate').val(element[23]);
+                            $('#cbxFinalState').dropdown('set selected', element[24]);
+                            $('#cbxActionResult').dropdown('set selected', element[25]);
+                            $('#inspectionDate').calendar('set date', element[26], true);
+                            $('#fechaultima').val(element[26]);
+                        };
+                    }
+                }
+            });
+        }
+
+    });
+
+
+    $("#serialID").blur(function () {
+        var serialID = document.getElementById("serialID").value;        
+        var headquarterid = $("#cbxHeadquarter").val();
+
+        if (headquarterid != "" && headquarterid != null) {
+            var html = ' value =';
+            $.ajax({
+                url: '@Url.Action("GetDataElementBySerial", "Inspections")',
+                data: { serial: serialID, headquaterid: headquarterid },
+                type: 'POST',
+                success: function (data) {
+                    if (data.result) {
+                        var element = data.data;
+                        if (element.length > 0) {
+                            $('#id').val(element[0]);
+                            $('#model').val(element[3]);
+                            $('#material').val(element[4]);
+                            $('#mark').val(element[6]);
+                            $('#serial').val(element[2]);
+                            $('#serialID').val(element[2]);
+                            $('#precintoID').val(element[30]);
+                            $('#rfid').val(element[1]);
+                            $('#lot').val(element[7]);
+                            $('#cbxElement').dropdown('set selected', element[8]);
+                            $('#cbxLocation').val(element[30]);
+                            $('#fabricationDate').val(element[21]);
+                            $('#purchaseDate').val(element[23]);
+                            $('#cbxFinalState').dropdown('set selected', element[24]);
+                            $('#cbxActionResult').dropdown('set selected', element[25]);
+                            $('#fechaultima').val(element[26]);
+                            $('#cbxInspector').dropdown('set selected', element[27]);
+                        };
+                    }
+                }
+            });
+        }
+
+    });
+
+     $("#precintoID").blur(function () {
+         var precintoID = document.getElementById("precintoID").value;
+        var headquarterid = $("#cbxHeadquarter").val();
+
+        if (headquarterid != "" && headquarterid != null) {
+            var html = ' value =';
+            $.ajax({
+                url: '@Url.Action("GetDataElementByPrecinto", "Inspections")',
+                data: { precinto: precintoID, headquaterid: headquarterid },
+                type: 'POST',
+                success: function (data) {
+                    if (data.result) {
+                        var element = data.data;
+                        if (element.length > 0) {
+                            $('#id').val(element[0]);
+                            $('#model').val(element[3]);
+                            $('#material').val(element[4]);
+                            $('#mark').val(element[6]);
+                            $('#serial').val(element[2]);
+                            $('#serialID').val(element[2]);
+                            $('#precintoID').val(element[30]);
+                            $('#rfid').val(element[1]);
+                            $('#lot').val(element[7]);
+                            $('#cbxElement').dropdown('set selected', element[8]);
+                            $('#cbxLocation').val(element[30]);
+                            $('#fabricationDate').val(element[21]);
+                            $('#purchaseDate').val(element[23]);
+                            $('#cbxFinalState').dropdown('set selected', element[24]);
+                            $('#cbxActionResult').dropdown('set selected', element[25]);
+                            //$('#inspectionDate').calendar('set date', , true);
+                            $('#fechaultima').val(element[26]);
+                            $('#cbxInspector').dropdown('set selected', element[27]);
+                           
+                        };
+                    }
+                }
+            });
+        }
+
+    });
+
+
+
+    @*$('#cbxFinalState').on('change', function () {
+        var html;
+        var value = $('option:selected', this).val();
+        $.ajax({
+            url: '@Url.Action("GetActionResultByState")',
+            data: { idState: value },
+            type: 'POST',
+            success: function (data) {
+                if (data.result) {
+                    $.each(data.data, function (index, value) {
+                        html = html + ' <option value="' + index + '">' + value + '</option>';
+                    });
+                    $('#cbxActionResult').dropdown('clear');
+                    $('#cbxActionResult').html(html);
+                }
+            }
+        });
+    })*@
+    $('#cbxElement').on('change', function () {
+        var html = '<table class="ui selectable celled table ui center aligned" >' +
+                            '<thead>' +
+                            '<tr>' +
+                            '<th>Categoria</th>' +
+                            '<th>Factor</th>' +
+                            '<th>Estado</th>' +
+                            '<th>Comentario</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>';
+        var rfid = $("#rfid").val();
+        var headquarterid = $("#cbxHeadquarter").val();
+        $.ajax({
+            data: { rfid: rfid, headquarterid: headquarterid },
+            url: '@Url.Action("GetFactorByElement")',
+            type: 'POST',
+            success: function (data) {
+                if (data.result) {
+                    $.each(data.data, function (cat, value) {
+                        
+                        if (value.toString().split("|")[2] == 1) {
+                            html = html +
+                         '<tr><td> ' + value.toString().split("|")[0] + '</td>' +
+                         '<td> ' + value.toString().split("|")[1] + '</td>' +
+                                '<td><select id="factor_' + cat + '" class="ui search dropdown" name="factor_' + cat + '">' +
+                         '<option selected="selected" value="1">Aceptado</option>' +
+                         '<option value="2">Rechazado</option>' +
+                         '</select></td>' +
+                                '<td><input type="text" id="comment_' + cat + '" class="comments" name="comment_' + cat + '" placeholder="comentario" autocomplete="off" maxlength="150" value="' + value.toString().split("|")[3] + '" >' +
+                    '</td>' +
+                    '</tr>';
+                        }
+                        else {
+                            html = html +
+                         '<tr><td> ' + value.toString().split("/")[0] + '</td>' +
+                         '<td> ' + value.toString().split("/")[1] + '</td>' +
+                                '<td><select id="factor_' + cat + '" class="ui search dropdown" name="factor_' + cat + '">' +
+                         '<option value="1">Aceptado</option>' +
+                         '<option selected="selected" value="2">Rechazado</option>' +
+                         '</select></td>' +
+                                '<td><input type="text" id="comment_' + cat + '" class="comments" name="comment_' + cat + '" placeholder="comentario" autocomplete="off" maxlength="150" value="' + value.toString().split("/")[3] + '" >' +
+                    '</td>' +
+                    '</tr>';
+                        }
+
+                    });
+                    html = html + '</tbody>' +
+                    '</table>';
+                    $('#detail').html(html);
+
+                }
+
+
+
+            }
+        });
+    });
+
+    $('#inspectionDate').calendar({
+        type: 'date',
+        text: {
+            days: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            today: 'Today',
+            now: 'Now',
+            am: 'AM',
+            pm: 'PM'
+        },
+        formatter: {
+            date: function (date, settings) {
+                if (!date) return '';
+                var day = date.getDate();
+                var month = date.getMonth() + 1;
+                var year = date.getFullYear();
+                return year + '-' + month + '-' + day;
+            }
+        },
+        onChange: function (date, text, mode) {
+            $('#cinspectionDate').val(text);
+        }
+    });
+
+    $('#formProcessCreateInspections').form({
+        fields: {
+            cbxLocation: {
+                identifier: 'cbxLocation',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Debe elegir un valor'
+                    },
+                ]
+            },
+            cbxFinalState: {
+                identifier: 'cbxFinalState',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Debe elegir un valor'
+                    },
+                ]
+            },
+            cbxActionResult: {
+                identifier: 'cbxActionResult',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Debe elegir un valor'
+                    },
+                ]
+            },
+            cbxInspector: {
+                identifier: 'cbxActionResult',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Debe elegir un valor'
+                    },
+                ]
+            },
+            cinspectionDate: {
+                identifier: 'cinspectionDate',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Debe elegir un valor'
+                    },
+                ]
+            },
+        }, inline: true,
+        on: 'blur'
+    });
+    $('#btnGuardar').on('click', function () {
+        $('#formProcessCreateInspections').submit();
+    });
+
+    function onBeginProcessCreateInspections() {
+        if (validComents()) {
+            $('#messageCreateInspections').hide();
+            $('#renderPages').addClass("loading");
+            return true;
+        } else {
+            $('#messageCreateInspections').show('slow').addClass("warning").removeClass("info");
+            $('#textmessageCreateInspections').text('Debe diligenciar todos los comentarios para los factores inspeccionados');
+            return false;
+        }
+    }
+
+    function onFailureProcessCreateInspections() {
+        $('#renderPages').removeClass("loading");
+        $('#messageCreateInspections').show('slow').addClass("warning").removeClass("info");
+        $('#textmessageCreateInspections').text("Ha ocurrido un error al procesar la solicitud");
+    }
+    function onSuccessProcessCreateInspections(data) {
+        $('#renderPages').removeClass("loading");
+        if (data.result) {
+            $('#messageCreateInspections').show('slow').removeClass("warning").addClass("info");
+            $('#textmessageCreateInspections').text("Proceso Completado");
+        } else {
+            $('#messageCreateInspections').show('slow').addClass("warning").removeClass("info");
+            $('#textmessageCreateInspections').text(data.message);
+        }
+    }
+    function validComents() {
+        var i = 0;
+        $('.comments').each(function (idx, val) {
+            if ($(val).val() === "") {
+                i = i + 1;
+            }
+        });
+        if (i > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+</script>

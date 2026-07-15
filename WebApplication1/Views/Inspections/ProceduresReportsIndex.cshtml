@@ -1,0 +1,163 @@
+﻿<script src="~/Scripts/dropzone/dropzone.min.js"></script>
+<link href="~/Scripts/dropzone/dropzone.min.css" rel="stylesheet" />
+<link href="~/Scripts/calendar/calendar.min.css" rel="stylesheet" />
+<script src="~/Scripts/calendar/calendar.min.js"></script>
+
+@using WebApplication1.Models;
+@{
+    var session = Session["SessionUser"] as SessionModels;
+}
+
+@if (session.Idioma == "spain")
+{
+    <h3 class="titlesPages">VIAJES COUNTRY | DATAMART | TRAZA DOCUMENTOS</h3>
+}
+
+
+@using (Ajax.BeginForm("SearchProceduresT", "Inspections", null, new AjaxOptions()
+{
+    HttpMethod = "POST",
+    OnBegin = "onBeginProcessSearch()",
+    OnSuccess = "onSuccessProcessSearch(data)",
+    OnFailure = "onFailureProcessSearch()",
+}, new { @id = "formProcessSearch" }))
+{
+    if (session.Idioma == "spain")
+    {
+        <div class="ui equal width form">
+            <div class="fields">
+                <div class="field">
+                    <label>Origen</label>
+                    @Html.DropDownList("cbxOrigenGDS", (SelectList)ViewBag.GdsDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown" })
+                </div>
+            </div>
+            <div class="fields">
+                <div class="field">
+                    <label>Fecha Inicial</label>
+                    <div class="ui calendar calendarPicker" style="margin-top:-13px" id="purchaseDate">
+                        <div class="ui input left icon">
+                            <i class="calendar icon"></i>
+                            <input type="text" placeholder="Fecha Inicial">
+                        </div>
+                    </div>
+                    <input type="hidden" name="cpurchaseDate" id="cpurchaseDate" autocomplete="off">
+                </div>
+                <div class="field">
+                    <label>Fecha Fabricacion</label>
+                    <div class="ui calendar calendarPicker" style="margin-top:-13px" id="fabricationDate">
+                        <div class="ui input left icon">
+                            <i class="calendar icon"></i>
+                            <input type="text" placeholder="Fecha Final">
+                        </div>
+                    </div>
+                    <input type="hidden" name="cfabricationDate" id="cfabricationDate" autocomplete="off">
+                </div>
+            </div>
+            <button class="ui primary button" style="background-color: #112F4A !important">
+                Buscar
+            </button>
+        </div>
+    }
+    <div id="renderSearchProcedure"></div>
+}
+
+<script type="text/javascript">
+
+    $('#formProcessSearch').form({
+        fields: {
+            cbxOrigenGDS: {
+                identifier: 'cbxOrigenGDS',
+                rules: [{
+                    type: 'empty',
+                    prompt: 'Debe seleccionar una opción'
+                }]
+            },
+            cpurchaseDate: {
+                identifier: 'cpurchaseDate',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Debe elegir una fecha inicial'
+                    },
+                ]
+            },
+            cfabricationDate: {
+                identifier: 'cfabricationDate',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Debe elegir una fecha final'
+                    },
+                ]
+            },
+
+        }, inline: true,
+        on: 'blur'
+    });
+
+    function onBeginProcessSearch() {
+        $('#renderPages').addClass("loading");
+        $('#renderSearchProcedure').empty();
+    }
+    function onFailureProcessSearch() {
+        $('#renderPages').removeClass("loading");
+        $('#messageCreate').show('slow').addClass("warning").removeClass("info");
+        $('#textmessageCreate').text("Ha ocurrido un error al procesar la solicitud");
+    }
+
+    function onSuccessProcessSearch(data) {
+        $('#renderPages').removeClass("loading");
+        $('#renderSearchProcedure').html(data);
+    }
+
+    $('#fabricationDate').calendar({
+        type: 'date',
+        text: {
+            days: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            today: 'Today',
+            now: 'Now',
+            am: 'AM',
+            pm: 'PM'
+        },
+        formatter: {
+            date: function (date, settings) {
+                if (!date) return '';
+                var day = date.getDate();
+                var month = date.getMonth() + 1;
+                var year = date.getFullYear();
+                return year + '-' + month + '-' + day;
+            }
+        },
+        onChange: function (date, text, mode) {
+            $('#cfabricationDate').val(text);
+        }
+    });
+    $('#purchaseDate').calendar({
+        type: 'date',
+        text: {
+            days: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            today: 'Today',
+            now: 'Now',
+            am: 'AM',
+            pm: 'PM'
+        },
+        formatter: {
+            date: function (date, settings) {
+                if (!date) return '';
+                var day = date.getDate();
+                var month = date.getMonth() + 1;
+                var year = date.getFullYear();
+                return year + '-' + month + '-' + day;
+            }
+        },
+        onChange: function (date, text, mode) {
+            $('#cpurchaseDate').val(text);
+        }
+    });
+
+</script>
+
