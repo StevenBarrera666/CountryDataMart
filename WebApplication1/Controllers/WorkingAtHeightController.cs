@@ -581,9 +581,10 @@ namespace WebApplication1.Controllers
                                     if (!String.IsNullOrEmpty(SedeID))
                                     {
                                         CurriculumBo curriculumBo = new CurriculumBo();
-                                        int Encabezadoid = curriculumBo.CreateEncabezado(rfid, Serial, Modelo,
-                                            Marca, Lote, Elemento, SedeID, Ubicacion, Tag,
-                                            Precinto, EstadoFinalId, InspectorID, Convert.ToDateTime(FechaInspeccion));
+                                        int Encabezadoid = 0;
+                                        //curriculumBo.CreateEncabezado(rfid, Serial, Modelo,
+                                        //    Marca, Lote, Elemento, SedeID, Ubicacion, Tag,
+                                        //    Precinto, EstadoFinalId, InspectorID, Convert.ToDateTime(FechaInspeccion));
 
                                         util = new Util();
                                         util.CreateCurriculum(Encabezadoid);

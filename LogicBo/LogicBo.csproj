@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LogicBo</RootNamespace>
     <AssemblyName>LogicBo</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
@@ -44,7 +44,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp">
-      <HintPath>..\..\..\..\..\..\..\..\Documentos\Win\WindowsApp1\bin\Debug\itextsharp.dll</HintPath>
+      <HintPath>..\..\..\..\Documents\DATAMARTR\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="SCIST.CapaDatos">
       <HintPath>..\..\..\..\..\..\..\..\Documentos\Win\WindowsApp1\bin\Debug\SCIST.CapaDatos.dll</HintPath>

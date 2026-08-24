@@ -1,0 +1,152 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient( circle at center, #082a58 0%, #031b3d 40%, #020c1f 100% );
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =========================================
+   CONTENEDOR PRINCIPAL
+========================================= */
+
+.access-panel {
+    width: 1220px;
+    height: 802px;
+    margin: 22px auto;
+    border: 2px solid #235693;
+    border-radius: 26px;
+    background: rgba(5, 27, 60, 0.35);
+    box-shadow: 0 0 40px rgba(0, 115, 255, 0.08), inset 0 0 30px rgba(0, 115, 255, 0.04);
+
+}
+
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.plane-icon {
+    font-size: 42px;
+}
+
+.access-title {
+    font-size: 44px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.access-subtitle {
+    color: #a8bfdf;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* línea decorativa */
+
+.line {
+    width: 65px;
+    height: 1px;
+    background: #267ddf;
+}
+
+
+/* punto */
+
+.dot {
+    width: 7px;
+    height: 7px;
+    margin: 0 8px;
+    background: #2c91ff;
+    border-radius: 50%;
+}
+
+
+/* =========================================
+   OPCIONES
+========================================= */
+
+.access-option {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+    .access-option:hover {
+        transform: translateY(-8px);
+    }
+
+
+/* =========================================
+   CÍRCULO GENERAL
+========================================= */
+
+.access-circle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 22px;
+    background: radial-gradient( circle at center, rgba(11, 54, 108, 0.9), rgba(2, 18, 42, 0.95) );
+}
+
+
+/* =========================================
+   ADMINISTRADOR
+========================================= */
+
+.admin-circle {
+    border: 3px solid #24b5ff;
+    box-shadow: 0 0 10px #008dff, 0 0 30px rgba(0, 145, 255, 0.75), inset 0 0 25px rgba(0, 145, 255, 0.2);
+}
+
+
+/* =========================================
+   PROVEEDOR
+========================================= */
+
+.provider-circle {
+    border: 3px solid #40dfa2;
+    box-shadow: 0 0 10px #23cc91, 0 0 30px rgba(35, 204, 145, 0.65), inset 0 0 25px rgba(35, 204, 145, 0.2);
+}
+
+
+/* =========================================
+   CLIENTE
+========================================= */
+
+.client-circle {
+    border: 3px solid #a963ff;
+    box-shadow: 0 0 10px #9f4cff, 0 0 30px rgba(159, 76, 255, 0.7), inset 0 0 25px rgba(159, 76, 255, 0.2);
+}
+
+
+/* =========================================
+   ICONOS
+========================================= */
+
+.access-icon {
+    font-size: 95px;
+}
+
+
+/* =========================================
+   TEXTOS
+========================================= */
+
+.option-title {
+    margin-bottom: 5px;
+    font-size: 31px;
+    font-weight: 700;
+}
+
+.option-description {
+    color: #a7bedc;
+    font-size: 19px;
+    line-height: 1.3;
+}

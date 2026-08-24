@@ -8,24 +8,26 @@
     @Styles.Render("~/Content/Site.css")
     @Styles.Render("~/Content/font-awesome-4.7.0/css/font-awesome.css")
 
+    <link rel="stylesheet"
+          href="@Url.Content("~/Content/Tailwind/tailwind.css?v=2")" />
+
     <style>
         body {
-            background-image: url('@Url.Content("~/Content/Images/robotica-dighe_1200x630.jpeg")');
-            background-repeat: no-repeat;
+            background-image: url('@Url.Content("~/Content/Images/fondoNuevo.png")');
             background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+          
         }
     </style>
 </head>
 <body>
     <br />
 
-    <img class="ui centered image" src="@Url.Content("~/Content/Images/Logo.png")" style="border-radius: 0px 0px 20px 20px;width:18%">
-    <div class="ui very text container segment" id="segmentLogin"  style="background: transparent; margin-top: 6%; padding: 0 0; border: none;">
-        <div>
+        <div class="login-page grid grid-cols-1 gap-4 ">
             @RenderBody()
         </div>
 
-    </div>
     @Scripts.Render("~/bundles/jqueryJs")
     @Scripts.Render("~/bundles/semanticJs")
     @Scripts.Render("~/Content/LoadingOverlay/src/loadingoverlay.min.js")

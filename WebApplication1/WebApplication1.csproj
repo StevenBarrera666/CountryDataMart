@@ -59,7 +59,7 @@
     </Reference>
     <Reference Include="itextsharp, Version=4.1.6.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\Documentos\Win\WindowsApp1\bin\Debug\itextsharp.dll</HintPath>
+      <HintPath>..\..\..\..\Documents\DATAMARTR\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.2.1\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
@@ -217,9 +217,7 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\admnis.jpg" />
-    <Content Include="Content\alturas.jpg" />
-    <Content Include="Content\argentina.png" />
+    <Content Include="Content\Bootstrap\css\LayautLoginFacade.css" />
     <Content Include="Content\Bootstrap\css\bootstrap-grid.css" />
     <Content Include="Content\Bootstrap\css\bootstrap-grid.min.css" />
     <Content Include="Content\Bootstrap\css\bootstrap-reboot.css" />
@@ -230,17 +228,11 @@
     <Content Include="Content\Bootstrap\js\bootstrap.bundle.min.js" />
     <Content Include="Content\Bootstrap\js\bootstrap.js" />
     <Content Include="Content\Bootstrap\js\bootstrap.min.js" />
-    <Content Include="Content\Chile.jpg" />
-    <Content Include="Content\Colombia.png" />
-    <Content Include="Content\Ecuador.jpg" />
-    <Content Include="Content\espacios.jpg" />
     <Content Include="Content\facade.css" />
     <Content Include="Content\font-awesome-4.7.0\css\font-awesome.css" />
     <Content Include="Content\font-awesome-4.7.0\css\font-awesome.min.css" />
     <Content Include="Content\font-awesome-4.7.0\fonts\fontawesome-webfont.svg" />
     <Content Include="Content\font-awesome-4.7.0\HELP-US-OUT.txt" />
-    <Content Include="Content\formacion_com.jpg" />
-    <Content Include="Content\gestion_equipos.jpg" />
     <Content Include="Content\Images\02-Pantalla-ingreso-A.png" />
     <Content Include="Content\Images\02-Pantalla-ingreso-A_Old.jpg" />
     <Content Include="Content\Images\02-Pantalla-ingreso-C.jpg" />
@@ -252,7 +244,9 @@
     <Content Include="Content\Images\edit.png" />
     <Content Include="Content\Images\espacios_pie.png" />
     <Content Include="Content\Images\extintores_pie.png" />
+    <Content Include="Content\Images\fodolayaudfocade.png" />
     <Content Include="Content\Images\fondo.jpg" />
+    <Content Include="Content\Images\fondoNuevo.png" />
     <Content Include="Content\Images\header.jpg" />
     <Content Include="Content\Images\Imagen2.jpg" />
     <Content Include="Content\Images\Imagen3.png" />
@@ -262,8 +256,9 @@
     <Content Include="Content\Images\izage_pie.png" />
     <Content Include="Content\Images\Logo.png" />
     <Content Include="Content\Images\Logo1.png" />
-    <Content Include="Content\Images\LOgoVerthor.jpg" />
-    <Content Include="Content\Images\LOgoVerthor.png" />
+    <Content Include="Content\Images\LogoMejorado.png" />
+    <Content Include="Content\Images\LogoVector.jpg" />
+    <Content Include="Content\Images\LogoVector.png" />
     <Content Include="Content\Images\Logo_1.png" />
     <Content Include="Content\Images\Logo_solmaq.jfif" />
     <Content Include="Content\Images\M1_Cargar.png" />
@@ -318,18 +313,11 @@
     <Content Include="Content\Images\tr-izages.jpg" />
     <Content Include="Content\Images\tr-riesgoe.jpg" />
     <Content Include="Content\Images\tr_alturas.jpg" />
-    <Content Include="Content\indicadores.jpg" />
-    <Content Include="Content\inspeccion_man.jpg" />
-    <Content Include="Content\Italia.png" />
-    <Content Include="Content\Izage.jpg" />
     <Content Include="Content\LoadingOverlay\src\loading.gif" />
     <Content Include="Content\LoadingOverlay\src\loadingoverlay.js" />
     <Content Include="Content\LoadingOverlay\src\loadingoverlay.min.js" />
     <Content Include="Content\menuNew.css" />
     <Content Include="Content\modulo_medico.jpg" />
-    <Content Include="Content\Peru.png" />
-    <Content Include="Content\riesgoelectrico.png" />
-    <Content Include="Content\rxtintores.jpg" />
     <Content Include="Content\SegmentEffect\css\component.css" />
     <Content Include="Content\SegmentEffect\css\demo.css" />
     <Content Include="Content\SegmentEffect\css\normalize.css" />
@@ -499,31 +487,12 @@
     <Content Include="Content\Site.css" />
     <Content Include="Content\spain.png" />
     <Content Include="Content\styles\cardscss.css" />
+    <Content Include="Content\Tailwind\components\login.css" />
+    <Content Include="Content\Tailwind\input.css" />
     <Content Include="Content\toastr.css" />
     <Content Include="Content\toastr.min.css" />
-    <Content Include="Equipo_Izaje\ImagenEI_88.jpeg" />
-    <Content Include="Equipo_Izaje\ImagenEI_88.png" />
-    <Content Include="Equipo_Izaje\ImagenEI_89.png" />
-    <Content Include="Equipo_Izaje\ImagenEI_hola.png" />
-    <Content Include="Equipo_Izaje\ImagenEI_yy.png" />
-    <Content Include="Equipo_Izaje\Porta_Pantallas_02.png" />
     <Content Include="favicon.ico" />
-    <Content Include="Firmas\0.jpeg" />
-    <Content Include="Firmas\0.png" />
-    <Content Include="Firmas\1.jpg" />
-    <Content Include="Firmas\13.jpg" />
-    <Content Include="Firmas\2.jpg" />
-    <Content Include="Firmas\20.jpeg" />
-    <Content Include="Firmas\20.jpg" />
-    <Content Include="Firmas\23.jpg" />
-    <Content Include="Firmas\3.jpg" />
-    <Content Include="Firmas\5.jpg" />
-    <Content Include="Firmas\6.jpg" />
-    <Content Include="Firmas\7.jpg" />
-    <Content Include="Firmas\9.jpg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="Fotos_Personas\Foto_2.png" />
-    <Content Include="Fotos_Personas\Foto_3.png" />
     <Content Include="Global.asax" />
     <Content Include="Content\SemanticUI\.versions" />
     <Content Include="Content\SemanticUI\LICENSE" />
@@ -597,22 +566,9 @@
     <Content Include="fonts\Univers\UniversLTStd-Bold.otf" />
     <Content Include="fonts\Univers\UniversLTStd-Light.otf" />
     <Content Include="fonts\Univers\Univers_Bold.ttf" />
-    <Content Include="MEDICALCONCEPTS\18_REGLAMENTO INTERNO DE TRABAJO AMADEUS 2018 PDF.pdf" />
-    <Content Include="MEDICALCONCEPTS\18_Rut.pdf" />
-    <Content Include="MEDICALCONCEPTS\24_Rut.pdf" />
     <Content Include="Content\Fonts\RoobertENELGRE-Bold.otf" />
     <Content Include="Content\Fonts\RoobertENELGRE-Light.otf" />
     <Content Include="Content\Fonts\RoobertENELGRE-Regular.otf" />
-    <Content Include="Archivo_Cursos\Archivo_4.xlsx" />
-    <Content Include="Archivo_Hallazgo\ENEL - Mockups Equipos de izaje y Formación de Personal %281%29.pdf" />
-    <Content Include="Archivo_Hallazgo\RegistroFotografico_Montajes-técnicos-Zambrano-y-Vargas.pdf" />
-    <Content Include="Equipo_Izaje\CODIGO_71.pdf" />
-    <Content Include="Equipo_Izaje\CODIGO_72.pdf" />
-    <Content Include="Equipo_Izaje\CODIGO_80.pdf" />
-    <Content Include="Equipo_Izaje\CODIGO_81.pdf" />
-    <Content Include="Equipo_Izaje\CODIGO_87.pdf" />
-    <Content Include="Equipo_Izaje\CODIGO_88.pdf" />
-    <Content Include="Equipo_Izaje\Equipo_Izaje_Central Térmica Cartagena_JDSC.pdf" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
     <Content Include="Scripts\calendar\calendar.min.js" />
@@ -738,9 +694,7 @@
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
-    <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Shared\_LayoutLogin.cshtml" />
-    <Content Include="Views\Shared\_MenuPartial.cshtml" />
     <Content Include="Scripts\MultiLevelMenu\fonts\bpicons\bpicons.eot" />
     <Content Include="Scripts\MultiLevelMenu\fonts\bpicons\bpicons.ttf" />
     <Content Include="Scripts\MultiLevelMenu\fonts\bpicons\bpicons.woff" />
@@ -759,36 +713,12 @@
     <Content Include="Scripts\tables\README.md" />
     <Content Include="Views\Ally\Create.cshtml" />
     <Content Include="Views\Ally\PageInitial.cshtml" />
-    <Content Include="Views\WorkingAtHeight\Stock.cshtml" />
-    <Content Include="Views\WorkingAtHeight\Curriculum.cshtml" />
-    <Content Include="Views\WorkingAtHeight\TechnicalInformation.cshtml" />
-    <Content Include="Views\WorkingAtHeight\SearchCurriculum.cshtml" />
-    <Content Include="Views\WorkingAtHeight\SearchTechnicalInformation.cshtml" />
-    <Content Include="Views\WorkingAtHeight\CreateSede.cshtml" />
-    <Content Include="Views\WorkingAtHeight\IndexEquipment.cshtml" />
-    <Content Include="Views\WorkingAtHeight\StockByHeadquarter.cshtml" />
-    <Content Include="Views\Trainning\Trainning.cshtml" />
-    <Content Include="Views\Trainning\Certificate.cshtml" />
-    <Content Include="Views\Trainning\SearchCertificate.cshtml" />
-    <Content Include="Views\Trainning\SearchTrainning.cshtml" />
-    <Content Include="Views\Trainning\IndexPerson.cshtml" />
-    <Content Include="Views\Trainning\CreatePerson.cshtml" />
-    <Content Include="Views\Trainning\LoadCoursesByPerson.cshtml" />
-    <Content Include="Views\Trainning\LoadCourses.cshtml" />
-    <Content Include="Views\Trainning\Scheduler.cshtml" />
-    <Content Include="Views\Trainning\SearchScheduler.cshtml" />
-    <Content Include="Views\Trainning\EditPerson.cshtml" />
-    <Content Include="Views\Trainning\LoadDetailsScheduler.cshtml" />
-    <Content Include="Views\Trainning\LoadDetailsUser.cshtml" />
-    <Content Include="Views\WorkingAtHeight\EditEquipment.cshtml" />
     <Content Include="Views\Inspections\CreateInspections.cshtml" />
     <Content Include="Views\Inspections\SchedulerInspections.cshtml" />
     <Content Include="Views\Inspections\CreateTechnicalReports.cshtml" />
     <Content Include="Views\Inspections\SearchManagementOfFindings.cshtml" />
     <Content Include="Views\Inspections\LoadDetailsEquipment.cshtml" />
     <Content Include="Views\Inspections\ManagementOfFindings.cshtml" />
-    <Content Include="TECH_reports\CTG\EMGESA Inspección de Andamios 08-2018[5195].pdf" />
-    <Content Include="TECH_reports\TZP\INFORME TECNICO INSTALACION EMGESA- TERMOZIPA.pdf" />
     <Content Include="Views\Inspections\Features.cshtml" />
     <Content Include="Views\Inspections\TechnicalReportsIndex.cshtml" />
     <Content Include="Views\Inspections\FormatsReportsIndex.cshtml" />
@@ -804,39 +734,13 @@
     <Content Include="Views\Inspections\ProceduresReportsIndex.cshtml" />
     <Content Include="Views\Inspections\SearchFormatsT.cshtml" />
     <Content Include="Views\Inspections\SearchLegalityT.cshtml" />
-    <Content Include="Views\WorkingAtHeight\AssignEquipment.cshtml" />
     <Content Include="Views\MedicalConcepts\CreateAptitudConcept.cshtml" />
     <Content Include="Views\MedicalConcepts\PageInitial.cshtml" />
     <Content Include="Views\MedicalConcepts\SearchPageInitial.cshtml" />
     <Content Include="Views\UsersAndRoles\IndexRoles.cshtml" />
-    <Content Include="Views\WorkingAtHeight\DownloadResult.cshtml" />
     <Content Include="Views\Inspections\CreateTechInfo.cshtml" />
-    <Content Include="Views\Trainning\CreateRol.cshtml" />
-    <Content Include="Views\Trainning\CreateUser.cshtml" />
-    <Content Include="Views\Trainning\IndexUser.cshtml" />
-    <Content Include="Views\Trainning\IndexRol.cshtml" />
-    <Content Include="Views\Trainning\CreateInspector.cshtml" />
-    <Content Include="Views\Trainning\IndexInspector.cshtml" />
-    <Content Include="Views\Trainning\EditUser.cshtml" />
-    <Content Include="Views\Trainning\EditInspector.cshtml" />
-    <Content Include="Views\WorkingAtHeight\InspectionCert.cshtml" />
-    <Content Include="Views\WorkingAtHeight\SearchInspectionCert.cshtml" />
-    <Content Include="Views\WorkingAtHeight\CreateEquipmentIzage.cshtml" />
-    <Content Include="Views\WorkingAtHeight\CreateEquipment.cshtml" />
-    <Content Include="Views\WorkingAtHeight\IndexSede.cshtml" />
-    <Content Include="Views\WorkingAtHeight\CreatePais.cshtml" />
-    <Content Include="Views\WorkingAtHeight\CreateCategoriaSede.cshtml" />
-    <Content Include="Views\WorkingAtHeight\IndexPais.cshtml" />
-    <Content Include="Views\WorkingAtHeight\IndexSedeCategoria.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialEN.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialIT.cshtml" />
-    <Content Include="Views\Shared\_LayoutFacade.cshtml" />
-    <Content Include="Views\Shared\_LayoutIzage.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialIzageEN.cshtml" />
     <Content Include="Views\Account\LoginFacade.cshtml" />
     <Content Include="Views\Shared\_LayoutLoginFacade.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialIzageIT.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialIzage.cshtml" />
     <Content Include="Views\CronogramaIzaje\DetalleCronograma.cshtml" />
     <Content Include="Views\CronogramaIzaje\Index.cshtml" />
     <Content Include="Views\CronogramaIzaje\SearchCronograma.cshtml" />
@@ -869,34 +773,15 @@
     <Content Include="Views\Personas\Index.cshtml" />
     <Content Include="Views\Personas\SearchDetalleCurso.cshtml" />
     <Content Include="Views\Personas\SearchPerson.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialNew.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Shared\_Layout - Copia.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialWH.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialWHEN.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialWHIT.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialIC1.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialICIT.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialICEN.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialWHU.cshtml" />
-    <Content Include="Views\Shared\_MenuPartialIC.cshtml" />
     <Content Include="Views\Indicadores\Index.cshtml" />
-    <Content Include="Views\WorkingAtHeight\StockByHeadquarterByStatePor.cshtml" />
-    <Content Include="Views\WorkingAtHeight\StockByHeadquarterByStateVen.cshtml" />
-    <Content Include="Views\WorkingAtHeight\StockByHeadquarterByStateVig.cshtml" />
-    <Content Include="Views\WorkingAtHeight\StockByHeadquarterDados.cshtml" />
-    <Content Include="Views\WorkingAtHeight\StockByHeadquarterMant.cshtml" />
-    <Content Include="Views\WorkingAtHeight\StockByHeadquarterRechazos.cshtml" />
     <Content Include="Views\Inspections\ScheduleInspectionsByHeadquarter.cshtml" />
     <Content Include="Views\Izage\EditEquipmentIzage.cshtml" />
-    <Content Include="Views\WorkingAtHeight\LoadMatrix.cshtml" />
+    <None Include="Views\Shared\_MenuPartialWHU.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
-    <Folder Include="CERT_INS\" />
     <Folder Include="Content\Images\Banner\slides\thumbs\" />
-    <Folder Include="DarDeBajaEvidencia\" />
-    <Folder Include="Firmas\Firmas\" />
+    <Folder Include="Views\Trainning\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

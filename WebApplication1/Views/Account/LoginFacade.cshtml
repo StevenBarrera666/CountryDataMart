@@ -2,20 +2,112 @@
 @{
     var session = Session["SessionUser"] as SessionModels;
 }
-@{ ViewBag.Title = "LoginFacade"; Layout = "~/Views/Shared/_LayoutLoginFacade.cshtml"; } @using (Ajax.BeginForm("ValidateLogin", "Account", null, new AjaxOptions() { OnBegin = "OnBeginLogin()", OnSuccess = "OnSuccessLogin(data)", OnFailure = "OnError(xhr)", HttpMethod = "POST" }, new { @id = "formLogin" }))
-{
+@{ ViewBag.Title = "LoginFacade"; Layout = "~/Views/Shared/_LayoutLoginFacade.cshtml"; } @*@using (Ajax.BeginForm("ValidateLogin", "Account", null, new AjaxOptions() { OnBegin = "OnBeginLogin()", OnSuccess = "OnSuccessLogin(data)", OnFailure = "OnError(xhr)", HttpMethod = "POST" }, new { @id = "formLogin" }))*@
 
 
-<div class="ui equal width form">
-    @if (session.Idioma == "spain")
-    {
-        <a class="menu__link" href="@Url.Action("LogOff", "Account")" data-finish="true" style="font-size: larger; background-color: #112F4A !important; color: white;">
-            <i class="fa fa-home" aria-hidden="true"></i> Salir
-        </a>
-    }
+
+
+
+
+
+
+<div class="access-panel">
+
+    <div class="text-center mb-5">
+        <div class="plane-icon mb-2"></div>
+
+        <h1 class="access-title">
+            Bienvenido
+        </h1>
+
+        <div class="access-subtitle">
+            <span class="line"></span>
+            <span class="dot"></span>
+
+            <span class="mx-3">
+                Seleccione el tipo de acceso para continuar
+            </span>
+
+            <span class="dot"></span>
+            <span class="line"></span>
+        </div>
+    </div>
+
+
+    <div class="row justify-content-around align-items-start">
+
+
+
+        <div class="col-12 col-md-2 text-center access-option">
+            <p>
+                ADMINISTRADOR
+            </p>
+            <div class="access-circle admin-circle mx-auto">
+                <div class="access-icon"  onclick="alturas()">
+                    👨‍💼
+                </div>
+            </div>
+
+            <h2 class="option-title">
+                Administrador
+            </h2>
+
+            <p class="option-description">
+                Gestión completa del sistema<br>
+                y administración
+            </p>
+
+        </div>
+
+        <div class="col-12 col-md-2 text-center access-option">
+
+            <p>
+                PROVEEDOR
+            </p>
+            <div class="access-circle provider-circle mx-auto">
+                <div class="access-icon">
+                    🚚
+                </div>
+            </div>
+
+            <h2 class="option-title">
+                Proveedor
+            </h2>
+
+            <p class="option-description">
+                Gestión de productos,<br>
+                servicios y entregas
+            </p>
+
+        </div>
+
+
+        <div class="col-12 col-md-2 text-center access-option">
+
+            <p>
+                CLIENTE
+            </p>
+            <div class="access-circle client-circle mx-auto">
+                <div class="access-icon">
+                    👥
+                </div>
+            </div>
+
+            <h2 class="option-title">
+                Cliente
+            </h2>
+
+            <p class="option-description">
+                Consultas, reservas y<br>
+                seguimiento de servicios
+            </p>
+
+
+        </div>
+
     
-</div>
-   
-}
 
+    </div>
+
+</div>
 

@@ -1,4 +1,4 @@
-﻿@using WebApplication1.Models;
+﻿﻿@using WebApplication1.Models;
 @{
     var session = Session["SessionUser"] as SessionModels;
 }
@@ -8,8 +8,8 @@
         <div class="card float-right" style="width:153%">
             <div class="row" style="margin-top: -5% !important;">
                 @*<div class="col-sm-5" style="padding-right: 0 !important;padding-left: 0 !important;">
-                    <img class="d-block w-100" src="~/Content/Images/datamart.jpg" alt="" style="height: 100%;border-radius: .28571429rem;z-index: -1;position: unset;" />
-                </div>*@
+                        <img class="d-block w-100" src="~/Content/Images/datamart.jpg" alt="" style="height: 100%;border-radius: .28571429rem;z-index: -1;position: unset;" />
+                    </div>*@
                 <div class="col-sm-7">
                     <div class="card-block">
                         <div style="background-color: #112F4A !important; height: 48px; text-align: center; border-radius: .28571429rem; width: 183%; margin-left: -5%;">
@@ -23,14 +23,14 @@
                                         <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("ProceduresReportsIndex", "Inspections")')" style="color: #112F4A !important; font-size: medium;">Traza de Documentos</a></th>
                                     </tr>
                                     @*<tr>
-                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("FormatsReportsIndex", "Inspections")')" style="color: #aaaaaa !important;font-size: smaller;">Formatos</a></th>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("CertificatesReportsIndex", "Inspections")')" style="color: #aaaaaa !important;font-size: smaller;">Normatividad</a></th>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("Features", "Inspections")')" style="color: #aaaaaa !important;font-size: smaller;">Cargar documentos</a></th>
-                                    </tr>*@
+                                            <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("FormatsReportsIndex", "Inspections")')" style="color: #aaaaaa !important;font-size: smaller;">Formatos</a></th>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("CertificatesReportsIndex", "Inspections")')" style="color: #aaaaaa !important;font-size: smaller;">Normatividad</a></th>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("Features", "Inspections")')" style="color: #aaaaaa !important;font-size: smaller;">Cargar documentos</a></th>
+                                        </tr>*@
                                 </tbody>
                             </table>
                         </div>
@@ -40,10 +40,7 @@
 
             </div>
         </div>
-       
+
     </div>
-  
+
 </div>
-
-
-

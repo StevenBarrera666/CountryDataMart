@@ -757,13 +757,15 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                DateTime fechaI=Convert.ToDateTime(collection["cpurchaseDate"]);
-                DateTime fechaF = Convert.ToDateTime(collection["cfabricationDate"]);
+                DateTime fechaI = new DateTime(2026, 1, 1);
+                DateTime fechaF = DateTime.Now;
 
-                int gdsID = collection["cbxOrigenGDS"].ToString() != string.Empty ? Convert.ToInt32(collection["cbxOrigenGDS"].ToString()) : 0;
-                var result = _inspectionsBo.GetLoadFATraces(gdsID,fechaI, fechaF);
-                ViewBag.id = collection["cbxOrigenGDS"].ToString();
+                int gdsID = 1;
+                var result = _inspectionsBo.GetLoadFATraces(gdsID, fechaI, fechaF);
+                ViewBag.id = 1;
                 return PartialView(result);
+
+             
             }
             catch (Exception ex)
             {
