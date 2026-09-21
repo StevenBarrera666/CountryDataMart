@@ -257,8 +257,6 @@
     <Content Include="Content\Images\Logo.png" />
     <Content Include="Content\Images\Logo1.png" />
     <Content Include="Content\Images\LogoMejorado.png" />
-    <Content Include="Content\Images\LogoVector.jpg" />
-    <Content Include="Content\Images\LogoVector.png" />
     <Content Include="Content\Images\Logo_1.png" />
     <Content Include="Content\Images\Logo_solmaq.jfif" />
     <Content Include="Content\Images\M1_Cargar.png" />
@@ -317,7 +315,6 @@
     <Content Include="Content\LoadingOverlay\src\loadingoverlay.js" />
     <Content Include="Content\LoadingOverlay\src\loadingoverlay.min.js" />
     <Content Include="Content\menuNew.css" />
-    <Content Include="Content\modulo_medico.jpg" />
     <Content Include="Content\SegmentEffect\css\component.css" />
     <Content Include="Content\SegmentEffect\css\demo.css" />
     <Content Include="Content\SegmentEffect\css\normalize.css" />
@@ -486,6 +483,9 @@
     <Content Include="Content\SemanticUI\themes\default\assets\images\flags.png" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\spain.png" />
+    <Content Include="Content\stylesLogin\Layaud.css" />
+    <Content Include="Content\stylesLogin\login.css" />
+    <Content Include="Content\styles\Facade.css" />
     <Content Include="Content\styles\cardscss.css" />
     <Content Include="Content\Tailwind\components\login.css" />
     <Content Include="Content\Tailwind\input.css" />
@@ -719,7 +719,7 @@
     <Content Include="Views\Inspections\SearchManagementOfFindings.cshtml" />
     <Content Include="Views\Inspections\LoadDetailsEquipment.cshtml" />
     <Content Include="Views\Inspections\ManagementOfFindings.cshtml" />
-    <Content Include="Views\Inspections\Features.cshtml" />
+    <Content Include="Views\Inspections\CompletarInfo.cshtml" />
     <Content Include="Views\Inspections\TechnicalReportsIndex.cshtml" />
     <Content Include="Views\Inspections\FormatsReportsIndex.cshtml" />
     <Content Include="Views\Inspections\CertificatesReportsIndex.cshtml" />
@@ -777,6 +777,7 @@
     <Content Include="Views\Indicadores\Index.cshtml" />
     <Content Include="Views\Inspections\ScheduleInspectionsByHeadquarter.cshtml" />
     <Content Include="Views\Izage\EditEquipmentIzage.cshtml" />
+    <Content Include="Views\Inspections\InformacionFaltante.cshtml" />
     <None Include="Views\Shared\_MenuPartialWHU.cshtml" />
   </ItemGroup>
   <ItemGroup>

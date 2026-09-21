@@ -11,53 +11,13 @@
     OnFailure = "onFailureCreateFeature()",
 }, new { @id = "formProcessCreateFeature" }))
 {
-    <div class="ui equal width form">
-        <div class="required inline fields">
-
-            <div class="field">
-                <label>Sede</label>
-                @Html.DropDownList("cbxHeadquarter", (SelectList)ViewBag.HeadquarterDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown" })
-            </div>
-        </div>
-        <div class="fields">
-            <div class="field">
-                <label>Tipo</label>
-                @Html.DropDownList("cbxFeatures", (SelectList)ViewBag.FeaturesDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown" })
-            </div>
-        </div>
-        <div class="fields">
-            <div class="field">
-                <label>Nombre</label>
-                <input type="text" id="name" name="name" placeholder="Nombre del Formato" autocomplete="off" maxlength="50">
-            </div>
-        </div>
-    </div>
+    <label>Expediente No: PARAMETRO NUMERO DE EXPEDIENTE</label>
 }
-<div class="ui equal width form">
-    <div class="fields">
-        <div class="field">
-            <label>Archivo</label>
-            <form action="@Url.Action("UploadFile")" method="POST" class="dropzone" id="file">
-                <input type="hidden" name="type" value="file" />
-            </form>
-            <div class="ui floating message info" style="width: 50%; margin-left: 25%; margin-right: 25%; text-align: center;display:none" id="messageFile">
-                <div class="header">
-                    Atención
-                </div>
-                <p>El archivo ya ha sido registrado en nuestro sistema, al guardar se finalizará el proceso</p>
-            </div>
-        </div>
-    </div>
-</div>
+
 <button class="ui primary button" id="btnGuardar">
     Guardar
 </button>
-<div class="ui floating warning message" style="width:50%;margin-left:25%;margin-right:25%;text-align:center;display:none" id="messageCreateFeature">
-    <div class="header">
-        Atención
-    </div>
-    <p id="textmessageCreateFeature"></p>
-</div>
+
 
 <script type="text/javascript">
     $('#messageCreateFeature').hide();

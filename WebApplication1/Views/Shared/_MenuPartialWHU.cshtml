@@ -3,44 +3,222 @@
     var session = Session["SessionUser"] as SessionModels;
 }
 <link href="~/Content/styles/cardscss.css" rel="stylesheet" />
-<div class="main" id="facade">
-    <div class="container" style="margin-left: 60%; max-width:1440px; width:800px">
-        <div class="card float-right" style="width:153%">
-            <div class="row" style="margin-top: -5% !important;">
-                @*<div class="col-sm-5" style="padding-right: 0 !important;padding-left: 0 !important;">
-                        <img class="d-block w-100" src="~/Content/Images/datamart.jpg" alt="" style="height: 100%;border-radius: .28571429rem;z-index: -1;position: unset;" />
-                    </div>*@
-                <div class="col-sm-7">
-                    <div class="card-block">
-                        <div style="background-color: #112F4A !important; height: 48px; text-align: center; border-radius: .28571429rem; width: 183%; margin-left: -5%;">
-                            <h5 class="card-title" style="color: white;margin-left: -13%;padding-top: 10px;">Modificar Expedientes</h5>
-                        </div>
-                        <div>
+<link href="~/Content/styles/Facade.css" rel="stylesheet" />
 
-                            <table class="table table-striped">
-                                <tbody>
-                                    <tr>
-                                        <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("ProceduresReportsIndex", "Inspections")')" style="color: #112F4A !important; font-size: medium;">Traza de Documentos</a></th>
-                                    </tr>
-                                    @*<tr>
-                                            <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("FormatsReportsIndex", "Inspections")')" style="color: #aaaaaa !important;font-size: smaller;">Formatos</a></th>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("CertificatesReportsIndex", "Inspections")')" style="color: #aaaaaa !important;font-size: smaller;">Normatividad</a></th>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row" style="padding: 0rem !important;"><a class="menu__link" href="#" onclick="loadDummyData('@Url.Action("Features", "Inspections")')" style="color: #aaaaaa !important;font-size: smaller;">Cargar documentos</a></th>
-                                        </tr>*@
-                                </tbody>
-                            </table>
-                        </div>
+<div class="main" id="facade" style="margin:0;
+">
 
-                    </div>
+    
+
+    <div class="facade-container">
+
+        <div class="row no-gutters facade-layout">
+
+            <!-- SIDEBAR -->
+            <aside class="col-12 col-md-3 facade-sidebar" style="max-width:200px">
+
+                <div class="sidebar-header col-1">
+                    <h5 class="sidebar-title">
+                        Modificar Expedientes
+                    </h5>
                 </div>
 
-            </div>
+                <nav class="sidebar-menu">
+
+                    <a href="@Url.Action("SearchProceduresT", "Inspections")"
+                       class="sidebar-link"
+                       onclick="loadProceduresTable(this); return false;">
+                        Traza AIRS
+                    </a>
+
+                    <a href=""
+                       class="sidebar-link"
+                       onclick="">
+                        Documentacion   AIR
+                    </a>
+
+                    <a href=""
+                       class="sidebar-link"
+                       onclick="">
+                        Autorizzacion
+                    </a>
+
+                    <a href=""
+                       class="sidebar-link"
+                       onclick="">
+                        Facturacion
+                    </a>
+
+
+                </nav>
+
+            </aside>
+
+
+            <!-- CONTENIDO -->
+            <main class="col-12 col-md facade-content">
+
+            
+
+                <div id="facadeContent">
+
+
+                    <div class="facade-content-placeholder">
+
+                        <h4>Seleccione una opción</h4>
+                    </div>
+
+                </div>
+
+            </main>
+
         </div>
 
     </div>
 
 </div>
+
+
+
+
+
+
+<script>
+    function loadProceduresTable(link) {
+        var content = $('#facadeContent'); 
+
+
+        // Evita enviar otra petición mientras está cargando.
+        if (content.data('loading')) {
+            return;
+        }
+
+        content.data('loading', true);
+        content.html(`
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <!-- Spinner de Bootstrap -->
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <!-- Mensaje para el usuario -->
+                <h5 class="modal-title mb-0">Por favor, espere...</h5>
+                <p class="text-muted mb-0 mt-2">Estamos procesando su solicitud.</p>
+            </div>
+        </div>
+    </div>
+`);
+
+        $.ajax({
+            url: link.href,
+            type: 'POST',
+
+            success: function (data) {
+                // Coloca la tabla dentro del panel derecho.
+                content.html(data);
+            },
+
+            error: function () {
+                content.html(
+                    '<div class="ui warning message">' +
+                    'No se pudo cargar la información. ' +
+                    'Haz clic nuevamente en Traza AIRS para reintentar.' +
+                    '</div>'
+                );
+            },
+
+            complete: function () {
+                content.data('loading', false);
+            }
+        });
+    }
+
+
+
+    var historialVistas = [];
+    var cargandoVista = false;
+
+
+
+
+
+    function cargarVista(url, esRetroceso) {
+        var $content = $('#LoginFacade');
+
+        if ($content.length === 0) {
+            console.error('No existe el elemento #LoginFacade');
+            return;
+        }
+
+        if (cargandoVista) {
+            return;
+        }
+
+        cargandoVista = true;
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+
+            beforeSend: function () {
+                // Conserva el contenido actual mientras llega la respuesta.
+                $content.addClass('loading');
+            },
+
+            success: function (data) {
+                if (esRetroceso) {
+                    // Elimina la pantalla de la que acabamos de salir.
+                    historialVistas.pop();
+                } else {
+                    var actual = historialVistas[
+                        historialVistas.length - 1
+                    ];
+
+                    if (actual !== url) {
+                        historialVistas.push(url);
+                    }
+                }
+
+                $content.html(data);
+
+                // Inicializa controles después de insertar la vista.
+                if (typeof LoadElementsDefaultPartial === 'function') {
+                    LoadElementsDefaultPartial('#LoginFacade');
+                }
+
+                actualizarBotonVolver();
+            },
+
+            error: function (xhr) {
+                console.error('Error cargando la vista:', xhr);
+
+                // No reemplaza la pantalla actual si falla la petición.
+                alert('No fue posible cargar el contenido. Intenta nuevamente.');
+            },
+
+            complete: function () {
+                cargandoVista = false;
+                $content.removeClass('loading');
+            }
+        });
+    }
+
+
+
+
+    function VentanaAnterior() {
+        console.log('Intentando volver a la vista anterior...');
+        if (historialVistas.length < 2 || cargandoVista) {
+            return;
+        }
+
+        var urlAnterior = historialVistas[
+            historialVistas.length - 2
+        ];
+
+        cargarVista(urlAnterior, true);
+    }
+
+</script>
+

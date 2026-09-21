@@ -8,8 +8,12 @@
     @Styles.Render("~/Content/Site.css")
     @Styles.Render("~/Content/font-awesome-4.7.0/css/font-awesome.css")
 
+  
+
     <link rel="stylesheet"
-          href="@Url.Content("~/Content/Tailwind/tailwind.css?v=2")" />
+          href="@Url.Content("~/Content/stylesLogin/login.css")" />
+
+
 
     <style>
         body {
@@ -17,16 +21,12 @@
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
-          
+
         }
     </style>
 </head>
 <body>
-    <br />
-
-        <div class="login-page grid grid-cols-1 gap-4 ">
-            @RenderBody()
-        </div>
+    @RenderBody()
 
     @Scripts.Render("~/bundles/jqueryJs")
     @Scripts.Render("~/bundles/semanticJs")

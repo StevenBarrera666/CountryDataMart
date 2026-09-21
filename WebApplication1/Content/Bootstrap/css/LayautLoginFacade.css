@@ -12,10 +12,10 @@ body {
 ========================================= */
 
 .access-panel {
-    width: 1220px;
+    width: 1000px;
     height: 802px;
     margin: 22px auto;
-    border: 2px solid #235693;
+    border: 1px solid #235693;
     border-radius: 26px;
     background: rgba(5, 27, 60, 0.35);
     box-shadow: 0 0 40px rgba(0, 115, 255, 0.08), inset 0 0 30px rgba(0, 115, 255, 0.04);

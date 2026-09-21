@@ -1,0 +1,114 @@
+﻿
+
+
+
+
+
+
+
+
+
+/* ==========================================
+   CONTENEDOR PRINCIPAL
+========================================== */
+
+
+.facade-container {
+
+    max-width: 1760px;
+    max-height: 1680px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+
+/* ==========================================
+   LAYOUT
+========================================== */
+
+.facade-layout {
+    min-height: 800px;
+}
+
+
+/* ==========================================
+   SIDEBAR
+========================================== */
+
+.facade-sidebar {
+    min-height: 800px;
+    background-color: #112F4A;
+    border-right: 1px solid #d7dde4;
+}
+
+
+/* ==========================================
+   CABECERA SIDEBAR
+========================================== */
+
+.sidebar-header {
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+.sidebar-title {
+    margin: 0;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+
+/* ==========================================
+   MENÚ
+========================================== */
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    padding: 15px 0;
+}
+
+
+.sidebar-link {
+    display: block;
+    padding: 14px 20px;
+    color: #ffffff;
+    font-size: 16px;
+    text-decoration: none;
+    transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+
+    .sidebar-link:hover {
+        color: #ffffff;
+        text-decoration: none;
+        background-color: rgba(255, 255, 255, 0.12);
+        padding-left: 26px;
+    }
+
+
+/* ==========================================
+   ÁREA DE CONTENIDO
+========================================== */
+
+.facade-content {
+    max-height: 800px;
+    padding: 30px;
+    background-color: #f5f7fa;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+
+.facade-content-placeholder {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}

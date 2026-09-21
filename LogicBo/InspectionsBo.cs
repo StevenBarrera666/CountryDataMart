@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Net.PeerToPeer;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
-using System.Data.SqlClient;
+using static System.Net.WebRequestMethods;
 namespace LogicBo
 {
     public class InspectionsBo
@@ -40,21 +42,18 @@ namespace LogicBo
             return result;
         }
 
-        public DataTable GetLoadFATraces(int idGDS, DateTime fechaIni, DateTime fechaFin)
+        public DataTable GetLoadFATraces()
         {
-            List<SqlParameter> parameters = new List<SqlParameter> {
-                new SqlParameter(){ ParameterName="intTipoDoc", SqlDbType=SqlDbType.Int,Value=1},
-                new SqlParameter(){ ParameterName="intGDS", SqlDbType=SqlDbType.Int,Value=idGDS},
-                new SqlParameter(){ ParameterName="intEmpAgentID", SqlDbType=SqlDbType.Int,Value=0},
-                new SqlParameter(){ ParameterName="intTipoQuery", SqlDbType=SqlDbType.Int,Value=1},
-                new SqlParameter(){ ParameterName="dteIni", SqlDbType=SqlDbType.DateTime,Value=fechaIni},
-                new SqlParameter(){ ParameterName="dteFin", SqlDbType=SqlDbType.DateTime,Value=fechaFin},
-                new SqlParameter(){ ParameterName="intConIssues", SqlDbType=SqlDbType.Int,Value=1},
-                new SqlParameter(){ ParameterName="TravelAgyID", SqlDbType=SqlDbType.Int,Value=1},
-            };
-            var result = executeProcedures.DataTable("SpP_LoadFATraces", parameters);
+            var result = executeProcedures.DataTable("SP_LOADTRACEDDM", null);
             return result;
         }
+
+        public Dictionary<string, string> GetLoadGDS()
+        {
+            var result = executeProcedures.DataTable("[SP_LOAD_GDS", null);
+            return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["Name"].ToString());
+        }
+
 
         public DataTable GetLegalityReportsIndex(int idHeadquarter)
         {
@@ -191,6 +190,56 @@ namespace LogicBo
 
 
         }
+
+          
+        public DataTable SearchDataFromFile(int Fileid)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                    new SqlParameter(){ ParameterName="fileid", SqlDbType=SqlDbType.Int,Value=Fileid},
+        };
+            var result = executeProcedures.DataTable("SP_LOADTRACEDDMVyFileid", parameters);
+            return result;
+        }
+
+
+        public DataTable searchCCByFileid(int Fileid)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                    new SqlParameter(){ ParameterName="fileid", SqlDbType=SqlDbType.Int,Value=Fileid},
+        };
+            var result = executeProcedures.DataTable("SP_LOADCCByFileid", parameters);
+            return result;
+        }
+
+        public DataTable searchIDEByFileid(int Fileid)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                    new SqlParameter(){ ParameterName="fileid", SqlDbType=SqlDbType.Int,Value=Fileid},
+        };
+            var result = executeProcedures.DataTable("SP_LOADIDEByFileid", parameters);
+            return result;
+        }
+
+        public DataTable addCustomerToFile(int customerID, int fileId, string userName)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                    new SqlParameter(){ ParameterName="intFileID", SqlDbType=SqlDbType.Int,Value=fileId},
+                    new SqlParameter(){ ParameterName="intCurrentID", SqlDbType=SqlDbType.Int,Value=customerID},
+                    new SqlParameter(){ ParameterName="UserName", SqlDbType=SqlDbType.VarChar,Value=userName}
+            };
+            var result = executeProcedures.DataTable("sp_UpdateCustomerToFiles", parameters);
+            return result;
+        }
+
+        public DataTable searchCustomers(int Fileid)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                    new SqlParameter(){ ParameterName="Fileid", SqlDbType=SqlDbType.Int,Value=Fileid},
+        };
+            var result = executeProcedures.DataTable("SP_LISTCUSTOMERBYFILEID", parameters);
+            return result;
+        }
+
         public DataTable SearchSchedulerInspections(int headQuarterTypeid, int Typeid, int ElementID)
         {
             List<SqlParameter> parameters = new List<SqlParameter> {

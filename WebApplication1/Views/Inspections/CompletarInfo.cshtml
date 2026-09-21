@@ -1,0 +1,472 @@
+﻿@using WebApplication1.Models
+
+@{
+    var session = Session["SessionUser"] as SessionModels;
+}
+
+
+@using System.Data
+@model DataTable
+
+<script src="~/Scripts/dropzone/dropzone.js"></script>
+<link href="~/Scripts/dropzone/dropzone.css" rel="stylesheet" />
+<link href="~/Scripts/tables/jquery.dynatable.css" rel="stylesheet" />
+<script type="text/javascript" src="~/Scripts/tables/jquery.dynatable.js"></script>
+
+
+@using (Ajax.BeginForm("FeaturesCreate", "Inspections", null, new AjaxOptions()
+{
+    HttpMethod = "POST",
+    OnBegin = "return onBeginCreateFeature()",
+    OnSuccess = "onSuccessCreateFeature(data)",
+    OnFailure = "onFailureCreateFeature()",
+}, new { @id = "formProcessCreateFeature" }))
+{
+    <h3>
+        Tiqueteador
+    </h3>
+    <label>"@Model.Rows[0]["Tiqueteador"]"</label>
+    <h3>
+        Pasajero
+    </h3>
+    <label>"@Model.Rows[0]["Pasajero"]"</label>
+    <h3>
+        PNR
+    </h3>
+    <label>"@Model.Rows[0]["PNR"]"</label>
+    <h3>
+        Numero Expediente
+    </h3>
+    <label>"@Model.Rows[0]["Numero Expediente"]"</label>
+
+    <div id="messageResult"
+         class="login-message"
+         role="alert"
+         aria-live="polite">
+    </div>
+
+    <table class="ui selectable celled table ui center aligned tablesInitial">
+        <thead>
+            <tr>
+                @foreach (System.Data.DataColumn col in Model.Columns)
+                {
+                    if (@col.ColumnName == "Tiquete" || @col.ColumnName == "IDs" || @col.ColumnName == "IssueDescription")
+                    {
+                        <th>@col.ColumnName</th>
+
+                    }
+
+                }
+                <th>Acción</th>
+            </tr>
+
+        </thead>
+        <tbody>
+            @foreach (System.Data.DataRow row in Model.Rows)
+            {
+                <tr>
+                    @foreach (DataColumn col in Model.Columns)
+                    {
+
+                        if (@col.ColumnName == "Tiquete" || @col.ColumnName == "IDs" || @col.ColumnName == "IssueDescription")
+                        {
+                            <td>@row[col.ColumnName]</td>
+                        }
+
+                    }
+                    <td>
+                        <a href="javascript:void(0)" onclick="mostrarPanelAsignaciones('@row["IDs"]')">Asignar</a>
+                    </td>
+                </tr>
+
+
+            }
+
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+    <div id="asignaciones">
+        @*----Si el id 1 o 2*@
+        <div id="cliente" class="border border-primary" style="display:none">
+
+            <div class="ui equal width form">
+                <div class="fields">
+                    <div class="field" style="text-align: center;">
+                        <b><label>Asignar Cliente</label></b>
+
+                    </div>
+                    <div class="field">
+
+                        <button class="btn btn-primary" onclick="buscarCliente('')">Buscar Clientes</button>
+
+                        
+                    </div>
+                </div>
+                <div class="fields">
+                    <div class="field">
+
+                        <table id="clientesS" class="ui selectable celled table ui center aligned tablesInitial">
+                            <thead>
+                                <tr>
+                                    <th hidden>ID</th>
+                                    <th hidden>ThirdPartyId</th>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Número Documento</th>
+                                    <th hidden>Tipo</th>
+                                    <th>Seleccionar</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*----Si el id 4*@
+        <div id="centroCosto" class="border border-primary" style="display:none">
+
+            <div class="ui equal width form">
+                <div class="fields">
+                    <div class="field" style="text-align: center;">
+                        <b> <label>Asignar Centro de costo</label></b>
+
+                    </div>
+                    <div class="field">
+
+                        <button class="btn btn-primary" onclick="buscarCC('')">Buscar Centros de Costo del cliente</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ui equal width form">
+                <div class="fields">
+                    <div class="field">
+                        <table id="centrocostoT" class="ui selectable celled table ui center aligned tablesInitial">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Seleccionar</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*----Si el id 5*@
+        <div id="idEmpleado" class="border border-primary" style="display:none">
+
+            <div class="ui equal width form">
+                <div class="fields">
+                    <div class="field" style="text-align: center;">
+                        <b> <label>Asignar ID de Empleado</label></b>
+                    </div>
+                    <div class="field">
+                        <button class="btn btn-primary" onclick="buscarID('')">Buscar IDs de Empleado del cliente</button>
+                    </div>
+                </div>
+            </div>
+            <div class="ui equal width form">
+                <div class="fields">
+                    <div class="field">
+
+                        <table id="empleado" class="ui selectable celled table ui center aligned tablesInitial">
+                            <thead>
+                                <tr>
+                                    <th>ID Empleado</th>
+                                    <th>Códigoe</th>
+                                    <th>Nombre</th>
+                                    <th>Seleccionar</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var numeroExpediente = parseInt('@Model.Rows[0]["Numero Expediente"]');
+
+    function mostrarPanelAsignaciones(id) {
+
+        console.log("Tipo de asignación:", id);
+
+        if (id == '1' || id == '2') {
+
+            $("#cliente").removeClass("hidden").show();
+
+            $("#idEmpleado").hide();
+            $("#centroCosto").hide();
+        }
+        else if (id == '4') {
+
+            $("#centroCosto").removeClass("hidden").show();
+
+            $("#cliente").hide();
+            $("#idEmpleado").hide();
+        }
+        else if (id == '5') {
+
+            $("#idEmpleado").removeClass("hidden").show();
+
+            $("#centroCosto").hide();
+            $("#cliente").hide();
+        }
+    }
+
+
+    // ==============================
+    // BUSCAR CENTROS DE COSTO
+    // ==============================
+
+        function buscarCC() {
+
+        $.ajax({
+
+            url: '@Url.Action("buscarCC", "Inspections")',
+
+            type: 'POST',
+
+            data: {
+                NoExpediente: numeroExpediente
+            },
+
+            success: function (getData) {
+
+                console.log("Centros de costo:", getData);
+
+                if (getData.result) {
+
+                    $("#centrocostoT tbody").empty();
+
+                    $.each(getData.data, function (i, centroCosto) {
+
+                        var fila = `
+                            <tr>
+                                <td>${centroCosto.Id}</td>
+                                <td>${centroCosto.Codigo}</td>
+
+                                <td>${centroCosto.Nombre}</td>
+
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-primary"
+                                            onclick="seleccionarCentroCosto('${centroCosto.Id}')">
+
+                                        Seleccionar
+
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+
+                        $("#centrocostoT tbody").append(fila);
+                    });
+
+                    $("#centroCosto")
+                        .removeClass("hidden")
+                        .show();
+                }
+            },
+
+            error: function (xhr) {
+
+                console.error(
+                    "Error buscando centros de costo:",
+                    xhr.responseText
+                );
+            }
+        });
+    }
+
+
+    // ==============================
+    // BUSCAR EMPLEADOS
+    // ==============================
+
+    function buscarID() {
+
+        console.log("Buscando empleados:", numeroExpediente);
+
+        $.ajax({
+
+            url: '@Url.Action("buscarID", "Inspections")',
+
+            type: 'POST',
+
+            data: {
+                NoExpediente: numeroExpediente
+            },
+
+            success: function (getData) {
+
+                console.log("Empleados:", getData);
+
+                if (getData.result) {
+
+                    $("#empleado tbody").empty();
+
+                    $.each(getData.data, function (i, empleado) {
+
+                        var fila = `
+                            <tr>
+                                <td>${empleado.Id}</td>
+                                 <td>${empleado.Codigo}</td>
+                                <td>${empleado.Nombre}</td>
+
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-primary"
+                                            onclick="seleccionarEmpleado('${empleado.Id}')">
+
+                                        Seleccionar
+
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+
+                        $("#empleado tbody").append(fila);
+                    });
+
+                    $("#idEmpleado")
+                        .removeClass("hidden")
+                        .show();
+                }
+            },
+
+            error: function (xhr) {
+
+                console.error(
+                    "Error buscando empleados:",
+                    xhr.responseText
+                );
+            }
+        });
+        }
+
+
+        function buscarCliente() {
+            
+            $.ajax({
+                url: '@Url.Action("buscarCliente", "Inspections")',
+                type: 'POST',
+                data: {
+                    NoExpediente: numeroExpediente
+                },
+                success: function (getData) {
+
+                    console.log("Clientes:", getData);
+                    if (getData.result) {
+                        $("#clientesS tbody").empty();
+                        $.each(getData.data, function (i, cliente) {
+
+                            //"{ Id = 21102, ThirdPartyId = 10006948, FirstName =  DIANA MARCEL, LastName = OSPINA BARRERA, DocumentNumber = 52454121, DocumentTypeID = 1 }"
+
+
+                            var fila = `
+                            <tr>
+                            <td hidden>${cliente.Id}</td>
+                            <td hidden>${cliente.ThirdPartyId}</td>
+                            <td>${cliente.FirstName}</td>
+                            <td>${cliente.LastName}</td>
+                            <td>${cliente.DocumentNumber}</td>
+                            <td hidden>${cliente.DocumentTypeID}</td>
+                            <td>
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        onclick="seleccionarCliente('${cliente.Id}','${cliente.FirstName} ${cliente.LastName}')">
+                                    Seleccionar
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                            $("#clientesS tbody").append(fila);
+                        });
+                        $("#clientesS").removeClass("hidden").show();
+                    }
+                },
+                error: function (xhr) {
+                    console.error("Error buscando clientes:", xhr.responseText);
+                }
+            });
+        }
+
+        function seleccionarCliente(id,nombre) {
+            var userName = "admin";
+
+
+            $.ajax({
+                url: '@Url.Action("registrarCliente", "Inspections")',
+                type: 'POST',
+                data: {
+                    idCliente:id,
+                    NoExpediente: numeroExpediente,
+                    userName: userName
+                },
+                success: function (getData) {
+
+                    console.log("crear clientes:", getData);
+                    if (getData.result) {
+                        alert("Cliente: " + nombre + " ha sido asignado con exito");
+                    }
+                },
+                error: function (xhr) {
+                    console.error("Error asignando el cliente:", xhr.responseText);
+                }
+            });
+
+
+
+
+
+
+
+
+
+        }
+        function seleccionarEmpleado(id){
+
+        }
+
+
+        function seleccionarCentroCosto(id) {
+
+
+        }
+
+
+      
+
+
+    </script>
+
+
+
+
+}
+
+
+

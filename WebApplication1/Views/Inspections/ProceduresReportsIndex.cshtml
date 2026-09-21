@@ -12,10 +12,7 @@
     var session = Session["SessionUser"] as SessionModels;
 }
 
-@if (session.Idioma == "spain")
-{
-    <h3 class="titlesPages"> COUNTRY | DATAMART | TRAZA DOCUMENTOS</h3>
-}
+
 
 
 @using (Ajax.BeginForm("SearchProceduresT", "Inspections", null, new AjaxOptions()
@@ -26,81 +23,22 @@
     OnFailure = "onFailureProcessSearch()",
 }, new { @id = "formProcessSearch" }))
 {
-    if (session.Idioma == "spain")
-    {
 
-        <button class="ui primary button" style="background-color: #112F4A !important">
-            Buscar
-        </button>
 
-        @*<div class="ui equal width form">
-                <div class="fields">
-                    <div class="field">
-                        <label>Origen</label>
-                        @Html.DropDownList("cbxOrigenGDS", (SelectList)ViewBag.GdsDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown" })
-                    </div>
-                </div>
-                <div class="fields">
-                    <div class="field">
-                        <label>Fecha Inicial</label>
-                        <div class="ui calendar calendarPicker" style="margin-top:-13px" id="purchaseDate">
-                            <div class="ui input left icon">
-                                <i class="calendar icon"></i>
-                                <input type="text" placeholder="Fecha Inicial">
-                            </div>
-                        </div>
-                        <input type="hidden" name="cpurchaseDate" id="cpurchaseDate" autocomplete="off">
-                    </div>
-                    <div class="field">
-                        <label>Fecha Fabricacion</label>
-                        <div class="ui calendar calendarPicker" style="margin-top:-13px" id="fabricationDate">
-                            <div class="ui input left icon">
-                                <i class="calendar icon"></i>
-                                <input type="text" placeholder="Fecha Final">
-                            </div>
-                        </div>
-                        <input type="hidden" name="cfabricationDate" id="cfabricationDate" autocomplete="off">
-                    </div>
-                </div>
 
-            </div>*@
-    }
+<button class="ui primary button" style="background-color: #112F4A !important">
+    Buscar
+</button>
+
+
     <div id="renderSearchProcedure"></div>
+
 }
 
 <script type="text/javascript">
+       
 
-    $('#formProcessSearch').form({
-        fields: {
-            cbxOrigenGDS: {
-                identifier: 'cbxOrigenGDS',
-                rules: [{
-                    type: 'empty',
-                    prompt: 'Debe seleccionar una opción'
-                }]
-            },
-            cpurchaseDate: {
-                identifier: 'cpurchaseDate',
-                rules: [
-                    {
-                        type: 'empty',
-                        prompt: 'Debe elegir una fecha inicial'
-                    },
-                ]
-            },
-            cfabricationDate: {
-                identifier: 'cfabricationDate',
-                rules: [
-                    {
-                        type: 'empty',
-                        prompt: 'Debe elegir una fecha final'
-                    },
-                ]
-            },
 
-        }, inline: true,
-        on: 'blur'
-    });
 
     function onBeginProcessSearch() {
         $('#renderPages').addClass("loading");

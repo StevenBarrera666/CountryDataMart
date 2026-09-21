@@ -1,15 +1,16 @@
 ﻿using LogicBo;
+using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using WebApplication1.Filters;
-using OfficeOpenXml;
-using OfficeOpenXml.Drawing;
-using System.IO;
 using Utils;
+using WebApplication1.Filters;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -111,7 +112,7 @@ namespace WebApplication1.Controllers
         }
         public ActionResult ProceduresReportsIndex()
         {
-            ViewBag.GdsDictionary = new SelectList(_headquarterBo.GetDictionarySede(), "Key", "Value");
+            ViewBag.GdsDictionary = new SelectList(_headquarterBo.GetDictionarySede(), "cbxGDS");
             return PartialView();
         }
         public ActionResult LegalityReportsIndex()
@@ -700,6 +701,163 @@ namespace WebApplication1.Controllers
                 throw;
             }
         }
+
+
+        public ActionResult CompletarInfo(int NoExpediente)
+        {
+            var model = _inspectionsBo.SearchDataFromFile(NoExpediente);
+            return PartialView(model);
+        }
+
+
+
+        //public ActionResult buscarCC(int NoExpediente)
+        //{
+        //    var model = _inspectionsBo.SearchDataFromFile(NoExpediente);
+        //    return PartialView(model);
+        //}
+        //public ActionResult buscarID(int NoExpediente)
+        //{
+        //    var model = _inspectionsBo.SearchDataFromFile(NoExpediente);
+        //    return PartialView(model);
+        //}
+
+
+        public JsonResult buscarCC(int NoExpediente)
+        {
+            try
+            {
+                DataTable dt =
+                    _inspectionsBo.searchCCByFileid(NoExpediente);
+
+                var datos = dt.AsEnumerable()
+                    .Select(row => new
+                    {
+                        Id = row["Id"].ToString(),
+                        Codigo = row["Código"].ToString(),
+                        Nombre = row["Nombre"].ToString()
+                    })
+                    .ToList();
+
+                return Json(new
+                {
+                    result = true,
+                    data = datos
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    result = false,
+                    message = ex.Message
+                });
+            }
+        }
+        public JsonResult buscarID(int NoExpediente)
+        {
+            try
+            {
+                DataTable dt =
+                    _inspectionsBo.searchIDEByFileid(NoExpediente);
+
+                var datos = dt.AsEnumerable()
+                    .Select(row => new
+                    {
+                        Id = row["Id"].ToString(),
+                        Codigo = row["Código"].ToString(),
+                        Nombre = row["Nombre"].ToString()
+                    })
+                    .ToList();
+
+                return Json(new
+                {
+                    result = true,
+                    data = datos
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    result = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+        public JsonResult buscarCliente(int NoExpediente)
+        {
+            try
+            {
+                DataTable dt =
+                    _inspectionsBo.searchCustomers(NoExpediente);
+
+                var datos = dt.AsEnumerable()
+                    .Select(row => new
+                    {
+                        Id = row["ID"].ToString(),
+                        ThirdPartyId = row["ThirdPartyId"].ToString(),
+                        FirstName = row["FirstName"].ToString(),
+                        LastName = row["LastName"].ToString(),
+                        DocumentNumber = row["DocumentNumber"].ToString(),
+                        DocumentTypeID = row["DocumentTypeID"].ToString()
+                    })
+                    .ToList();
+                return Json(new
+                {
+                    result = true,
+                    data = datos
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    result = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+
+
+        public JsonResult registrarCliente(int idCliente, int NoExpediente,string userName)
+        {
+            try
+            {
+                DataTable dt =
+                    _inspectionsBo.addCustomerToFile(idCliente,NoExpediente, userName);
+
+                var datos = dt.AsEnumerable()
+                    .Select(row => new
+                    {
+                        Id = row["ID"].ToString(),
+                    })
+                    .ToList();
+                return Json(new
+                {
+                    result = true,
+                    data = datos
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    result = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+
+
+
+
         [HttpPost]
         public PartialViewResult SearchManagementOfFindings(FormCollection collection)
         {
@@ -757,11 +915,7 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                DateTime fechaI = new DateTime(2026, 1, 1);
-                DateTime fechaF = DateTime.Now;
-
-                int gdsID = 1;
-                var result = _inspectionsBo.GetLoadFATraces(gdsID, fechaI, fechaF);
+                var result = _inspectionsBo.GetLoadFATraces();
                 ViewBag.id = 1;
                 return PartialView(result);
 
