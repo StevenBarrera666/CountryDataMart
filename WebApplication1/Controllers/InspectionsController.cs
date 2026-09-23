@@ -1,4 +1,5 @@
-﻿using LogicBo;
+﻿using ADO;
+using LogicBo;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using System;
@@ -917,6 +918,10 @@ namespace WebApplication1.Controllers
             {
                 var result = _inspectionsBo.GetLoadFATraces();
                 ViewBag.id = 1;
+
+                ViewBag.GDSDictionary = new SelectList(_inspectionsBo.GetLoadGDS(), "Key", "Value");
+
+                ViewBag.TiqueteadorDictionary = new SelectList(GetTiqueteadores(result), "Key", "Value");
                 return PartialView(result);
 
              
@@ -928,6 +933,29 @@ namespace WebApplication1.Controllers
 
 
         }
+
+        public Dictionary<string, string> GetTiqueteadores(DataTable dtResult)
+        {
+            Dictionary<string, string> tiqueteadores = new Dictionary<string, string>();
+            int i = 0;
+
+
+
+            foreach (DataRow row in dtResult.Rows)
+            {
+                string tiqueteador = row["Tiqueteador"].ToString();
+
+                // Validar que el valor no exista ya en el diccionario
+                if (!tiqueteadores.ContainsValue(tiqueteador))
+                {
+                    tiqueteadores.Add(i.ToString(), tiqueteador);
+                    i++;
+                }
+            }
+            return tiqueteadores;
+        }
+
+
         [HttpPost]
         public PartialViewResult SearchLegalityT(FormCollection collection)
         {

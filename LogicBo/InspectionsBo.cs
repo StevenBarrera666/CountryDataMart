@@ -50,7 +50,7 @@ namespace LogicBo
 
         public Dictionary<string, string> GetLoadGDS()
         {
-            var result = executeProcedures.DataTable("[SP_LOAD_GDS", null);
+            var result = executeProcedures.DataTable("SP_LOAD_GDS", null);
             return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["Name"].ToString());
         }
 

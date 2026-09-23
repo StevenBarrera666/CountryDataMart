@@ -4,44 +4,53 @@
 <script type="text/javascript" src="~/Scripts/tables/jquery.dynatable.js"></script>
 
 
-<table class="ui selectable celled table ui center aligned tablesInitial">
+<table class="ui selectable celled table ui center aligned tablesInitial" id="tblDatos">
     <thead>
         <tr>
             @foreach (System.Data.DataColumn col in Model.Columns)
             {
-                
-                    <th>@col.ColumnName</th>
+                <th data-dynatable-column="@col.ColumnName">@col.ColumnName</th>
             }
-            <th>documentar</th>
+            <th data-dynatable-column="documentar"
+                data-dynatable-no-sort="true">documentar</th>
         </tr>
-        <tr>
-            <td>
-            @Html.DropDownList("cbxGDS", (SelectList)ViewBag.GDSDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown", @id = "cbxGDS" })
-            </td>
-        </tr>
-    </thead>
-    <tbody>
-         
-        @foreach (System.Data.DataRow row in Model.Rows)
-        {
-            <tr data-origen="@row["Origen"].ToString()">
-                @foreach (DataColumn col in Model.Columns)
-                {
-                    @*<td>@row[col.ColumnName]</td>*@
-                    @Html.DropDownList("cbxGDS", (SelectList)ViewBag.GDSDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown", @id = "cbxMedio" })
-
-                }
+        }
+           
+            <tr>
                 <td>
-                    @*redirect a otra vista
-            Mostrar otra vista y pasarle @row[col.ColumnName] como parametro y el id de la columa Numero Expediente @row["Numero Expediente"]*@
-                    <a href="javascript:void(0)" onclick="cargarElement('@Url.Action("CompletarInfo",new { @NoExpediente=row["Numero Expediente"].ToString()})')">Pasar a Documentar</a>
+                    @Html.DropDownList("cbxGDS", (SelectList)ViewBag.GDSDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown", @id = "cbxGDS" })
+                </td>
+                <td>
+                </td>
+                <td>
+                </td>
+                <td>
+                </td>
+                <td>
+                    @Html.DropDownList("cbxTiqueteador", (SelectList)ViewBag.TiqueteadorDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown", @id = "cbxTiqueteador" })
                 </td>
             </tr>
-            ;
+        </thead>
+
+
+    <tbody>
+
+
+        @foreach (System.Data.DataRow row in Model.Rows)
+        {
+            <tr data-origen="@row["Origen"]"
+                data-value="@row["Tiqueteador"]">
+                @foreach (System.Data.DataColumn col in Model.Columns)
+                {
+                    <td>@row[col.ColumnName]</td>
+                }
+                <td></td>
+            </tr>
         }
+
     </tbody>
 </table>
-<br />
+
 
 
 <div class="ui card cardTest" style="display:none">
@@ -70,34 +79,90 @@
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
-        $('#cbxGDS').on('change', function () {
+    $(function () {
+        var $tabla = $('#tblDatos');
 
-            
-            // Obtener el texto o valor seleccionado (convertido a minúsculas para comparar fácilmente)
-            var valorSeleccionado = $(this).val().toString().trim().toLowerCase();
-            var textoSeleccionado = $(this).find('option:selected').text().trim().toLowerCase();
+        function normalizar(valor) {
+            return valor == null
+                ? ''
+                : String(valor).trim().toLowerCase();
+        }
 
+        // Las claves coinciden con data-dynatable-column del encabezado.
+        var columnas = $tabla.find('thead tr:first th').map(function () {
+            return $(this).attr('data-dynatable-column');
+        }).get();
 
-            console.log(valorSeleccionado);
-            console.log(textoSeleccionado);
-            // Recorrer todas las filas del tbody de la tabla
-            $('#tblDatos tbody tr').each(function () {
-                var origenFila = $(this).data('origen').toString().trim().toLowerCase();
+        // Leer las filas originales antes de inicializar Dynatable.
+        var registros = $tabla.find('tbody tr').map(function () {
+            var $fila = $(this);
+            var registro = {};
 
-                // Si la opción seleccionada es la vacía/defecto, muestra todas las filas
-                if (valorSeleccionado === "" || valorSeleccionado === "0") {
-                    $(this).show();
-                } else {
-                    // Compara el valor de data-origen con el valor o texto del dropdown
-                    if (origenFila === valorSeleccionado || origenFila === textoSeleccionado) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
+            $fila.children('td').each(function (indice) {
+                if (indice < columnas.length) {
+                    registro[columnas[indice]] = $(this).html();
                 }
             });
-        });
+
+            // Estos campos se usan para filtrar, no agregan columnas.
+            registro._filtroOrigen = normalizar($fila.attr('data-origen'));
+            registro._filtroTiqueteador = normalizar($fila.attr('data-value'));
+
+            return registro;
+        }).get();
+
+        // Conservar tu callback si está definido.
+        if (typeof processingComplete === 'function') {
+            $tabla.on('dynatable:afterProcess', processingComplete);
+        }
+
+        var dynatable = $tabla.dynatable({
+            table: {
+                // Excluir la segunda fila, que contiene los filtros.
+                headRowSelector: 'thead tr:first'
+            },
+            dataset: {
+                records: registros
+            }
+        }).data('dynatable');
+
+        function leerSeleccion(selector) {
+            var $select = $(selector);
+
+            return {
+                valor: normalizar($select.val()),
+                texto: normalizar($select.find('option:selected').text())
+            };
+        }
+
+        function coincide(dato, seleccion) {
+            // Mantiene tu convención: "" y "0" significan todos.
+            if (seleccion.valor === '' || seleccion.valor === '0') {
+                return true;
+            }
+
+            return dato === seleccion.valor || dato === seleccion.texto;
+        }
+
+        // Una sola consulta combina los dos filtros.
+        dynatable.queries.functions.filtrosCombinados = function (registro, filtros) {
+            return coincide(registro._filtroOrigen, filtros.origen)
+                && coincide(registro._filtroTiqueteador, filtros.tiqueteador);
+        };
+
+        function aplicarFiltros() {
+            dynatable.queries.add('filtrosCombinados', {
+                origen: leerSeleccion('#cbxGDS'),
+                tiqueteador: leerSeleccion('#cbxTiqueteador')
+            });
+
+            dynatable.settings.dataset.page = 1;
+            dynatable.process();
+        }
+
+        $('#cbxGDS, #cbxTiqueteador').on('change', aplicarFiltros);
+
+        aplicarFiltros();
     });
 
     function cargarElement(url) {
