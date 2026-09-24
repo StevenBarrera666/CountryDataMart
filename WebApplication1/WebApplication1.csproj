@@ -59,7 +59,7 @@
     </Reference>
     <Reference Include="itextsharp, Version=4.1.6.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Documents\DATAMARTR\itextsharp.dll</HintPath>
+      <HintPath>..\..\..\VIAJESCOUNTRYDATAMART\LogicBo\bin\Debug\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.2.1\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
@@ -778,6 +778,8 @@
     <Content Include="Views\Inspections\ScheduleInspectionsByHeadquarter.cshtml" />
     <Content Include="Views\Izage\EditEquipmentIzage.cshtml" />
     <Content Include="Views\Inspections\InformacionFaltante.cshtml" />
+    <Content Include="Views\Inspections\Documentacion.cshtml" />
+    <Content Include="Views\Inspections\Autorizacion.cshtml" />
     <None Include="Views\Shared\_MenuPartialWHU.cshtml" />
   </ItemGroup>
   <ItemGroup>

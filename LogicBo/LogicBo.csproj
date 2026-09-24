@@ -44,7 +44,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="itextsharp">
-      <HintPath>..\..\..\..\Documents\DATAMARTR\itextsharp.dll</HintPath>
+      <HintPath>..\..\..\VIAJESCOUNTRYDATAMART\LogicBo\bin\Debug\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="SCIST.CapaDatos">
       <HintPath>..\..\..\..\..\..\..\..\Documentos\Win\WindowsApp1\bin\Debug\SCIST.CapaDatos.dll</HintPath>
@@ -64,6 +64,7 @@
     <Compile Include="CategoriaIzajeBo.cs" />
     <Compile Include="CronogramaIzajeBo.cs" />
     <Compile Include="CronogramaPersonasIzajeBo.cs" />
+    <Compile Include="DocumentacionFilaModel.cs" />
     <Compile Include="EquipoIzage.cs" />
     <Compile Include="FactoresIzajeBo.cs" />
     <Compile Include="IndicadoresBo.cs" />

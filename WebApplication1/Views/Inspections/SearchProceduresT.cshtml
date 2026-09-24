@@ -4,41 +4,32 @@
 <script type="text/javascript" src="~/Scripts/tables/jquery.dynatable.js"></script>
 
 
-<table class="ui selectable celled table ui center aligned tablesInitial">
+<table class="ui selectable celled table ui center aligned tablesInitial" id="tblDatos">
     <thead>
         <tr>
             @foreach (System.Data.DataColumn col in Model.Columns)
             {
-                
-                    <th>@col.ColumnName</th>
+                <th>@col.ColumnName</th>
             }
-            <th>documentar</th>
         </tr>
         <tr>
             <td>
-            @Html.DropDownList("cbxGDS", (SelectList)ViewBag.GDSDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown", @id = "cbxGDS" })
+                @Html.DropDownList("cbxGDS", (SelectList)ViewBag.GDSDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown", @id = "cbxGDS" })
             </td>
         </tr>
     </thead>
     <tbody>
-         
+
         @foreach (System.Data.DataRow row in Model.Rows)
         {
             <tr data-origen="@row["Origen"].ToString()">
                 @foreach (DataColumn col in Model.Columns)
                 {
-                    @*<td>@row[col.ColumnName]</td>*@
-                    @Html.DropDownList("cbxGDS", (SelectList)ViewBag.GDSDictionary, "[-Seleccione una opción-]", new { @class = "ui search dropdown", @id = "cbxMedio" })
-
+                    <td>@row[col.ColumnName]</td>
                 }
                 <td>
-                    @*redirect a otra vista
-            Mostrar otra vista y pasarle @row[col.ColumnName] como parametro y el id de la columa Numero Expediente @row["Numero Expediente"]*@
-                    <a href="javascript:void(0)" onclick="cargarElement('@Url.Action("CompletarInfo",new { @NoExpediente=row["Numero Expediente"].ToString()})')">Pasar a Documentar</a>
-                </td>
-            </tr>
-            ;
-        }
+           </tr>
+         }
     </tbody>
 </table>
 <br />
@@ -73,7 +64,7 @@
     $(document).ready(function () {
         $('#cbxGDS').on('change', function () {
 
-            
+
             // Obtener el texto o valor seleccionado (convertido a minúsculas para comparar fácilmente)
             var valorSeleccionado = $(this).val().toString().trim().toLowerCase();
             var textoSeleccionado = $(this).find('option:selected').text().trim().toLowerCase();

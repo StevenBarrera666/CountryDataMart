@@ -16,7 +16,7 @@
 .facade-container {
 
     max-width: 1760px;
-    max-height: 1680px;
+    /*max-height: 1680px;*/
     margin: 0 auto;
     background-color: #ffffff;
     border-radius: 8px;

@@ -48,10 +48,100 @@ namespace LogicBo
             return result;
         }
 
+        public DataTable GetLoadFATracesDocumentar()
+        {
+            var result = executeProcedures.DataTable("SP_LOADTRACEDDM_DOCUMENTAR", null);
+            return result;
+        }
+
+        public DataTable GetLoadFATracesAurorizar()
+        {
+            var result = executeProcedures.DataTable("SP_LOADTRACEDDM_AUTORIZAR", null);
+            return result;
+        }
+
+
+        
+
         public Dictionary<string, string> GetLoadGDS()
         {
-            var result = executeProcedures.DataTable("[SP_LOAD_GDS", null);
+            var result = executeProcedures.DataTable("SP_LOAD_GDS", null);
             return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["Name"].ToString());
+        }
+
+        public Dictionary<string, string> GetLoadCanal()
+        {
+            var result = executeProcedures.DataTable("SP_LOADCANAL", null);
+            return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["canal"].ToString());
+        }
+
+        public Dictionary<string, string> GetLoadFormasPago()
+        {
+            var result = executeProcedures.DataTable("SP_LOADPaymentMethods", null);
+            return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["Name"].ToString());
+        }
+
+        public Dictionary<string, string> GetLoadPorcentaje()
+        {
+            var result = executeProcedures.DataTable("SP_LOAD_TA_Porcentajes", null);
+            return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["porcentaje"].ToString());
+        }
+
+        public Dictionary<string, string> GetLoadModalidad()
+        {
+            var result = executeProcedures.DataTable("SP_LOADMODALIDAD", null);
+            return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["descripcion"].ToString());
+        }
+
+      
+        public bool GuardarDetalleDocumentacion(DocumentacionFilaModel model)
+        {
+            bool resultado=false;
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                new SqlParameter(){ ParameterName="opc", SqlDbType=SqlDbType.Int,Value=2},
+                new SqlParameter(){ ParameterName="FileId", SqlDbType=SqlDbType.Int,Value=model.FileId},
+                new SqlParameter(){ ParameterName="CustomerId", SqlDbType=SqlDbType.Int,Value=model.CustomerId},
+                new SqlParameter(){ ParameterName="IdCanal", SqlDbType=SqlDbType.Int,Value=model.IdCanal},
+                new SqlParameter(){ ParameterName="IdModalidad", SqlDbType=SqlDbType.Int,Value=model.IdModalidad},
+                new SqlParameter(){ ParameterName="Solicitud", SqlDbType=SqlDbType.VarChar,Value=model.Solicitud},
+                new SqlParameter(){ ParameterName="IdCentroCostos", SqlDbType=SqlDbType.Int,Value=model.IdCentroCostos},
+                new SqlParameter(){ ParameterName="IdRazonViaje", SqlDbType=SqlDbType.Int,Value=model.IdRazonViaje},
+                new SqlParameter(){ ParameterName="OrdenServicio", SqlDbType=SqlDbType.VarChar,Value=model.OrdenServicio}
+                };
+
+            var result = executeProcedures.DataTable("SP_FileDocumentado", parameters);
+            if (result.Rows.Count == 1)
+                resultado = true;
+            return resultado;
+        }
+      
+
+
+        public Dictionary<string, string> GetLoadCentroCostos(int CustomerID)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                new SqlParameter(){ ParameterName="CustomerID", SqlDbType=SqlDbType.Int,Value=CustomerID},
+            };
+            var result = executeProcedures.DataTable("SP_LOADCOSTCENTERSBATCUSTOMERID", parameters);
+            return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["descripcion"].ToString());
+        }
+
+        public Dictionary<string, string> GetLoadTc(int CustomerID)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                new SqlParameter(){ ParameterName="CustomerID", SqlDbType=SqlDbType.Int,Value=CustomerID},
+            };
+            var result = executeProcedures.DataTable("SP_LOADTCBYCUSTOMER", parameters);
+            return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["Number"].ToString());
+        }
+        
+        public Dictionary<string, string> GetLoadReasonCode(int CustomerID)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                new SqlParameter(){ ParameterName="CustomerID", SqlDbType=SqlDbType.Int,Value=CustomerID},
+            };
+            var result = executeProcedures.DataTable("SP_LOADREASONCODECUSTOMERID", parameters);
+            return result.AsEnumerable().ToDictionary(row => row["id"].ToString(), row => row["descripcion"].ToString());
         }
 
 
@@ -191,7 +281,7 @@ namespace LogicBo
 
         }
 
-          
+
         public DataTable SearchDataFromFile(int Fileid)
         {
             List<SqlParameter> parameters = new List<SqlParameter> {

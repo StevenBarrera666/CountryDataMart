@@ -1,0 +1,560 @@
+﻿@using System.Data
+@model DataTable
+<link href="~/Scripts/tables/jquery.dynatable.css" rel="stylesheet" />
+<script type="text/javascript" src="~/Scripts/tables/jquery.dynatable.js"></script>
+<link href="~/Content/toastr.css" rel="stylesheet" />
+
+<style>
+    #tablesIndexDocumentacion td {
+        position: relative;
+        overflow: visible !important;
+    }
+
+    .campo-error {
+        border: 1px solid #e0b4b4 !important;
+        background-color: #fff6f6 !important;
+        color: #9f3a38 !important;
+        font-weight: bold !important;
+    }
+
+    /* Hace que todos los selects de la tabla tengan un ancho uniforme */
+    #tablesIndexDocumentacion select {
+        width: 100% !important;
+        min-width: 190px !important;
+        box-sizing: border-box;
+    }
+
+    #tablesIndexDocumentacion td {
+        white-space: nowrap;
+    }
+
+    /* Ampliar el contenedor principal para que use todo el ancho */
+    .main-container, .body-content, .ui.container {
+        width: 95% !important;
+        max-width: none !important;
+        margin: 0 auto !important;
+    }
+
+    /* Contenedor responsivo */
+    .table-responsive-container {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+    }
+
+    /* Ajuste de la tabla */
+    #tablesIndexDocumentacion {
+        width: 100% !important;
+        table-layout: auto;
+        font-size: 0.85rem;
+    }
+
+        #tablesIndexDocumentacion th,
+        #tablesIndexDocumentacion td {
+            padding: 0.5em 0.6em !important;
+            white-space: nowrap;
+        }
+
+        #tablesIndexDocumentacion select,
+        #tablesIndexDocumentacion .ui.dropdown {
+            min-width: 150px;
+            max-width: 200px;
+        }
+</style>
+
+<div class="ui equal width form">
+    <div class="fields">
+        <div class="field">
+            <label>Usuario</label>
+            <input type="text" id="txbIdentificacion" name="txbIdentificacion" autocomplete="off" maxlength="50">
+        </div>
+        <div class="field">
+            <label>Estado</label>
+            @Html.DropDownList("cbxEstado", (SelectList)ViewBag.EstadoDictionary, "Seleccione un estado", new { @class = "ui search dropdown" })
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive-container">
+    <table class="ui selectable celled table ui center aligned tablesInitial" id="tablesIndexDocumentacion">
+        <thead>
+            <tr>
+                @foreach (System.Data.DataColumn col in Model.Columns)
+                {
+                    if (col.ColumnName != "CustomerID" && col.ColumnName != "Numero Expediente" && col.ColumnName != "Numero de Expediente" && col.ColumnName != "Estado")
+                    {
+                        <th>@col.ColumnName</th>
+                    }
+                }
+                <th>Modificaciones</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (System.Data.DataRow row in Model.Rows)
+            {
+                string customerId = row["CustomerID"] != DBNull.Value ? row["CustomerID"].ToString() : "";
+                string fileid = row["Numero Expediente"] != DBNull.Value ? row["Numero Expediente"].ToString() : "";
+                string estadoid = row["estado1"] != DBNull.Value ? row["estado1"].ToString().Trim() : "";
+
+                // Evaluamos si el registro ya está documentado (estadoid es "1")
+                bool estaDocumentado = (estadoid == "1");
+
+                <tr>
+                    @foreach (System.Data.DataColumn col in Model.Columns)
+                    {
+                        if (col.ColumnName == "CustomerID" || col.ColumnName == "Numero Expediente" || col.ColumnName == "Numero de Expediente" || col.ColumnName == "Estado")
+                        {
+                            continue;
+                        }
+
+                        if (col.ColumnName == "Canal")
+                        {
+                            <td>
+                                @{
+                                    string valorCanal = row["Canal"] != DBNull.Value ? row["Canal"].ToString().Trim() : "0";
+                                    var listCanalOriginal = ViewBag.CanalDictionary as SelectList;
+                                    SelectList listCanalFinal;
+
+                                    if (listCanalOriginal != null && !string.IsNullOrEmpty(valorCanal) && valorCanal != "0")
+                                    {
+                                        listCanalFinal = new SelectList(listCanalOriginal.Items, "Key", "Value", valorCanal);
+                                    }
+                                    else
+                                    {
+                                        listCanalFinal = listCanalOriginal ?? new SelectList(Enumerable.Empty<SelectListItem>());
+                                    }
+                                }
+
+                                @if (estaDocumentado)
+                                {
+                                    @Html.DropDownList("cbxCanal", listCanalFinal, "Seleccione un canal", new { @class = "ui search dropdown canal-select", disabled = "disabled" })
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("cbxCanal", listCanalFinal, "Seleccione un canal", new { @class = "ui search dropdown canal-select" })
+                                }
+                            </td>
+                        }
+                        else if (col.ColumnName == "Modalidad")
+                        {
+                            <td>
+                                @{
+                                    string valorModalidad = row["Modalidad"] != DBNull.Value ? row["Modalidad"].ToString().Trim() : "0";
+                                    var listModalidadOriginal = ViewBag.ModalidadDictionary as SelectList;
+                                    SelectList listModalidadFinal;
+
+                                    if (listModalidadOriginal != null && !string.IsNullOrEmpty(valorModalidad) && valorModalidad != "0")
+                                    {
+                                        listModalidadFinal = new SelectList(listModalidadOriginal.Items, "Key", "Value", valorModalidad);
+                                    }
+                                    else
+                                    {
+                                        listModalidadFinal = listModalidadOriginal ?? new SelectList(Enumerable.Empty<SelectListItem>());
+                                    }
+                                }
+
+                                @if (estaDocumentado)
+                                {
+                                    @Html.DropDownList("cbxModalidad", listModalidadFinal, "Seleccione una Modalidad", new { @class = "ui search dropdown modalidad-select", disabled = "disabled" })
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("cbxModalidad", listModalidadFinal, "Seleccione una Modalidad", new { @class = "ui search dropdown modalidad-select" })
+                                }
+                            </td>
+                        }
+                        else if (col.ColumnName == "Solicitud")
+                        {
+                            <td>
+                                @{
+                                    string valorSolicitud = row["Solicitud"] != DBNull.Value ? row["Solicitud"].ToString().Trim() : "";
+                                }
+
+                                @if (estaDocumentado)
+                                {
+                                    <input type="text" name="txbSolicitud" class="solicitud-input" autocomplete="off" maxlength="50" placeholder="Número de Solicitud" value="@valorSolicitud" disabled="disabled">
+                                }
+                                else
+                                {
+                                    <input type="text" name="txbSolicitud" class="solicitud-input" autocomplete="off" maxlength="50" placeholder="Número de Solicitud" value="@valorSolicitud">
+                                }
+                            </td>
+                                    }
+
+                                    else if (col.ColumnName == "Orden de Servicio")
+                                    {
+                            <td>
+                                @{
+                                    string valorOrdenServicio = row["Orden de Servicio"] != DBNull.Value ? row["Orden de Servicio"].ToString().Trim() : "";
+                                }
+
+                                @if (estaDocumentado)
+                                {
+                                    <input type="text" name="txbOrdenServicio" class="ordenservicio-input" autocomplete="off" maxlength="50" placeholder="Orden de Servicio" value="@valorOrdenServicio" disabled="disabled">
+                                }
+                                else
+                                {
+                                    <input type="text" name="txbOrdenServicio" class="ordenservicio-input" autocomplete="off" maxlength="50" placeholder="Orden de Servicio" value="@valorOrdenServicio">
+                                }
+                            </td>
+                        }
+
+                        else if (col.ColumnName == "Centro de Costos")
+                        {
+                            <td>
+                            @{
+                                string valorCentroCostos = row["Centro de Costos"] != DBNull.Value ? row["Centro de Costos"].ToString().Trim() : "0";
+
+                                var dict = ViewBag.CentroCostosDict as Dictionary<string, SelectList>;
+                                SelectList listCentroCostosOriginal = (dict != null && dict.ContainsKey(customerId))
+                                                                        ? dict[customerId]
+                                                                        : null;
+
+                                bool tieneElementosCC = listCentroCostosOriginal != null && listCentroCostosOriginal.Any();
+                                SelectList listCentroCostosFinal;
+
+                                if (tieneElementosCC)
+                                {
+                                    if (!string.IsNullOrEmpty(valorCentroCostos) && valorCentroCostos != "0")
+                                    {
+                                        listCentroCostosFinal = new SelectList(listCentroCostosOriginal.Items, "Key", "Value", valorCentroCostos);
+                                    }
+                                    else
+                                    {
+                                        listCentroCostosFinal = listCentroCostosOriginal;
+                                    }
+                                }
+                                else
+                                {
+                                    listCentroCostosFinal = new SelectList(Enumerable.Empty<SelectListItem>());
+                                }
+                            }
+
+                            @if (tieneElementosCC && !estaDocumentado)
+                            {
+                                @Html.DropDownList("cbxCentroCostos", listCentroCostosFinal, "Seleccione un Centro de Costo", new { @class = "ui search dropdown centrocostos-select" })
+                            }
+                            else if (tieneElementosCC && estaDocumentado)
+                            {
+                                @Html.DropDownList("cbxCentroCostos", listCentroCostosFinal, "Seleccione un Centro de Costo", new { @class = "ui search dropdown centrocostos-select", disabled = "disabled" })
+                            }
+                            else
+                            {
+                                @Html.DropDownList("cbxCentroCostos", listCentroCostosFinal, "No tiene Centro de Costos", new { @class = "ui search dropdown centrocostos-select", disabled = "disabled" })
+                            }
+                            </td>
+                        }
+                        else if (col.ColumnName == "Razón de Viaje")
+                        {
+                            <td>
+                            @{
+                                string valorRazonViaje = row["Razón de Viaje"] != DBNull.Value ? row["Razón de Viaje"].ToString().Trim() : "0";
+
+                                var dictRV = ViewBag.reasonCodeDict as Dictionary<string, SelectList>;
+                                SelectList listRVOriginal = (dictRV != null && dictRV.ContainsKey(customerId))
+                                                             ? dictRV[customerId]
+                                                             : null;
+
+                                bool tieneElementosRV = listRVOriginal != null && listRVOriginal.Any();
+                                SelectList listRVFinal;
+
+                                if (tieneElementosRV)
+                                {
+                                    if (!string.IsNullOrEmpty(valorRazonViaje) && valorRazonViaje != "0")
+                                    {
+                                        listRVFinal = new SelectList(listRVOriginal.Items, "Key", "Value", valorRazonViaje);
+                                    }
+                                    else
+                                    {
+                                        listRVFinal = listRVOriginal;
+                                    }
+                                }
+                                else
+                                {
+                                    listRVFinal = new SelectList(Enumerable.Empty<SelectListItem>());
+                                }
+                            }
+
+                            @if (tieneElementosRV && !estaDocumentado)
+                            {
+                                @Html.DropDownList("cbxReasonCode", listRVFinal, "Seleccione una Razon de viaje", new { @class = "ui search dropdown razonviaje-select" })
+                            }
+                            else if (tieneElementosRV && estaDocumentado)
+                            {
+                                @Html.DropDownList("cbxReasonCode", listRVFinal, "Seleccione una Razon de viaje", new { @class = "ui search dropdown razonviaje-select", disabled = "disabled" })
+                            }
+                            else
+                            {
+                                @Html.DropDownList("cbxReasonCode", listRVFinal, "No tiene razones de viaje", new { @class = "ui search dropdown razonviaje-select", disabled = "disabled" })
+                            }
+                            </td>
+                        }
+                        else
+                        {
+                            <td> @row[col.ColumnName] </td>
+                        }
+                    }
+                    <!-- Celdas fijas -->
+                    <td></td>
+                    <td class="celda-estado">
+                        @(estaDocumentado ? "Documentado" : "No Documentado")
+                    </td>
+                    <td>
+                        @if (estaDocumentado)
+                        {
+                            <button type="button"
+                                    class="ui button disabled btn-guardar-fila"
+                                    disabled="disabled"
+                                    data-file-id="@fileid"
+                                    data-customer-id="@customerId">
+                                <i class="check icon"></i> Guardado
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    class="ui primary button btn-guardar-fila"
+                                    data-file-id="@fileid"
+                                    data-customer-id="@customerId">
+                                <i class="save icon"></i> Guardar
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<br />
+
+
+<div class="content">
+    <div class="renderImages ui cards" style="display:none"></div>
+</div>
+
+<script type="text/javascript">
+    // --- EVENTO DE CREADO/MODIFICACIÓN FUERA DEL READY (Delegación directa a document) ---
+    $(document).on('change input', '.canal-select, .modalidad-select, .solicitud-input, .centrocostos-select, .razonviaje-select', function () {
+        var valor = $(this).val();
+
+        // Si el usuario selecciona o escribe una opción válida, se remueven los errores y tooltips
+        if (valor !== null && valor !== undefined && valor.toString().trim() !== "" && valor.toString().trim() !== "0") {
+            $(this).removeClass('campo-error')
+                .removeAttr('title');
+
+            $(this).closest('td')
+                .removeClass('error')
+                .removeAttr('data-tooltip')
+                .removeAttr('data-position')
+                .removeAttr('data-variation');
+        }
+    });
+    $(document).ready(function () {
+        // 1. Inicializar Dynatable
+        $('#tablesIndexDocumentacion').dynatable();
+
+        // 2. Delegación del evento click en la tabla para asegurar que responda incluso con Dynatable
+       $('#tablesIndexDocumentacion').on('click', '.btn-guardar-fila', function (e) {
+    e.preventDefault();
+
+    var $btn = $(this);
+    var $tr = $btn.closest('tr');
+
+    // 1. Referencias de los controles de la fila
+    var $canal = $tr.find('.canal-select');
+    var $modalidad = $tr.find('.modalidad-select');
+    var $solicitud = $tr.find('.solicitud-input');
+    var $ordenservicio = $tr.find('.ordenservicio-input');
+    var $centroCostos = $tr.find('.centrocostos-select');
+    var $razonViaje = $tr.find('.razonviaje-select');
+
+    // 2. Función auxiliar actualizada
+    function esInvalido($el, mensajeError) {
+        if ($el.length === 0) return false;
+
+        // SI EL CAMPO ESTÁ DESHABILITADO: Se ignora la validación requerida
+        if ($el.is(':disabled')) {
+            $el.removeClass('campo-error').removeAttr('title');
+            $el.closest('td').removeClass('error')
+               .removeAttr('data-tooltip')
+               .removeAttr('data-position')
+               .removeAttr('data-variation');
+            return false; // NO es inválido
+        }
+
+        var val = $el.val();
+        var invalido = (val === null || val === undefined || val.toString().trim() === "" || val.toString().trim() === "0");
+        var $td = $el.closest('td');
+
+        if (invalido) {
+            $el.addClass('campo-error').attr('title', mensajeError);
+            $td.addClass('error')
+               .attr('data-tooltip', mensajeError)
+               .attr('data-position', 'top center')
+               .attr('data-variation', 'mini red');
+        } else {
+            $el.removeClass('campo-error').removeAttr('title');
+            $td.removeClass('error')
+               .removeAttr('data-tooltip')
+               .removeAttr('data-position')
+               .removeAttr('data-variation');
+        }
+        return invalido;
+    }
+
+    // 3. Función auxiliar para obtener el valor o "0" si está deshabilitado/vacío
+    function obtenerValor($el) {
+        if ($el.length === 0 || $el.is(':disabled')) {
+            return "0";
+        }
+        var val = $el.val();
+        return (val === null || val === undefined || val.toString().trim() === "") ? "0" : val.toString().trim();
+    }
+
+    // 4. Evaluar validaciones (solo campos habilitados fallarán si están vacíos)
+    var v1 = esInvalido($canal, "El canal es requerido");
+    var v2 = esInvalido($modalidad, "La modalidad es requerida");
+    var v3 = esInvalido($solicitud, "La solicitud es requerida");
+    var v4 = esInvalido($centroCostos, "El centro de costos es requerido");
+    var v5 = esInvalido($razonViaje, "La razón de viaje es requerida");
+           var v6 = esInvalido($ordenservicio, "La Orden de Servicio es requerida");
+    if (v1 || v2 || v3 || v4 || v5) {
+        return; // Si algún campo HABILITADO está incompleto, detiene el proceso
+    }
+
+    // 5. Construcción del objeto de datos (garantiza "0" si está deshabilitado)
+    var dataFila = {
+        FileId: $btn.data('file-id'),
+        CustomerId: $btn.data('customer-id'),
+        IdCanal: obtenerValor($canal),
+        IdModalidad: obtenerValor($modalidad),
+        Solicitud: obtenerValor($solicitud),
+        IdCentroCostos: obtenerValor($centroCostos),
+        IdRazonViaje: obtenerValor($razonViaje),
+        OrdenServicio:obtenerValor($ordenservicio),
+    };
+
+    // 6. Envío AJAX
+    $.ajax({
+        url: '@Url.Action("GuardarDocumentacionFila", "Inspections")',
+        type: 'POST',
+        data: JSON.stringify(dataFila),
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        beforeSend: function () {
+            $btn.addClass('loading disabled');
+        },
+        success: function (response) {
+            if (response.success) {
+                var $celdaEstado = $tr.find('.celda-estado');
+                if ($celdaEstado.length === 0) {
+                    $celdaEstado = $btn.closest('td').prev('td');
+                }
+
+                $celdaEstado.html('Documentado');
+
+                $btn.removeClass('loading primary')
+                    .addClass('disabled')
+                    .prop('disabled', true)
+                    .html('<i class="check icon"></i> Guardado');
+                var $alerta = $(
+                    '<div style="position: fixed; top: 25px; right: 25px; z-index: 999999; ' +
+                    'background-color: #21ba45; color: white; padding: 15px 25px; borderRadius: 8px; ' +
+                    'box-shadow: 0px 4px 12px rgba(0,0,0,0.3); font-family: sans-serif; font-size: 14px; ' +
+                    'display: flex; align-items: center; gap: 10px;">' +
+                    '<i class="check circle icon" style="font-size: 18px; margin: 0;"></i>' +
+                    '<span><b>¡Éxito!</b> El registro se guardó correctamente.</span>' +
+                    '</div>'
+                );
+
+                $('body').append($alerta);
+
+                // Ocultar y remover la alerta gradualmente a los 3 segundos
+                setTimeout(function () {
+                    $alerta.fadeOut(400, function () {
+                        $(this).remove();
+                    });
+                }, 3000);
+
+            } else {
+                $btn.removeClass('loading disabled');
+                var $alerta = $(
+                    '<div style="position: fixed; top: 25px; right: 25px; z-index: 999999; ' +
+                    'background-color: #ba2130; color: white; padding: 15px 25px; borderRadius: 8px; ' +
+                    'box-shadow: 0px 4px 12px rgba(0,0,0,0.3); font-family: sans-serif; font-size: 14px; ' +
+                    'display: flex; align-items: center; gap: 10px;">' +
+                    '<i class="check circle icon" style="font-size: 18px; margin: 0;"></i>' +
+                    '<span><b>¡Éxito!</b> Error creando el registro.</span>' +
+                    '</div>'
+                );
+
+                $('body').append($alerta);
+
+                // Ocultar y remover la alerta gradualmente a los 3 segundos
+                setTimeout(function () {
+                    $alerta.fadeOut(400, function () {
+                        $(this).remove();
+                    });
+                }, 3000);
+
+            }
+        },
+        error: function (xhr, status, error) {
+            $btn.removeClass('loading disabled');
+            console.error('Error AJAX:', error);
+
+        }
+    });
+});
+
+        $('#cbxGDS').on('change', function () {
+            var valorSeleccionado = $(this).val().toString().trim().toLowerCase();
+            var textoSeleccionado = $(this).find('option:selected').text().trim().toLowerCase();
+
+            $('#tblDatos tbody tr').each(function () {
+                var origenFila = $(this).data('origen').toString().trim().toLowerCase();
+
+                if (valorSeleccionado === "" || valorSeleccionado === "0") {
+                    $(this).show();
+                } else {
+                    if (origenFila === valorSeleccionado || origenFila === textoSeleccionado) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                }
+            });
+        });
+    });
+
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+                $('.titlesPages').html('@ViewBag.ApplicationName | ' + $('.titlesPages').html());
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+
+    var $element = $('.cardTest');
+
+    function getDetailTechReports(pdfs, type) {
+        $('.renderImages').html('');
+        $element.find($('#number').text(pdfs));
+        $element.find($('#pdfref').attr('href', '../../PROCEDURE_reports/' + pdfs));
+        $element.find($('#type').text(type));
+        $('.renderImages').append('<div class="ui card cardTest"> ' + $element.html() + '</div>');
+        $('.renderImages').show('slow');
+    }
+</script>

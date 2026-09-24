@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="itextsharp">
-      <HintPath>..\..\..\..\Documents\DATAMARTR\itextsharp.dll</HintPath>
+      <HintPath>..\..\..\VIAJESCOUNTRYDATAMART\LogicBo\bin\Debug\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="SCIST.CapaDatos, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

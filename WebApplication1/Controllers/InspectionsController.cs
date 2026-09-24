@@ -1,4 +1,5 @@
-﻿using LogicBo;
+﻿using iTextSharp.text.pdf;
+using LogicBo;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using System;
@@ -74,8 +75,8 @@ namespace WebApplication1.Controllers
             return PartialView(model);
         }
 
-  
-    public ActionResult CreateInspections(int? headquarterId, string RFID, int? elementid)
+
+        public ActionResult CreateInspections(int? headquarterId, string RFID, int? elementid)
         {
             ViewBag.headquarterId = headquarterId;
             ViewBag.elementid = elementid;
@@ -168,7 +169,7 @@ namespace WebApplication1.Controllers
         }
 
         public JsonResult GetDataElementBySerial(string serial, int headquaterid)
-            {
+        {
             try
             {
                 var result = _elementBo.GetDataElementBySerial(serial, headquaterid);
@@ -196,7 +197,7 @@ namespace WebApplication1.Controllers
 
         }
 
-        
+
 
         [HttpPost]
         public JsonResult GetFactorByElement(string rfid, int headquarterid)
@@ -393,7 +394,7 @@ namespace WebApplication1.Controllers
                 string Marca = collection["mark"];
                 string Modelo = collection["model"];
                 string Observaciones = collection["obser"];
-                
+
 
 
                 string folderName = string.Empty;
@@ -421,7 +422,7 @@ namespace WebApplication1.Controllers
                 }
                 Session["FilesInspections"] = null;
 
-                var result = _inspectionsBo.TechInfoCreate(headQuarterType, Elementoid,Marca,Modelo,Observaciones,fileName);
+                var result = _inspectionsBo.TechInfoCreate(headQuarterType, Elementoid, Marca, Modelo, Observaciones, fileName);
 
 
                 return Json(new { result = true }, JsonRequestBehavior.AllowGet);
@@ -678,7 +679,7 @@ namespace WebApplication1.Controllers
                 int? cbxHeadquarter = int.TryParse(collection["cbxHeadquarter"].ToString(), out tempcbxHeadquarter) ? tempcbxHeadquarter : (int?)null;
                 int? cbxElement = Int32.TryParse(collection["cbxElement"].ToString(), out tempcbxElement) ? tempcbxElement : (int?)null;
 
-                var result = _curriculumBo.GetListByElement(cbxHeadquarter, cbxElement, rFID,serial,precinto);
+                var result = _curriculumBo.GetListByElement(cbxHeadquarter, cbxElement, rFID, serial, precinto);
                 return PartialView(result);
             }
             catch (Exception ex)
@@ -824,12 +825,12 @@ namespace WebApplication1.Controllers
 
 
 
-        public JsonResult registrarCliente(int idCliente, int NoExpediente,string userName)
+        public JsonResult registrarCliente(int idCliente, int NoExpediente, string userName)
         {
             try
             {
                 DataTable dt =
-                    _inspectionsBo.addCustomerToFile(idCliente,NoExpediente, userName);
+                    _inspectionsBo.addCustomerToFile(idCliente, NoExpediente, userName);
 
                 var datos = dt.AsEnumerable()
                     .Select(row => new
@@ -917,17 +918,136 @@ namespace WebApplication1.Controllers
             {
                 var result = _inspectionsBo.GetLoadFATraces();
                 ViewBag.id = 1;
+                ViewBag.GDSDictionary = new SelectList(_inspectionsBo.GetLoadGDS(), "Key", "Value");
                 return PartialView(result);
 
-             
+
             }
             catch (Exception ex)
             {
                 throw;
             }
 
-
         }
+        [HttpPost]
+        public PartialViewResult Documentacion(FormCollection collection)
+        {
+            try
+            {
+                var result = _inspectionsBo.GetLoadFATracesDocumentar();
+                ViewBag.id = 1;
+                ViewBag.CanalDictionary = new SelectList(_inspectionsBo.GetLoadCanal(), "Key", "Value");
+                ViewBag.ModalidadDictionary = new SelectList(_inspectionsBo.GetLoadModalidad(), "Key", "Value");
+                ViewBag.PorcentajeDictionary = new SelectList(_inspectionsBo.GetLoadModalidad(), "Key", "Value");
+
+             
+
+
+                // Creamos un diccionario: Key = CustomerID, Value = SelectList de sus Centros de Costos
+                var centroCostosDict = new Dictionary<string, SelectList>();
+                foreach (System.Data.DataRow row in result.Rows)
+                {
+                    string custId = row["CustomerID"].ToString();
+                    if (!centroCostosDict.ContainsKey(custId))
+                    {
+                        var list = _inspectionsBo.GetLoadCentroCostos(Convert.ToInt32(custId));
+                        centroCostosDict.Add(custId, new SelectList(list, "Key", "Value"));
+                    }
+                }
+
+                // Creamos un diccionario: Key = CustomerID, Value = SelectList de sus Centros de Costos
+                var reasonCodeDict = new Dictionary<string, SelectList>();
+                foreach (System.Data.DataRow row in result.Rows)
+                {
+                    string custId = row["CustomerID"].ToString();
+                    if (!reasonCodeDict.ContainsKey(custId))
+                    {
+                        var list = _inspectionsBo.GetLoadReasonCode(Convert.ToInt32(custId));
+                        reasonCodeDict.Add(custId, new SelectList(list, "Key", "Value"));
+                    }
+                }
+
+
+                ViewBag.CentroCostosDict = centroCostosDict;
+                var estadosDictionary = new Dictionary<int, string>
+                    {
+                        { 1, "No Documentado" },
+                        { 2, "Documentado" }
+                    };
+                ViewBag.EstadoDictionary = new SelectList(estadosDictionary, "Key", "Value");
+
+
+
+                return PartialView(result);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public PartialViewResult Autorizacion(FormCollection collection)
+        {
+            try
+            {
+                var result = _inspectionsBo.GetLoadFATracesAurorizar();
+                ViewBag.id = 1;
+                ViewBag.PorcentajeDictionary = new SelectList(_inspectionsBo.GetLoadPorcentaje(), "Key", "Value");
+                ViewBag.FormaPagoDictionary = new SelectList(_inspectionsBo.GetLoadFormasPago(), "Key", "Value");
+
+                // Creamos un diccionario: Key = CustomerID, Value = SelectList de sus Tarjetas de Credito
+                var tcDict = new Dictionary<string, SelectList>();
+                foreach (System.Data.DataRow row in result.Rows)
+                {
+                    string custId = row["CustomerID"].ToString();
+                    if (!tcDict.ContainsKey(custId))
+                    {
+                        var list = _inspectionsBo.GetLoadTc(Convert.ToInt32(custId));
+                        tcDict.Add(custId, new SelectList(list, "Key", "Value"));
+                    }
+                }
+                ViewBag.TcDict = tcDict;
+                var estadosDictionary = new Dictionary<int, string>
+                    {
+                        { 1, "No Autorizado" },
+                        { 2, "Autorizado" }
+                    };
+                ViewBag.EstadoDictionary = new SelectList(estadosDictionary, "Key", "Value");
+
+
+
+                return PartialView(result);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarDocumentacionFila(DocumentacionFilaModel model)
+        {
+            try
+            {
+                // Invocar a la capa de negocio para procesar los datos
+                 bool resultado = _inspectionsBo.GuardarDetalleDocumentacion(model);
+
+
+
+                return Json(new { success = true, message = "Datos actualizados correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
+
+
+
+
         [HttpPost]
         public PartialViewResult SearchLegalityT(FormCollection collection)
         {
@@ -978,7 +1098,7 @@ namespace WebApplication1.Controllers
             }
         }
 
-        
+
 
 
         [HttpPost]
