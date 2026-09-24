@@ -934,7 +934,7 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                var result = _inspectionsBo.GetLoadFATracesDocumentar();
+                 var result = _inspectionsBo.GetLoadFATracesDocumentar();
                 ViewBag.id = 1;
                 ViewBag.CanalDictionary = new SelectList(_inspectionsBo.GetLoadCanal(), "Key", "Value");
                 ViewBag.ModalidadDictionary = new SelectList(_inspectionsBo.GetLoadModalidad(), "Key", "Value");
