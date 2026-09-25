@@ -64,6 +64,7 @@
     <Compile Include="CategoriaIzajeBo.cs" />
     <Compile Include="CronogramaIzajeBo.cs" />
     <Compile Include="CronogramaPersonasIzajeBo.cs" />
+    <Compile Include="AutorizacionFilaModel.cs" />
     <Compile Include="DocumentacionFilaModel.cs" />
     <Compile Include="EquipoIzage.cs" />
     <Compile Include="FactoresIzajeBo.cs" />

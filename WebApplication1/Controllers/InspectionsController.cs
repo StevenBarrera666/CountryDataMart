@@ -1044,8 +1044,20 @@ namespace WebApplication1.Controllers
         }
 
 
-
-
+        [HttpPost]
+        public JsonResult GuardarAutorizacionFila(AutorizacionFilaModel model)
+        {
+            try
+            {
+                // Invocar a la capa de negocio para procesar los datos
+                bool resultado = _inspectionsBo.GuardarDetalleAutorizacion(model);
+                return Json(new { success = true, message = "Datos actualizados correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
 
         [HttpPost]

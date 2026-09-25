@@ -450,13 +450,7 @@
 
             var $btn = $(this);
             var $tr = $btn.closest('tr');
-
-            var $canal = $tr.find('.canal-select');
-            var $modalidad = $tr.find('.modalidad-select');
-            var $solicitud = $tr.find('.solicitud-input');
-            var $ordenservicio = $tr.find('.ordenservicio-input');
-            var $centroCostos = $tr.find('.centrocostos-select');
-            var $razonViaje = $tr.find('.razonviaje-select');
+                       
             var $formaPago = $tr.find('.fp-select');
             var $tc = $tr.find('.tc-select');
             var $porcentaje = $tr.find('.por-select');
@@ -501,15 +495,10 @@
                 return (val === null || val === undefined || val.toString().trim() === "") ? "0" : val.toString().trim();
             }
 
-            var v1 = esInvalido($canal, "El canal es requerido");
-            var v2 = esInvalido($modalidad, "La modalidad es requerida");
-            var v3 = esInvalido($solicitud, "La solicitud es requerida");
-            var v4 = esInvalido($centroCostos, "El centro de costos es requerido");
-            var v5 = esInvalido($razonViaje, "La razón de viaje es requerida");
-            var v6 = esInvalido($ordenservicio, "La Orden de Servicio es requerida");
-            var v7 = esInvalido($porcentaje, "El Porcentaje TA es requerido");
+            var v1 = esInvalido($formaPago, "Forma de pago es requerido");
+           
 
-            if (v1 || v2 || v3 || v4 || v5 || v6 || v7) {
+            if (v1) {
                 return;
             }
 
@@ -517,23 +506,15 @@
             var dataFila = {
                 FileId: $btn.data('file-id'),
                 CustomerId: $btn.data('customer-id'),
-                FiledetailId: $btn.data('filedetail-id'),
-                IdCanal: obtenerValor($canal),
-                IdModalidad: obtenerValor($modalidad),
-                Solicitud: obtenerValor($solicitud),
-                IdCentroCostos: obtenerValor($centroCostos),
-                IdRazonViaje: obtenerValor($razonViaje),
-                OrdenServicio: obtenerValor($ordenservicio),
-                FormaPago: obtenerValor($formaPago),
-                TarjetaCredito: obtenerValor($tc),
-                PorcentajeTA: obtenerValor($porcentaje),
-                Tarifa: limpiarMoneda($tr.find('.tarifa-input')),
-                Impuestos: limpiarMoneda($tr.find('.impuestos-input')),
-                Total: limpiarMoneda($tr.find('.total-input'))
+                FileDetailID: $btn.data('filedetail-id'),                
+                PaymentMethodId: obtenerValor($formaPago),
+                PaymentCardId: obtenerValor($tc),
+                FareTA: limpiarMoneda($tr.find('.tarifa-input')),
+                IVATA: limpiarMoneda($tr.find('.impuestos-input')),
+                FareWithTaxes: limpiarMoneda($tr.find('.total-input'))
             };
-
             $.ajax({
-                url: '@Url.Action("GuardarDocumentacionFila", "Inspections")',
+                url: '@Url.Action("GuardarAutorizacionFila", "Inspections")',
                 type: 'POST',
                 data: JSON.stringify(dataFila),
                 contentType: 'application/json; charset=utf-8',
@@ -597,25 +578,6 @@
                 error: function (xhr, status, error) {
                     $btn.removeClass('loading disabled');
                     console.error('Error AJAX:', error);
-                }
-            });
-        });
-
-        $('#cbxGDS').on('change', function () {
-            var valorSeleccionado = $(this).val().toString().trim().toLowerCase();
-            var textoSeleccionado = $(this).find('option:selected').text().trim().toLowerCase();
-
-            $('#tblDatos tbody tr').each(function () {
-                var origenFila = $(this).data('origen').toString().trim().toLowerCase();
-
-                if (valorSeleccionado === "" || valorSeleccionado === "0") {
-                    $(this).show();
-                } else {
-                    if (origenFila === valorSeleccionado || origenFila === textoSeleccionado) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
                 }
             });
         });

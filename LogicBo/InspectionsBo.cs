@@ -114,7 +114,26 @@ namespace LogicBo
                 resultado = true;
             return resultado;
         }
-      
+
+        public bool GuardarDetalleAutorizacion(AutorizacionFilaModel model)
+        {
+            bool resultado = false;
+            List<SqlParameter> parameters = new List<SqlParameter> {
+                new SqlParameter(){ ParameterName="opc", SqlDbType=SqlDbType.Int,Value=2},
+                new SqlParameter(){ ParameterName="FileId", SqlDbType=SqlDbType.Int,Value=model.FileId},
+                new SqlParameter(){ ParameterName="CustomerId", SqlDbType=SqlDbType.Int,Value=model.CustomerId},
+                new SqlParameter(){ ParameterName="FileDetailId", SqlDbType=SqlDbType.Int,Value=model.FileDetailID},
+                new SqlParameter(){ ParameterName="PaymentMethodId", SqlDbType=SqlDbType.Int,Value=model.PaymentMethodId},
+                new SqlParameter(){ ParameterName="PaymentCardId", SqlDbType=SqlDbType.VarChar,Value=model.PaymentCardId},
+                new SqlParameter(){ ParameterName="FareTA", SqlDbType=SqlDbType.Decimal,Value=model.FareTA},
+                new SqlParameter(){ ParameterName="IVATA", SqlDbType=SqlDbType.Decimal,Value=model.IVATA}
+            };
+            var result = executeProcedures.DataTable("SP_FileAutorizado", parameters);
+            if (result.Rows.Count == 1)
+                resultado = true;
+            return resultado;
+        }
+
 
 
         public Dictionary<string, string> GetLoadCentroCostos(int CustomerID)
