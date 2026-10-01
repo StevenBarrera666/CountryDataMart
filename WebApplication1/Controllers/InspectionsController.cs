@@ -893,6 +893,8 @@ namespace WebApplication1.Controllers
 
         }
 
+    
+
         [HttpPost]
         public PartialViewResult SearchFormatsT(FormCollection collection)
         {
@@ -929,6 +931,35 @@ namespace WebApplication1.Controllers
             }
 
         }
+
+
+        public ActionResult ClientesPerfil(string modulo)
+        {
+            SessionModels sessionModels = base.Session["SessionUser"] as SessionModels;
+            sessionModels.ModuloSeleccionado = modulo;
+            return View();
+        }
+
+
+        public ActionResult Perfil(string modulo)
+        {
+            SessionModels sessionModels = base.Session["SessionUser"] as SessionModels;
+            sessionModels.ModuloSeleccionado = modulo;
+            return View();
+        }
+
+        public ActionResult Opciones(string modulo)
+        {
+            SessionModels sessionModels = base.Session["SessionUser"] as SessionModels;
+            sessionModels.ModuloSeleccionado = modulo;
+            return View();
+        }
+
+
+
+
+
+
         [HttpPost]
         public PartialViewResult Documentacion(FormCollection collection)
         {
@@ -999,6 +1030,7 @@ namespace WebApplication1.Controllers
                 // Creamos un diccionario: Key = CustomerID, Value = SelectList de sus Tarjetas de Credito
                 var tcDict = new Dictionary<string, SelectList>();
                 foreach (System.Data.DataRow row in result.Rows)
+
                 {
                     string custId = row["CustomerID"].ToString();
                     if (!tcDict.ContainsKey(custId))
@@ -1224,5 +1256,9 @@ namespace WebApplication1.Controllers
         #endregion
 
 
+    }
+
+    internal class HttpostAttribute : Attribute
+    {
     }
 }

@@ -780,6 +780,10 @@
     <Content Include="Views\Inspections\InformacionFaltante.cshtml" />
     <Content Include="Views\Inspections\Documentacion.cshtml" />
     <Content Include="Views\Inspections\Autorizacion.cshtml" />
+    <Content Include="Views\Inspections\ClientesPerfil.cshtml" />
+    <Content Include="Views\Home\AdministradorP.cshtml" />
+    <Content Include="Views\Inspections\Perfil.cshtml" />
+    <Content Include="Views\Inspections\Opciones.cshtml" />
     <None Include="Views\Shared\_MenuPartialWHU.cshtml" />
   </ItemGroup>
   <ItemGroup>

@@ -44,7 +44,9 @@
     @Scripts.Render("~/Content/LoadingOverlay/src/loadingoverlay.min.js")
     @Scripts.Render("~/bundles/jqueryUnobstriveJs")
     @RenderSection("scripts", required: false)
+
     <script type="text/javascript">
+
         function alturas() {
              var link = '@Url.Action("Index", "Home", new { modulo = "WH" })';
 

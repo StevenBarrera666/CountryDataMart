@@ -5,8 +5,7 @@
 <link href="~/Content/styles/cardscss.css" rel="stylesheet" />
 <link href="~/Content/styles/Facade.css" rel="stylesheet" />
 
-<div class="main" id="facade" style="margin:0;
-">
+<div class="main" id="facade" style="margin:0;">
 
     
 
@@ -20,42 +19,31 @@
 
                 <div class="sidebar-header col-1">
                     <h5 class="sidebar-title">
-                        Modificar Expedientes
+                        Administrador de Perfiles
                     </h5>
                 </div>
 
                 <nav class="sidebar-menu">
 
-                    <a href="@Url.Action("SearchProceduresT", "Inspections")"
+                    <a href="@Url.Action("ClientesPerfil", "Inspections")"
                        class="sidebar-link"
                        onclick="loadProceduresTable(this); return false;">
-                        Traza AIRS
+                        Cliente
                     </a>
 
-                    <a href="@Url.Action("Documentacion", "Inspections")"
+                    <a href="@Url.Action("Perfil", "Inspections")"
                        class="sidebar-link"
                        onclick="loadProceduresTable(this); return false;">
-                        Documentación   AIR
+                        Perfil
                     </a>
 
-                    <a href="@Url.Action("Autorizacion", "Inspections")"
+                    <a href="@Url.Action("Opciones", "Inspections")"
                        class="sidebar-link"
                        onclick="loadProceduresTable(this); return false;">
-                        Autorización
+                        Opciones 
                     </a>
 
-                    <a href=""
-                       class="sidebar-link"
-                       onclick="">
-                        Facturacion
-                    </a>
-
-                    <a href=""
-                       class="sidebar-link"
-
-                       onclick="AdministrarP(); return false ;">
-                        Administrar  Perfiles
-                    </a>
+                
 
 
                 </nav>
@@ -75,7 +63,20 @@
 
                     <div class="facade-content-placeholder">
 
-                        <h4>Seleccione una opción</h4>
+
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Dropdown button
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Action</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary">Primary</button>
+
                     </div>
 
                 </div>
