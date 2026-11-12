@@ -186,8 +186,12 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="Controllers\CentroCostoModel.cs" />
+    <Compile Include="Controllers\ProveedorController.cs" />
     <Compile Include="Controllers\CronogramaIzajeController.cs" />
     <Compile Include="Controllers\CronogramaPersonasIzajeController.cs" />
+    <Compile Include="Controllers\ClienteController.cs" />
+    <Compile Include="Controllers\EmpleadoController.cs" />
     <Compile Include="Controllers\FactoresIzajeController.cs" />
     <Compile Include="Controllers\FindingIzajeController.cs" />
     <Compile Include="Controllers\IndicadoresController.cs" />
@@ -196,7 +200,9 @@
     <Compile Include="Controllers\DownloadController.cs" />
     <Compile Include="Controllers\MedicalConceptsController.cs" />
     <Compile Include="Controllers\ManagmentIndicatorsController.cs" />
+    <Compile Include="Controllers\PanelConfiguracionViewModel.cs" />
     <Compile Include="Controllers\PersonasController.cs" />
+    <Compile Include="Controllers\TarjetaCreditoModel.cs" />
     <Compile Include="Controllers\UsersAndRolesController.cs" />
     <Compile Include="Controllers\TrainningController.cs" />
     <Compile Include="Controllers\InspectionsController.cs" />
@@ -211,6 +217,15 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\ComprobanteFormViewModel.cs" />
+    <Compile Include="Models\InvariantDecimalModelBinder.cs" />
+    <Compile Include="Models\EmpleadoFormViewModel.cs" />
+    <Compile Include="Models\ProveedorPerfilViewModel.cs" />
+    <Compile Include="Models\ClientePerfilViewModel.cs" />
+    <Compile Include="Models\PortalDbContext.cs" />
+    <Compile Include="Models\TablasMaestras.cs" />
+    <Compile Include="Models\EmpleadoPerfilViewModel.cs" />
+    <Compile Include="Models\Empleado.cs" />
     <Compile Include="Models\UtilityModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -244,6 +259,7 @@
     <Content Include="Content\Images\edit.png" />
     <Content Include="Content\Images\espacios_pie.png" />
     <Content Include="Content\Images\extintores_pie.png" />
+    <Content Include="Content\Images\favicon.svg" />
     <Content Include="Content\Images\fodolayaudfocade.png" />
     <Content Include="Content\Images\fondo.jpg" />
     <Content Include="Content\Images\fondoNuevo.png" />
@@ -713,7 +729,7 @@
     <Content Include="Scripts\tables\README.md" />
     <Content Include="Views\Ally\Create.cshtml" />
     <Content Include="Views\Ally\PageInitial.cshtml" />
-    <Content Include="Views\Inspections\CreateInspections.cshtml" />
+    <Content Include="Views\Empleado\Perfil.cshtml" />
     <Content Include="Views\Inspections\SchedulerInspections.cshtml" />
     <Content Include="Views\Inspections\CreateTechnicalReports.cshtml" />
     <Content Include="Views\Inspections\SearchManagementOfFindings.cshtml" />
@@ -780,10 +796,21 @@
     <Content Include="Views\Inspections\InformacionFaltante.cshtml" />
     <Content Include="Views\Inspections\Documentacion.cshtml" />
     <Content Include="Views\Inspections\Autorizacion.cshtml" />
+    <Content Include="Views\Inspections\Facturacion.cshtml" />
     <Content Include="Views\Inspections\ClientesPerfil.cshtml" />
     <Content Include="Views\Home\AdministradorP.cshtml" />
     <Content Include="Views\Inspections\Perfil.cshtml" />
     <Content Include="Views\Inspections\Opciones.cshtml" />
+    <Content Include="Views\Inspections\_PanelConfiguracion.cshtml" />
+    <Content Include="Views\Empleado\Empleados.cshtml" />
+    <Content Include="Views\Empleado\Registrar.cshtml" />
+    <Content Include="Views\Cliente\Perfil.cshtml" />
+    <Content Include="Views\Cliente\Clientes.cshtml" />
+    <Content Include="Views\Cliente\Registrar.cshtml" />
+    <Content Include="Views\Proveedor\Proveedores.cshtml" />
+    <Content Include="Views\Proveedor\Perfil.cshtml" />
+    <Content Include="Views\Proveedor\Registrar.cshtml" />
+    <Content Include="Views\Home\AdministradorTraza.cshtml" />
     <None Include="Views\Shared\_MenuPartialWHU.cshtml" />
   </ItemGroup>
   <ItemGroup>

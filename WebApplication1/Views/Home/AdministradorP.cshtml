@@ -1,181 +1,324 @@
-﻿﻿@using WebApplication1.Models;
+﻿@using WebApplication1.Models;
 @{
     var session = Session["SessionUser"] as SessionModels;
 }
+
 <link href="~/Content/styles/cardscss.css" rel="stylesheet" />
 <link href="~/Content/styles/Facade.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+<style>
+    .facade-layout {
+        min-height: 0;
+        height: calc(100vh - 150px); /* misma altura que el sidebar; el contenido hace scroll interno */
+        overflow: hidden;
+    }
+
+    .facade-layout > .facade-content {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto !important;
+        overflow-x: auto;
+    }
+
+    /* Estructura del Sidebar unificada */
+    .facade-sidebar {
+        background-color: #0f2942;
+        min-height: 0;
+        height: calc(100vh - 150px); /* descuenta topbar + footer para que Regresar no quede tapado */
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 20px 14px;
+        box-sizing: border-box;
+    }
+
+    /* Encabezado con Logo y Título */
+    .sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        margin-bottom: 20px;
+    }
+
+    .brand-logo-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        padding: 2px;
+        object-fit: contain;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .sidebar-title {
+        color: #ffffff;
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.25;
+        margin: 0;
+        letter-spacing: 0.2px;
+    }
+
+    /* Menú de Navegación */
+    .sidebar-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sidebar-link {
+        color: #cbd5e1 !important;
+        font-size: 0.88rem;
+        font-weight: 500;
+        padding: 10px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .sidebar-link i {
+            font-size: 1.05rem;
+            color: #94a3b8;
+            transition: color 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #ffffff !important;
+        }
+
+            .sidebar-link:hover i {
+                color: #38bdf8;
+            }
+
+    /* Botón Regresar en la parte inferior */
+    .link-sidebar-regresar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background-color: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 50px;
+        color: #ffffff !important;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 8px 16px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        margin-top: 25px;
+    }
+
+        .link-sidebar-regresar:hover {
+            background-color: #ffffff;
+            color: #0f2942 !important;
+            border-color: #ffffff;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        .link-sidebar-regresar i {
+            font-size: 0.95rem;
+            transition: transform 0.2s ease;
+        }
+
+        .link-sidebar-regresar:hover i {
+            transform: translateX(-3px);
+        }
+    /* Topbar superior */
+    .facade-topbar {
+        background-color: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 14px 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        flex-shrink: 0;
+    }
+
+    .topbar-left {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .topbar-breadcrumb {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+
+    .topbar-title {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f2942;
+        line-height: 1.2;
+    }
+
+    .badge-modulo {
+        background-color: #f1f5f9;
+        color: #0284c7;
+        border: 1px solid #e2e8f0;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Área de trabajo interna con padding uniforme */
+    .facade-work-area {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 24px 28px;
+        background-color: #f8fafc;
+    }
+</style>
 
 <div class="main" id="facade" style="margin:0;">
-
-    
-
+    <!-- 1. TOPBAR SUPERIOR (Aporta equilibrio y contexto) -->
+    <header class="facade-topbar">
+        <div class="topbar-left">
+            <span class="topbar-breadcrumb">Perfiles &nbsp;/&nbsp; Módulo Central</span>
+            <h4 class="topbar-title">Control de Clientes, Proveedores, Empleados</h4>
+        </div>
+        <div class="topbar-right">
+            <span class="badge-modulo"><i class="bi bi-shield-check"></i> Modo Operativo</span>
+        </div>
+    </header>
     <div class="facade-container">
-
-
         <div class="row no-gutters facade-layout">
 
             <!-- SIDEBAR -->
-            <aside class="col-12 col-md-3 facade-sidebar" style="max-width:200px">
-
-                <div class="sidebar-header col-1">
-                    <h5 class="sidebar-title">
-                        Administrador de Perfiles
-                    </h5>
-                </div>
-
-                <nav class="sidebar-menu">
-
-                    <a href="@Url.Action("ClientesPerfil", "Inspections")"
-                       class="sidebar-link"
-                       onclick="loadProceduresTable(this); return false;">
-                        Cliente
-                    </a>
-
-                    <a href="@Url.Action("Perfil", "Inspections")"
-                       class="sidebar-link"
-                       onclick="loadProceduresTable(this); return false;">
-                        Perfil
-                    </a>
-
-                    <a href="@Url.Action("Opciones", "Inspections")"
-                       class="sidebar-link"
-                       onclick="loadProceduresTable(this); return false;">
-                        Opciones 
-                    </a>
-
-                
-
-
-                </nav>
-
-                <button onclick="history.back(); return false;" style="margin-left:15px;">Regresar</button>
-
-            </aside>
-
-
-            <!-- CONTENIDO -->
-            <main class="col-12 col-md facade-content">
-
-
-
-                <div id="facadeContent">
-
-
-                    <div class="facade-content-placeholder">
-
-
-                        <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Dropdown button
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#">Action</a>
-                                <a class="dropdown-item" href="#">Another action</a>
-                                <a class="dropdown-item" href="#">Something else here</a>
-                            </div>
-                        </div>
-
-                        <button type="button" class="btn btn-primary">Primary</button>
-
+            <aside class="col-12 col-md-3 facade-sidebar" style="max-width: 240px;">
+                <div>
+                    <!-- Encabezado con Logo y Título -->
+                    <div class="sidebar-brand">
+                        <img src="https://media.licdn.com/dms/image/v2/D4E0BAQF2x7iCMYp2xg/company-logo_200_200/B4EZWx7s2DG0AI-/0/1742446973008/viajes_country_logo?e=2147483647&v=beta&t=367QfeVQPDy58eiMwkUbR4ToyWmcAqGMxWfk16ZiEIU"
+                             alt="Logo"
+                             class="brand-logo-img"
+                             onerror="this.src='/Content/Images/logo-default.png';" />
+                        <h5 class="sidebar-title">Administrador de Perfiles</h5>
                     </div>
 
+                    <!-- Enlaces del módulo de perfiles con sus respectivos iconos -->
+                    <nav class="sidebar-menu">
+                        <a href="@Url.Action("Clientes", "Cliente")"
+                           class="sidebar-link"
+                           onclick="loadProceduresTable(this); return false;">
+                            <i class="bi bi-people"></i>
+                            <span>Clientes</span>
+                        </a>
+
+                        <a href="@Url.Action("Empleados", "Empleado")"
+                           class="sidebar-link"
+                           onclick="loadProceduresTable(this); return false;">
+                            <i class="bi bi-person-badge"></i>
+                            <span>Empleados</span>
+                        </a>
+
+                        <a href="@Url.Action("Proveedores", "Proveedor")"
+                           class="sidebar-link"
+                           onclick="loadProceduresTable(this); return false;">
+                            <i class="bi bi-truck"></i>
+                            <span>Proveedores</span>
+                        </a>
+
+                        <a href="@Url.Action("Opciones", "Inspections")"
+                           class="sidebar-link"
+                           onclick="loadProceduresTable(this); return false;">
+                            <i class="bi bi-sliders"></i>
+                            <span>Opciones</span>
+                        </a>
+                    </nav>
                 </div>
 
+                <!-- Botón Inferior de Regreso -->
+                <div>
+                    <a href="javascript:void(0)" class="link-sidebar-regresar" onclick="history.back(); return false;">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Regresar</span>
+                    </a>
+                </div>
+            </aside>
+
+            <!-- CONTENEDOR DE CONTENIDO DINÁMICO -->
+            <main class="col-12 col-md facade-content" style="max-height:none !important">
+                <div id="facadeContent">
+                    <div class="facade-content-placeholder"></div>
+                </div>
             </main>
 
         </div>
-
     </div>
-
 </div>
 
-
-
-
-
-
 <script>
-
-
     function AdministrarP() {
-        console.log("Prueba");
-
         var link = '@Url.Action("AdministradorP", "Home", new { modulo = "AP" })';
-
-        console.log(link);
         location.href = link;
-
     }
-
-
-
-
-
-
-
 
     function loadProceduresTable(link) {
         var content = $('#facadeContent');
-
-
-        // Evita enviar otra petición mientras está cargando.
         if (content.data('loading')) {
             return;
         }
 
         content.data('loading', true);
         content.html(`
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body text-center py-4">
-                <!-- Spinner de Bootstrap -->
-                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-                    <span class="visually-hidden">Cargando...</span>
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body text-center py-4">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <h5 class="modal-title mb-0">Por favor, espere...</h5>
+                        <p class="text-muted mb-0 mt-2">Estamos procesando su solicitud.</p>
+                    </div>
                 </div>
-                <!-- Mensaje para el usuario -->
-                <h5 class="modal-title mb-0">Por favor, espere...</h5>
-                <p class="text-muted mb-0 mt-2">Estamos procesando su solicitud.</p>
             </div>
-        </div>
-    </div>
-`);
+        `);
 
         $.ajax({
             url: link.href,
             type: 'POST',
-
             success: function (data) {
-                // Coloca la tabla dentro del panel derecho.
                 content.html(data);
             },
-
             error: function () {
                 content.html(
                     '<div class="ui warning message">' +
                     'No se pudo cargar la información. ' +
-                    'Haz clic nuevamente en Traza AIRS para reintentar.' +
+                    'Haz clic nuevamente en la opción para reintentar.' +
                     '</div>'
                 );
             },
-
             complete: function () {
                 content.data('loading', false);
             }
         });
     }
 
-
-
     var historialVistas = [];
     var cargandoVista = false;
 
-
-
-
-
     function cargarVista(url, esRetroceso) {
         var $content = $('#LoginFacade');
-
         if ($content.length === 0) {
             console.error('No existe el elemento #LoginFacade');
             return;
@@ -184,27 +327,19 @@
         if (cargandoVista) {
             return;
         }
-
         cargandoVista = true;
 
         $.ajax({
             url: url,
             type: 'GET',
-
             beforeSend: function () {
-                // Conserva el contenido actual mientras llega la respuesta.
                 $content.addClass('loading');
             },
-
             success: function (data) {
                 if (esRetroceso) {
-                    // Elimina la pantalla de la que acabamos de salir.
                     historialVistas.pop();
                 } else {
-                    var actual = historialVistas[
-                        historialVistas.length - 1
-                    ];
-
+                    var actual = historialVistas[historialVistas.length - 1];
                     if (actual !== url) {
                         historialVistas.push(url);
                     }
@@ -212,21 +347,16 @@
 
                 $content.html(data);
 
-                // Inicializa controles después de insertar la vista.
                 if (typeof LoadElementsDefaultPartial === 'function') {
                     LoadElementsDefaultPartial('#LoginFacade');
                 }
 
                 actualizarBotonVolver();
             },
-
             error: function (xhr) {
                 console.error('Error cargando la vista:', xhr);
-
-                // No reemplaza la pantalla actual si falla la petición.
                 alert('No fue posible cargar el contenido. Intenta nuevamente.');
             },
-
             complete: function () {
                 cargandoVista = false;
                 $content.removeClass('loading');
@@ -234,21 +364,11 @@
         });
     }
 
-
-
-
     function VentanaAnterior() {
-        console.log('Intentando volver a la vista anterior...');
         if (historialVistas.length < 2 || cargandoVista) {
             return;
         }
-
-        var urlAnterior = historialVistas[
-            historialVistas.length - 2
-        ];
-
+        var urlAnterior = historialVistas[historialVistas.length - 2];
         cargarVista(urlAnterior, true);
     }
-
 </script>
-

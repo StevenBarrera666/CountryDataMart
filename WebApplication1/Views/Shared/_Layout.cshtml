@@ -1,359 +1,251 @@
 ﻿@using WebApplication1.Models
-
 @{
     var session = Session["SessionUser"] as SessionModels;
 }
-
 <!DOCTYPE html>
-
-<html>
-
+<html lang="es">
 <head>
-
     <meta charset="utf-8" />
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
-
-    <title>
-        @ViewBag.Title - Viajes Country - Datamart
-    </title>
-
-
-    @* ============================================
-        ESTILOS GENERALES
-        ============================================ *@
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Viajes Country - Datamart</title>
 
     @Styles.Render("~/Content/SemanticUi/semantic.css")
-
     @Styles.Render("~/Content/Site.css")
+    @Styles.Render("~/Content/font-awesome-4.7.0/css/font-awesome.css")
 
-    @Styles.Render(
-        "~/Content/font-awesome-4.7.0/css/font-awesome.css"
-    )
-
-
-    @* ============================================
-        BOOTSTRAP
-        ============================================ *@
-
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" />
-
-
-    @* ============================================
-        ESTILOS TEMPORALES DEL LAYOUT
-        Después podemos moverlos a un CSS
-        ============================================ *@
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" />
+    <!-- Hoja de iconos requerida para el footer y menús -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="@Url.Content("~/Content/Images/favicon.svg")" />
+    <link rel="alternate icon" href="@Url.Content("~/favicon.ico")" type="image/x-icon" />
+    <link rel="shortcut icon" href="@Url.Content("~/favicon.ico")" type="image/x-icon" />
     <style>
-
-        body {
-
-            background-image:
-                url('@Url.Content("~/Content/Images/robotica-dighe_1200x630.jpeg")');
-
-            background-repeat: no-repeat;
-
-            background-size: cover;
-
+        html, body {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Evita scrolls dobles en toda la ventana */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f1f3f7;
         }
 
-
-        .card-header .fa {
-
-            transition:
-                .3s transform ease-in-out;
-
+        .main-app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-
-        .card-header .collapsed .fa {
-
-            transform: rotate(90deg);
-
+        .main-body-content {
+            flex: 1 1 auto;
+            height: calc(100vh - 42px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-
-        .card-bdy {
-
-            background:
-                linear-gradient(
-                    to bottom,
-                    #ddefe0,
-                    #54c4a4
-                );
-
+        /* --- ESTILOS DEL PIE DE PÁGINA --- */
+        .facade-footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            min-height: 42px;
+            padding: 6px 24px;
+            font-size: 0.82rem;
+            color: #475569;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.03);
+            z-index: 100;
         }
 
+        .facade-footer-left {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
 
-        .btn-bdy {
+        .facade-footer-right {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
 
-            color: #00B5AD !important;
+        .facade-footer .app-badge {
+            background-color: #0f2942;
+            color: #ffffff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.72rem;
+            letter-spacing: 0.4px;
+        }
 
-            font-size: 16px;
+        .albatross-logo-box {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
 
+        .albatross-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo-fallback {
+            font-size: 0.7rem;
             font-weight: bold;
-
+            color: #0284c7;
         }
-
     </style>
-
 </head>
-
-
 <body>
 
+    <div class="main-app-container">
 
-    @* ============================================
-        CONTENEDOR PRINCIPAL DEL LAYOUT
-        ============================================ *@
-
-    <div class="main" style="margin:0; ">
-
-
-        @* ========================================
-            ZONA SUPERIOR / MENÚ
-            ======================================== *@
-
-        <div class="ui equal width form">
-
-
-            @* ====================================
-                MENÚ DINÁMICO SEGÚN SESIÓN
-                ==================================== *@
-
-            <div class="fields">
-
-
-                @if (session != null &&
-                     session.Idioma == "spain")
-                {
-
-                    if (session.ModuloSeleccionado == "WH")
-                    {
-
+        <!-- CUERPO PRINCIPAL -->
+        <div class="main-body-content">
+            @if (session != null && session.Idioma == "spain" && session.ModuloSeleccionado == "WH")
+            {
+                <div class="ui equal width form">
+                    <div class="fields">
                         @Html.Partial("_MenuPartialWHU")
+                    </div>
+                </div>
+            }
 
-                    }
+            @RenderBody()
+        </div>
 
+        <!-- PIE DE PÁGINA (Al fondo de la ventana) -->
+        <footer class="facade-footer">
+            <div class="facade-footer-left">
+                <span class="app-badge">Viajes Country Datamart v1.0</span>
+                <span>Versión 1.0 &nbsp;|&nbsp; Desarrollado por</span>
+                <div class="albatross-logo-box">
+                    <img src="https://lookaside.fbsbx.com/lookaside/crawler/instagram/albatross_atig/profile_pic.jpg"
+                         alt="Albatross IT Group 2026"
+                         class="albatross-logo"
+                         referrerpolicy="no-referrer"
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'logo-fallback\'>A</span>';" />
+                </div>
+                <strong style="color: #0f2942;">Albatross IT Group 2026</strong>
+            </div>
 
+            <div class="facade-footer-right">
+                <i class="bi bi-clock" style="color: #64748b; font-size: 0.9rem;"></i>
+                <span id="footerFechaHora" style="color: #475569; font-weight: 500; font-size: 0.82rem; margin-left: 4px;">--/--/---- --:--:--</span>
+            </div>
+        </footer>
+        <script type="text/javascript">
+            (function () {
+                function pintarReloj() {
+                    var el = document.getElementById('footerFechaHora');
+                    if (!el) return;
+
+                    var d = new Date();
+                    var dia = String(d.getDate()).padStart(2, '0');
+                    var mes = String(d.getMonth() + 1).padStart(2, '0');
+                    var anio = d.getFullYear();
+
+                    var horas = d.getHours();
+                    var ampm = horas >= 12 ? 'p. m.' : 'a. m.';
+                    horas = horas % 12;
+                    horas = horas ? horas : 12; // Formato 12 horas
+                    var strHoras = String(horas).padStart(2, '0');
+                    var minutos = String(d.getMinutes()).padStart(2, '0');
+                    var segundos = String(d.getSeconds()).padStart(2, '0');
+
+                    el.innerHTML = dia + '/' + mes + '/' + anio + ', ' + strHoras + ':' + minutos + ':' + segundos + ' ' + ampm;
                 }
 
-
-            </div>
-
-
-        </div>
-
-
-        @* ========================================
-            ÁREA PRINCIPAL
-            ======================================== *@
-
-        <div class="field">
-
-
-            <div class="ui segment overflow-auto"
-                 id="renderPages"
-                 style="
-                    min-height:550px !important;
-                    background-color:transparent;
-                    border:none;
-                    height:650px !important;
-                 ">
-
-                @RenderBody()
-
-            </div>
-
-
-            <div class="ui segment overflow-auto"
-                 id="renderPagesOculto"
-                 style="
-                    min-height:250px !important;
-                    background-color:transparent;
-                    border:none;
-                    height:650px !important;
-                 ">
-
-            </div>
-
-
-        </div>
-
+                // Ejecutar inmediatamente y programar cada segundo
+                pintarReloj();
+                setInterval(pintarReloj, 1000);
+            })();
+        </script>
 
     </div>
 
-
-    @* ============================================
-        JAVASCRIPT BASE
-        ============================================ *@
-
     @Scripts.Render("~/bundles/jqueryJs")
-
     @Scripts.Render("~/bundles/semanticJs")
-
-    @Scripts.Render(
-        "~/Content/LoadingOverlay/src/loadingoverlay.min.js"
-    )
-
+    @Scripts.Render("~/Content/LoadingOverlay/src/loadingoverlay.min.js")
     @Scripts.Render("~/bundles/jqueryUnobstriveJs")
-
-
-    @* ============================================
-        PLUGINS JAVASCRIPT
-        ============================================ *@
-
     <script src="~/Scripts/tables/jquery.dynatable.js"></script>
-
     <script src="~/Scripts/calendar/calendar.min.js"></script>
-
     <script src="~/Scripts/toastr.js"></script>
-
     <script src="~/Scripts/dropzone/dropzone.min.js"></script>
-
     <script src="~/Scripts/chartJs/Chart.bundle.min.js"></script>
-
-
-    @* ============================================
-        BOOTSTRAP JS
-
-        NO volvemos a cargar jquery.slim porque
-        jquery ya viene de ~/bundles/jqueryJs
-        ============================================ *@
-
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
 
-
     <script type="text/javascript">
-
-  
-
-
-
-   
-
-        function actualizarBotonVolver() {
-            $('#LoginFacade .js-volver').prop(
-                'disabled',
-                historialVistas.length < 2
-            );
+        // Reloj en tiempo real para el footer
+        function actualizarFechaHoraFooter() {
+            var d = new Date();
+            var opciones = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            var texto = d.toLocaleString('es-CO', opciones);
+            var span = document.getElementById('footerFechaHora');
+            if (span) {
+                span.textContent = texto;
+            }
         }
 
-
-
-
-        /* =========================================
-           CONFIGURACIÓN TOASTR
-           ========================================= */
-
-        toastr.options = {
-
-            "closeButton": false,
-
-            "debug": false,
-
-            "newestOnTop": false,
-
-            "progressBar": true,
-
-            "positionClass": "toast-bottom-right",
-
-            "preventDuplicates": false,
-
-            "onclick": null,
-
-            "showDuration": "300",
-
-            "hideDuration": "0",
-
-            "timeOut": "5000",
-
-            "extendedTimeOut": "1000",
-
-            "showEasing": "swing",
-
-            "hideEasing": "linear",
-
-            "showMethod": "fadeIn",
-
-            "hideMethod": "fadeOut"
-
-        };
-
-
-        $.fn.noop = function () {
-
-            return this;
-
-        };
-
-
-        toastr.options.hideMethod =
-            'noop';
-
-
-
-        /* =========================================
-           COMPONENTES INICIALES
-           ========================================= */
-
-        function LoadElementsDefault() {
-
-            $('.ui.dropdown')
-                .dropdown();
-
-        }
-
-
-        $(function () {
-
+        $(document).ready(function () {
+            actualizarFechaHoraFooter();
+            setInterval(actualizarFechaHoraFooter, 1000);
             LoadElementsDefault();
-
         });
 
-
-
-        /* =========================================
-           TABLAS DYNATABLE
-           ========================================= */
-
-
-        function probarBoton() {
-            console.log("El botón sí llamó a JavaScript");
-            alert("JavaScript funcionando");
+        function actualizarBotonVolver() {
+            $('#LoginFacade .js-volver').prop('disabled', historialVistas.length < 2);
         }
 
-        function LoadTables() {
+        toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-bottom-right",
+            "preventDuplicates": false,
+            "showDuration": "300",
+            "hideDuration": "0",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+        $.fn.noop = function () { return this; };
+        toastr.options.hideMethod = 'noop';
 
-            $('.tablesInitial')
-                .dynatable();
-
+        function LoadElementsDefault() {
+            $('.ui.dropdown').dropdown();
         }
-
-
-
-        /* =========================================
-           EVENTO RENDERPAGES
-           ========================================= */
-
-        $('#renderPages')
-            .on(
-                'click',
-                function () {
-
-                    $('#menuPartial')
-                        .hide();
-
-                }
-            );
-
-
-
-      
 
         function LoadElementsDefaultPartial(element) {
             $(element).find($('.ui.dropdown').dropdown());
@@ -364,19 +256,7 @@
             $("#menuPartial").hide();
         });
     </script>
-    44
 
-
-    @* ============================================
-        SCRIPTS ESPECÍFICOS DE CADA VISTA
-        ============================================ *@
-
-    @RenderSection(
-        "scripts",
-        required: false
-    )
-
-
+    @RenderSection("scripts", required: false)
 </body>
-
 </html>

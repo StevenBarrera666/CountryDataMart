@@ -932,12 +932,22 @@ namespace WebApplication1.Controllers
 
         }
 
-
-        public ActionResult ClientesPerfil(string modulo)
+        [HttpPost]
+        public PartialViewResult ClientesPerfil(FormCollection collection)
         {
-            SessionModels sessionModels = base.Session["SessionUser"] as SessionModels;
-            sessionModels.ModuloSeleccionado = modulo;
-            return View();
+            try
+            {
+                var result = _inspectionsBo.listCustomers();
+                ViewBag.id = 1;
+                //ViewBag.GDSDictionary = new SelectList(_inspectionsBo.GetLoadGDS(), "Key", "Value");
+                return PartialView(result);
+
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
 
@@ -1017,6 +1027,63 @@ namespace WebApplication1.Controllers
             }
         }
 
+        private static string NormalizarDocumento(string doc)
+        {
+            return new string((doc ?? string.Empty).Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant();
+        }
+
+        /// <summary>
+        /// Para cada documento de cliente presente en el listado, busca el cliente por Clientes.NumeroDocumento
+        /// y carga sus tarifas administrativas (categoría + valor). Resultado en ViewBag.DocColumn y ViewBag.TarifasPorDocumento.
+        /// </summary>
+        private void CargarTarifasAdministrativasPorDocumento(DataTable result)
+        {
+            var tarifasPorDoc = new Dictionary<string, List<KeyValuePair<string, decimal>>>();
+            ViewBag.TarifasPorDocumento = tarifasPorDoc;
+            ViewBag.DocColumn = null;
+
+            // Columna del listado que trae el número de documento del cliente
+            string[] candidatas = { "Numero Documento", "Numero de Documento", "NumeroDocumento", "Documento", "Identificacion", "Identificación", "Nit", "NIT", "Numero Identificacion" };
+            string docColumn = candidatas.FirstOrDefault(c => result.Columns.Contains(c))
+                               ?? result.Columns.Cast<DataColumn>()
+                                      .Select(c => c.ColumnName)
+                                      .FirstOrDefault(n => n.IndexOf("document", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                                                           n.IndexOf("expediente", StringComparison.OrdinalIgnoreCase) < 0);
+            if (docColumn == null) return;
+            ViewBag.DocColumn = docColumn;
+
+            foreach (DataRow row in result.Rows)
+            {
+                string doc = NormalizarDocumento(row[docColumn] == DBNull.Value ? null : row[docColumn].ToString());
+                if (doc.Length == 0 || tarifasPorDoc.ContainsKey(doc)) continue;
+
+                var lista = new List<KeyValuePair<string, decimal>>();
+                try
+                {
+                    DataTable dtCliente = _inspectionsBo.ExecuteDataTable(
+                        "SELECT Id FROM dbo.Clientes WHERE REPLACE(REPLACE(REPLACE(REPLACE(LTRIM(RTRIM(NumeroDocumento)), '.', ''), '-', ''), ' ', ''), ',', '') = @Doc",
+                        new List<System.Data.SqlClient.SqlParameter> { new System.Data.SqlClient.SqlParameter("@Doc", doc) });
+
+                    if (dtCliente != null && dtCliente.Rows.Count > 0)
+                    {
+                        DataTable dtTarifas = _inspectionsBo.ObtenerTarifasClienteDataTable(Convert.ToInt32(dtCliente.Rows[0]["Id"]));
+                        if (dtTarifas != null)
+                        {
+                            foreach (DataRow rt in dtTarifas.Rows)
+                            {
+                                lista.Add(new KeyValuePair<string, decimal>(
+                                    rt["CategoriaTarifaNombre"].ToString(),
+                                    rt["TarifaAdministrativa"] != DBNull.Value ? Convert.ToDecimal(rt["TarifaAdministrativa"]) : 0m));
+                            }
+                        }
+                    }
+                }
+                catch (Exception) { /* sin tarifas para este documento */ }
+
+                tarifasPorDoc[doc] = lista;
+            }
+        }
+
         [HttpPost]
         public PartialViewResult Autorizacion(FormCollection collection)
         {
@@ -1025,7 +1092,14 @@ namespace WebApplication1.Controllers
                 var result = _inspectionsBo.GetLoadFATracesAurorizar();
                 ViewBag.id = 1;
                 ViewBag.PorcentajeDictionary = new SelectList(_inspectionsBo.GetLoadPorcentaje(), "Key", "Value");
-                ViewBag.FormaPagoDictionary = new SelectList(_inspectionsBo.GetLoadFormasPago(), "Key", "Value");
+                var formasPago = _inspectionsBo.GetLoadFormasPago();
+                ViewBag.FormaPagoDictionary = new SelectList(formasPago, "Key", "Value");
+
+                // Ids de las formas de pago que corresponden a "Tarjeta de Crédito" (habilitan la lista de TC)
+                ViewBag.FormaPagoTcIds = new HashSet<string>(
+                    formasPago.Where(fp => fp.Value.IndexOf("tarjeta", StringComparison.OrdinalIgnoreCase) >= 0).Select(fp => fp.Key));
+
+                CargarTarifasAdministrativasPorDocumento(result);
 
                 // Creamos un diccionario: Key = CustomerID, Value = SelectList de sus Tarjetas de Credito
                 var tcDict = new Dictionary<string, SelectList>();
@@ -1058,6 +1132,112 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        public PartialViewResult Facturacion(FormCollection collection)
+        {
+            var result = _inspectionsBo.GetLoadFATracesFacturar();
+            return PartialView(result);
+        }
+
+        private static DataColumn BuscarColumna(DataTable dt, Func<string, bool> criterio)
+        {
+            foreach (DataColumn c in dt.Columns)
+            {
+                if (criterio(c.ColumnName.Trim().ToLowerInvariant())) return c;
+            }
+            return null;
+        }
+
+        private static decimal ADecimal(object valor)
+        {
+            if (valor == null || valor == DBNull.Value) return 0m;
+            if (valor is string s)
+            {
+                s = s.Trim().Replace("$", "").Replace(" ", "");
+                if (s.Length == 0) return 0m;
+                // Admite tanto "1.234,56" como "1234.56"
+                if (s.Contains(",") && s.Contains(".")) s = s.LastIndexOf(',') > s.LastIndexOf('.') ? s.Replace(".", "").Replace(",", ".") : s.Replace(",", "");
+                else if (s.Contains(",")) s = s.Replace(",", ".");
+                return decimal.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            return Convert.ToDecimal(valor);
+        }
+
+        [HttpPost]
+        public JsonResult RemisionarFila(int fileDetailId)
+        {
+            try
+            {
+                var session = Session["SessionUser"] as SessionModels;
+                if (session == null)
+                    throw new Exception("Se ha perdido la sesión del Usuario");
+
+                // Los valores se toman del SP y no del cliente
+                var dt = _inspectionsBo.GetLoadFATracesFacturar();
+                var colDetalle = BuscarColumna(dt, n => n == "filedetailid");
+                var colTotal = BuscarColumna(dt, n => n.Contains("total") && n.Contains("tarifa") && n.Contains("adm"));
+                var colExpediente = BuscarColumna(dt, n => n.Replace("ú", "u") == "numero expediente");
+                var colRemision = BuscarColumna(dt, n => n.Replace("ó", "o").Contains("remision") && !n.Contains("fecha"));
+                if (colDetalle == null || colTotal == null || colExpediente == null)
+                    throw new Exception("El SP de facturación no devolvió las columnas esperadas (FileDetailID, Total tarifa administrativa, Numero expediente).");
+
+                DataRow fila = null;
+                foreach (DataRow r in dt.Rows)
+                {
+                    if (r[colDetalle] != DBNull.Value && Convert.ToInt32(r[colDetalle]) == fileDetailId) { fila = r; break; }
+                }
+                if (fila == null) throw new Exception("No se encontró el registro a remisionar.");
+
+                if (colRemision != null && fila[colRemision] != DBNull.Value && fila[colRemision].ToString().Trim() != "" && fila[colRemision].ToString().Trim() != "0")
+                    throw new Exception("El registro ya está remisionado.");
+
+                decimal total = ADecimal(fila[colTotal]);
+                if (total <= 0) throw new Exception("El Total tarifa administrativa debe ser mayor a cero.");
+
+                decimal sinImpuestos = Math.Round(total - (total * 19m / 100m), 2);
+                decimal impuesto = Math.Round(sinImpuestos * 19m / 100m, 2);
+                int fileId = Convert.ToInt32(fila[colExpediente]);
+
+                var res = _inspectionsBo.RegistrarTA(total, sinImpuestos, fileId, session.LoginUser, impuesto, fileDetailId);
+                string idGenerado = res != null && res.Rows.Count > 0 
+                    ? Convert.ToString(res.Rows[0][0]) : "";
+                var respuesta = _inspectionsBo.CrearRemision(fileDetailId, Convert.ToInt32(idGenerado), fileId, session.LoginUser);
+
+                string codigo = respuesta != null && respuesta.Rows.Count > 0
+                    ? Convert.ToString(respuesta.Rows[0][0]) : "";
+                string msg =  Convert.ToString(respuesta.Rows[0][1]);
+                string remisionGenerado = string.Empty;
+                if (codigo == "0")
+                {
+                    remisionGenerado = "0";
+                }
+                else
+                {
+                    remisionGenerado = respuesta != null && res.Rows.Count > 0 ? Convert.ToString(respuesta.Rows[0][1]) : "";
+                    msg = "Remsion no: " + msg + " creada exitosamente";
+                }
+
+
+                if (remisionGenerado != "" && remisionGenerado != "0")
+                {
+                    try
+                    {
+                        _inspectionsBo.FileFacturado(fileDetailId,remisionGenerado,"","Remisionado");
+                    }
+                    catch (Exception exFact)
+                    {
+                        msg += " (La remisión se creó, pero falló sp_filefacturado: " + exFact.Message + ")";
+                    }
+                }
+
+                return Json(new { success = true, remisionGenerado = remisionGenerado, message = msg });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
         public JsonResult GuardarDocumentacionFila(DocumentacionFilaModel model)
         {
             try
@@ -1074,6 +1254,48 @@ namespace WebApplication1.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+        [HttpGet]
+        public ActionResult ObtenerPanelConfiguracion(string customerId, string thirdPartyId)
+        {
+            var model = new PanelConfiguracionViewModel();
+
+            // 1. Obtener Centros de Costo según el cliente o tercero
+            //model.CentrosCosto = _inspectionsBo.GetLoadCentroCostos(Convert.ToInt32(customerId));
+
+            // 2. Obtener Tarjetas de Crédito
+            //model.TarjetasCredito = _inspectionsBo.GetLoadTc(Convert.ToInt32(customerId));
+
+            // 3. Cargar opciones para el DropdownList si hay tarjetas o según tu regla de negocio
+            //if (model.TarjetasCredito.Any())
+            //{
+            //    model.OpcionesDropdown = _servicio.ObtenerOpcionesDropdown()
+            //        .Select(x => new SelectListItem
+            //        {
+            //            Value = x.Id.ToString(),
+            //            Text = x.Nombre
+            //        }).ToList();
+            //}
+
+            return PartialView("_PanelConfiguracion", model);
+        }
+
+        //[HttpPost]
+        //public JsonResult ObtenerPanelConfiguracion(int customerId, int thirdPartyId)
+        //{
+        //    try
+        //    {
+        //        // Invocar a la capa de negocio para procesar los datos
+        //        bool resultado = _inspectionsBo.GuardarDetalleDocumentacion(model);
+
+
+
+        //        return Json(new { success = true, message = "Datos actualizados correctamente" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { success = false, message = ex.Message });
+        //    }
+        //}
 
 
         [HttpPost]
@@ -1081,9 +1303,36 @@ namespace WebApplication1.Controllers
         {
             try
             {
+                // Validaciones de negocio (se repiten aquí aunque el cliente ya las valide)
+                var formasPago = _inspectionsBo.GetLoadFormasPago();
+                string nombreFormaPago;
+                if (string.IsNullOrWhiteSpace(model.PaymentMethodId) || model.PaymentMethodId == "0" ||
+                    !formasPago.TryGetValue(model.PaymentMethodId, out nombreFormaPago))
+                {
+                    return Json(new { success = false, message = "Debe seleccionar la Forma de Pago TA." });
+                }
+
+                bool esTarjeta = nombreFormaPago.IndexOf("tarjeta", StringComparison.OrdinalIgnoreCase) >= 0;
+                bool vacioTc = string.IsNullOrWhiteSpace(model.PaymentCardId) || model.PaymentCardId == "0";
+
+                if (esTarjeta && vacioTc)
+                    return Json(new { success = false, message = "Debe seleccionar el Número de Tarjeta de Crédito TA." });
+                if (!model.SinTarifasAsignadas && string.IsNullOrWhiteSpace(model.TarifaAsignada))
+                    return Json(new { success = false, message = "Debe seleccionar una de las tarifas asignadas al cliente." });
+                if (model.FareTA <= 0 || model.IVATA <= 0 || model.FareWithTaxes <= 0)
+                    return Json(new { success = false, message = "Tarifa TA, IVA Tarifa TA y Total tarifa TA deben estar pobladas." });
+                if (string.IsNullOrWhiteSpace(model.PedidoAgencia))
+                    return Json(new { success = false, message = "El Pedido Agencia es obligatorio." });
+                if (esTarjeta && (string.IsNullOrWhiteSpace(model.VoucherAgencia) || model.VoucherAgencia.Trim() == "0" ||
+                                  string.IsNullOrWhiteSpace(model.AutorizacionAgencia)))
+                    return Json(new { success = false, message = "Voucher Agencia y Autorización Agencia son obligatorios con Tarjeta de Crédito." });
+
+                // Si no es tarjeta no se envía número de tarjeta
+                if (!esTarjeta) model.PaymentCardId = "0";
+
                 // Invocar a la capa de negocio para procesar los datos
                 bool resultado = _inspectionsBo.GuardarDetalleAutorizacion(model);
-                return Json(new { success = true, message = "Datos actualizados correctamente" });
+                return Json(new { success = true, message = "Expediente Autorizado" });
             }
             catch (Exception ex)
             {

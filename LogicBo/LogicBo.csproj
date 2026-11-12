@@ -62,10 +62,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CategoriaIzajeBo.cs" />
+    <Compile Include="ProveedorRegistroViewModel.cs" />
+    <Compile Include="ClienteRegistroViewModel.cs" />
+    <Compile Include="ClienteTarifaItemViewModel.cs" />
+    <Compile Include="ComprobanteItemViewModel.cs" />
     <Compile Include="CronogramaIzajeBo.cs" />
     <Compile Include="CronogramaPersonasIzajeBo.cs" />
     <Compile Include="AutorizacionFilaModel.cs" />
     <Compile Include="DocumentacionFilaModel.cs" />
+    <Compile Include="EmpleadoRegistroViewModel.cs" />
     <Compile Include="EquipoIzage.cs" />
     <Compile Include="FactoresIzajeBo.cs" />
     <Compile Include="IndicadoresBo.cs" />

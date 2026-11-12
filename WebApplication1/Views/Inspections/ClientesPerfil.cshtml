@@ -1,5 +1,175 @@
-﻿<h3 class="titlesPages">
-    Clientes
-</h3>
+﻿@using System.Data
+@model DataTable
 
+<link href="~/Scripts/tables/jquery.dynatable.css" rel="stylesheet" />
+<script type="text/javascript" src="~/Scripts/tables/jquery.dynatable.js"></script>
+<link href="~/Content/toastr.css" rel="stylesheet" />
 
+<style>
+    #tablesIndexDocumentacion td {
+        position: relative;
+        overflow: visible !important;
+    }
+
+    .campo-error {
+        border: 1px solid #e0b4b4 !important;
+        background-color: #fff6f6 !important;
+        color: #9f3a38 !important;
+        font-weight: bold !important;
+    }
+
+    #tablesIndexDocumentacion select {
+        width: 100% !important;
+        min-width: 190px !important;
+        box-sizing: border-box;
+    }
+
+    #tablesIndexDocumentacion td {
+        white-space: nowrap;
+    }
+
+    .main-container, .body-content, .ui.container {
+        width: 95% !important;
+        max-width: none !important;
+        margin: 0 auto !important;
+    }
+
+    .table-responsive-container {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+    }
+
+    #tablesIndexDocumentacion {
+        width: 100% !important;
+        table-layout: auto;
+        font-size: 0.85rem;
+    }
+
+        #tablesIndexDocumentacion th,
+        #tablesIndexDocumentacion td {
+            padding: 0.5em 0.6em !important;
+            white-space: nowrap;
+        }
+
+        #tablesIndexDocumentacion select,
+        #tablesIndexDocumentacion .ui.dropdown {
+            min-width: 150px;
+            max-width: 200px;
+        }
+
+    /* Estilos para el panel expandible detallado */
+    .detalle-row {
+        background-color: #f9fafb !important;
+    }
+
+    .panel-configuracion {
+        padding: 15px;
+        border: 1px solid #d4d4d5;
+        border-radius: 4px;
+        background-color: #ffffff;
+    }
+</style>
+
+<div class="table-responsive-container">
+    <table class="ui selectable celled table ui center aligned tablesInitial" id="tablesIndexDocumentacion">
+        <thead>
+            <tr>
+                @foreach (System.Data.DataColumn col in Model.Columns)
+                {
+                    if (col.ColumnName != "CustomerId" && col.ColumnName != "ThirdPartyId")
+                    {
+                        <th>@col.ColumnName</th>
+                    }
+                }
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (System.Data.DataRow row in Model.Rows)
+            {
+                var customerId = Model.Columns.Contains("CustomerId") ? row["CustomerId"] : null;
+                var thirdPartyId = Model.Columns.Contains("ThirdPartyId") ? row["ThirdPartyId"] : null;
+
+                <tr>
+                    @foreach (System.Data.DataColumn col in Model.Columns)
+                    {
+                        if (col.ColumnName == "CustomerId" || col.ColumnName == "ThirdPartyId")
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            <td>@row[col.ColumnName]</td>
+                        }
+                    }
+                    <td>
+                        <button type="button"
+                                class="ui primary button btn-guardar-fila"
+                                data-customer-id="@customerId"
+                                data-thirdparty-id="@thirdPartyId">
+                            <i class="save icon"></i> Configurar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<br />
+<div class="content">
+    <div class="renderImages ui cards" style="display:none"></div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Inicialización de Dynatable
+        $('#tablesIndexDocumentacion').dynatable();
+
+        // Delegación de eventos para capturar el click incluso si Dynatable pagina/filtra
+        $(document).on('click', '.btn-guardar-fila', function () {
+            alert("A");
+            var $btn = $(this);
+            var $tr = $btn.closest('tr');
+            var customerId = $btn.data('customer-id');
+            var thirdPartyId = $btn.data('thirdparty-id');
+
+            // Verificar si ya existe la fila expandida debajo
+            if ($tr.next().hasClass('detalle-row')) {
+                // Si existe, la ocultamos/eliminamos (Toggle)
+                $tr.next('.detalle-row').remove();
+                return;
+            }
+
+            // Eliminar otros paneles abiertos (Opcional: mantener solo uno abierto a la vez)
+            $('.detalle-row').remove();
+
+            // Calcular número total de columnas para hacer colspan
+            var totalCols = $tr.children('td').length;
+
+            // Fila temporal de carga
+            var $loadingRow = $('<tr class="detalle-row"><td colspan="' + totalCols + '"><div class="ui active inline loader"></div> Cargando información...</td></tr>');
+            $tr.after($loadingRow);
+
+            // Llamada AJAX al controlador MVC
+            $.ajax({
+                url: '@Url.Action("ObtenerPanelConfiguracion", "Inspections")', 
+                type: 'GET',
+                data: { customerId: customerId, thirdPartyId: thirdPartyId },
+                success: function (htmlPartial) {
+                    var $detailRow = $('<tr class="detalle-row"><td colspan="' + totalCols + '"><div class="panel-configuracion">' + htmlPartial + '</div></td></tr>');
+                    $loadingRow.replaceWith($detailRow);
+
+                    // Inicializar dropdowns de Semantic UI si aplica
+                    if ($.fn.dropdown) {
+                        $('.ui.dropdown').dropdown();
+                    }
+                },
+                error: function () {
+                    $loadingRow.find('td').html('<span style="color:red;"><i class="exclamation triangle icon"></i> Ocurrió un error al cargar la configuración.</span>');
+                }
+            });
+        });
+    });
+</script>

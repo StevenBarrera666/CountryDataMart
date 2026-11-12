@@ -48,7 +48,7 @@ namespace ADO
             //_connectionString = ConfigurationManager.ConnectionStrings["AppConnection"].ToString();
             _connectionString = ConfigurationManager.AppSettings["conexP"].ToString();
             _connectionBd = new ConnectionBd(_connectionString);
-            _timeOut = 180;
+            _timeOut = 1800;
             _sqlCommand = new SqlCommand();
             _dataAdapter = new SqlDataAdapter(_sqlCommand);
             _sqlCommand.CommandTimeout = _timeOut;

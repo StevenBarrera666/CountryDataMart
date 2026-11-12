@@ -1,0 +1,157 @@
+@using System.Data
+@using System.Linq
+@model DataTable
+<link href="~/Content/toastr.css" rel="stylesheet" />
+
+<style>
+    #tablesFacturacion {
+        width: 100% !important;
+        font-size: 0.85rem;
+    }
+
+        #tablesFacturacion th,
+        #tablesFacturacion td {
+            padding: 0.5em 0.6em !important;
+            white-space: nowrap;
+        }
+
+    .table-responsive-container {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+    }
+</style>
+
+@functions {
+    static readonly string[] ColumnasOcultas = { "customerid", "filedetailid", "estado1", "estado 1" };
+
+    static string Norm(string nombre)
+    {
+        return (nombre ?? "").Trim().ToLowerInvariant().Replace("á", "a").Replace("é", "e").Replace("í", "i").Replace("ó", "o").Replace("ú", "u");
+    }
+
+    static bool EsRemision(string nombre)
+    {
+        var n = Norm(nombre);
+        return n.Contains("remision") && !n.Contains("fecha");
+    }
+
+    static bool EsFactura(string nombre)
+    {
+        var n = Norm(nombre);
+        return n.Contains("factura") && !n.Contains("fecha") && !n.Contains("total") && !n.Contains("valor");
+    }
+
+    static bool Es(string nombre, string esperado)
+    {
+        return Norm(nombre) == esperado.ToLowerInvariant();
+    }
+
+    static bool Vacio(string v)
+    {
+        return v == "" || v == "0";
+    }
+
+    static string Valor(DataRow row, DataColumn col)
+    {
+        return row[col] == DBNull.Value ? "" : Convert.ToString(row[col]).Trim();
+    }
+}
+
+<div class="table-responsive-container">
+    <table class="ui selectable celled table ui center aligned tablesInitial" id="tablesFacturacion">
+        <thead>
+            <tr>
+                @foreach (DataColumn col in Model.Columns)
+                {
+                    if (ColumnasOcultas.Contains(col.ColumnName.Trim().ToLowerInvariant())) { continue; }
+                    <th>@col.ColumnName</th>
+                }
+                <th>Remisionar</th>
+                <th>Facturar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (DataRow row in Model.Rows)
+            {
+                string remision = "";
+                string factura = "";
+                foreach (DataColumn c in Model.Columns)
+                {
+                    if (EsRemision(c.ColumnName)) { remision = Valor(row, c); }
+                    else if (EsFactura(c.ColumnName)) { factura = Valor(row, c); }
+                }
+                string customerId = Model.Columns.Contains("CustomerId") ? Valor(row, Model.Columns["CustomerId"]) : "";
+                string fileDetailId = Model.Columns.Contains("FileDetailID") ? Valor(row, Model.Columns["FileDetailID"]) : "";
+
+                <tr data-customer-id="@customerId" data-filedetail-id="@fileDetailId">
+                    @foreach (DataColumn col in Model.Columns)
+                    {
+                        if (ColumnasOcultas.Contains(col.ColumnName.Trim().ToLowerInvariant())) { continue; }
+                        string v = Valor(row, col);
+                        if (Es(col.ColumnName, "Estado") && v == "")
+                        {
+                            v = !Vacio(remision) ? "Remisionado" : "Sin estado";
+                        }
+                        else if (EsRemision(col.ColumnName) && Vacio(v))
+                        {
+                            v = "No remisionado";
+                        }
+                        else if (EsFactura(col.ColumnName) && Vacio(v))
+                        {
+                            v = "No facturado";
+                        }
+                        string clase = EsRemision(col.ColumnName) ? "col-remision" : Es(col.ColumnName, "Estado") ? "col-estado" : "";
+                        <td class="@clase">@v</td>
+                    }
+                    <td>
+                        <button type="button" title="@(!Vacio(remision) ? "Ya remisionado: " + remision : "")" class="ui mini button primary btn-remisionar" @(!Vacio(remision) ? "disabled" : "")>Remisionar</button>
+                    </td>
+                    <td>
+                        <button type="button" class="ui mini button green btn-facturar" @(!Vacio(remision) || !Vacio(factura) ? "disabled" : "")>Facturar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    (function () {
+        $(document).off('.facturacion');
+        $(document).on('click.facturacion', '#tablesFacturacion .btn-remisionar', function () {
+            var $btn = $(this); console.log('Remisionar click', $btn.closest('tr').data('filedetail-id'), $btn.prop('disabled'));
+            if ($btn.prop('disabled') || $btn.data('loading')) return;
+            var fileDetailId = $btn.closest('tr').data('filedetail-id');
+            $btn.data('loading', true).addClass('loading');
+
+            $.ajax({
+                url: '@Url.Action("RemisionarFila", "Inspections")',
+                type: 'POST',
+                data: { fileDetailId: fileDetailId },
+                success: function (r) {
+                    if (r.success) {
+                        var remision = (r.remisionGenerado || '').toString().trim();
+                        if (remision !== '' && remision !== '0') {
+                            var $tr = $btn.closest('tr');
+                            $tr.find('td.col-remision').text(remision);
+                            $tr.find('td.col-estado').text('Remisionado');
+                            $tr.find('.btn-remisionar, .btn-facturar').prop('disabled', true);
+                            if (window.toastr) toastr.success(r.message); else alert(r.message);
+                        } else {
+                            if (window.toastr) toastr.warning(r.message); else alert(r.message);
+                        }
+                        $btn.data('loading', false).removeClass('loading');
+                    } else {
+                        if (window.toastr) toastr.error(r.message); else alert(r.message);
+                        $btn.data('loading', false).removeClass('loading');
+                    }
+                },
+                error: function () {
+                    if (window.toastr) toastr.error('Error al remisionar'); else alert('Error al remisionar');
+                    $btn.data('loading', false).removeClass('loading');
+                }
+            });
+        });
+    })();
+</script>

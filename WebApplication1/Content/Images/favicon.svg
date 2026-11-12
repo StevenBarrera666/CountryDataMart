@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="vcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0f2942" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo circular con borde sutil -->
+  <circle cx="32" cy="32" r="30" fill="url(#vcGrad)" stroke="#38bdf8" stroke-width="2" />
+
+  <!-- Isotipo: Letras VC entrelazadas con estilo moderno -->
+  <!-- Letra V -->
+  <path d="M16 22 L26 44 L32 44 L22 22 Z" fill="#ffffff" />
+  <!-- Letra C -->
+  <path d="M46 25 C43 21 37 21 33 24 C28 28 28 36 33 40 C37 43 43 43 46 39 L41 35 C39 37 36 37 34 35 C32 33 32 30 34 29 C36 27 39 27 41 29 Z" fill="#38bdf8" />
+  
+  <!-- Punto indicador de datos (Datamart) -->
+  <circle cx="45" cy="22" r="3" fill="#ffffff" />
+</svg>

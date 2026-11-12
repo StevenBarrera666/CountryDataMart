@@ -1,0 +1,574 @@
+﻿@using System.Globalization
+@{
+    var culturaCol = new CultureInfo("es-CO");
+}
+@model WebApplication1.Models.EmpleadoPerfilViewModel
+@{
+    ViewBag.Title = Model.NombreCompleto + " - Perfil";
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+<style>
+    /* Estructura para habilitar scroll interno y evitar que se corte */
+    .container-perfil-empleado {
+        padding: 24px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .card-custom {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e5e9f2;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+
+    /* Avatar y Ficha Lateral */
+    .avatar-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .avatar-circle {
+        width: 105px;
+        height: 105px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: #dbeafe;
+    }
+
+    .badge-f2 {
+        position: absolute;
+        top: 0;
+        right: -6px;
+        background-color: #d1fae5;
+        color: #065f46;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .user-name {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-top: 14px;
+        margin-bottom: 2px;
+        line-height: 1.25;
+    }
+
+    .user-role {
+        font-size: 0.88rem;
+        color: #64748b;
+        margin-bottom: 14px;
+    }
+
+    .btn-outline-custom {
+        border-radius: 20px;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 5px 16px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+        .btn-outline-custom:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border-color: #94a3b8;
+        }
+
+    /* Secciones Colapsables */
+    .section-title {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .field-label {
+        font-size: 0.76rem;
+        color: #64748b;
+        margin-bottom: 1px;
+        font-weight: 600;
+    }
+
+    .field-value {
+        font-size: 0.86rem;
+        color: #1e293b;
+        margin-bottom: 11px;
+    }
+
+    .field-link {
+        color: #0284c7;
+        text-decoration: none;
+    }
+
+        .field-link:hover {
+            text-decoration: underline;
+        }
+
+    /* Pestañas Superiores */
+    .custom-tabs .nav-link {
+        color: #64748b;
+        border: none;
+        border-bottom: 2px solid transparent;
+        font-weight: 500;
+        font-size: 0.9rem;
+        padding: 10px 18px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .custom-tabs .nav-link.active {
+            color: #0284c7;
+            border-bottom: 2px solid #0284c7;
+            background: transparent;
+            font-weight: 600;
+        }
+
+    /* Tabla de Detalles (Resumen) */
+    .table-details {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+        .table-details tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+            .table-details tr:last-child {
+                border-bottom: none;
+            }
+
+        .table-details td {
+            padding: 12px 6px;
+            font-size: 0.88rem;
+            vertical-align: top;
+        }
+
+            .table-details td.label-cell {
+                color: #475569;
+                font-weight: 600;
+                width: 28%;
+            }
+
+            .table-details td.value-cell {
+                color: #1e293b;
+            }
+</style>
+
+<div class="container-fluid container-perfil-empleado">
+
+    <!-- Barra Superior: Regreso y contexto -->
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <a href="javascript:void(0)" class="ui mini basic button" onclick="cargarElement('@Url.Action("Empleados", "Empleado")')">
+            <i class="arrow left icon"></i> Volver a Empleados
+        </a>
+        <span class="text-muted small">Ficha Activa: <strong>@Model.FichaCodigo</strong></span>
+    </div>
+
+    <div class="row" style="align-items: flex-start;">
+
+        <!-- ================= COLUMNA IZQUIERDA: PERFIL DEL EMPLEADO ================= -->
+        <div class="col-lg-3 col-md-4">
+            <div class="card-custom text-center">
+
+                <!-- Avatar y Badge de Ficha/Estado -->
+                <div class="avatar-wrapper mb-2">
+                    <img src="@Model.FotoUrl"
+                         onerror="this.src='https://ui-avatars.com/api/?name=@Url.Encode(Model.NombreCompleto)&background=0284c7&color=fff&size=128';"
+                         alt="Foto Perfil" class="avatar-circle shadow-sm" />
+                    <span class="badge-f2">@Model.FichaCodigo</span>
+                </div>
+
+                <h2 class="user-name">@Model.NombreCompleto</h2>
+                <p class="user-role">@Model.Cargo</p>
+
+                <!-- Selector Dinámico de Fichas (Multi-ficha) -->
+                <div class="mb-3">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="btnDropdownFichas" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 8px; font-size: 0.82rem; font-weight: 600;">
+                            Ficha: @Model.FichaCodigo
+                        </button>
+                        <ul class="dropdown-menu shadow-sm" aria-labelledby="btnDropdownFichas">
+                            @if (Model.FichasDisponibles != null && Model.FichasDisponibles.Any())
+                            {
+                                foreach (var f in Model.FichasDisponibles)
+                                {
+                                    <li>
+                                        <a class="dropdown-item @(f.FichaId == Model.FichaIdActual ? "active fw-bold" : "")"
+                                           href="javascript:void(0)"
+                                           onclick="cargarElement('@Url.Action("Perfil", "Empleado", new { id = Model.Id, fichaId = f.FichaId })')">
+                                            <strong>@f.FichaCodigo</strong> - @f.FichaNombre
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li><span class="dropdown-item text-muted small">Sin fichas asociadas</span></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Botón Actualizar Datos -->
+                <div class="mb-4">
+                    <a href="javascript:void(0)"
+                       class="btn-outline-custom"
+                       onclick="cargarElement('@Url.Action("Registrar", "Empleado", new { id = Model.Id })')">
+                        <i class="bi bi-pencil"></i> Actualizar Datos
+                    </a>
+                </div>
+
+                <hr class="text-muted" style="opacity: 0.15;" />
+
+                <!-- Sección 1: Información General -->
+                <div class="text-start">
+                    <div class="section-title" data-bs-toggle="collapse" data-bs-target="#secInfoGeneral" aria-expanded="true">
+                        <span>Información General</span>
+                        <i class="bi bi-chevron-down" style="font-size: 0.75rem;"></i>
+                    </div>
+
+                    <div id="secInfoGeneral" class="collapse show">
+                        <div class="field-label">Identificación</div>
+                        <div class="field-value">@Model.TipoIdentificacion<br /><strong>@Model.NumeroIdentificacion</strong></div>
+
+                        <div class="field-label">Correo Corporativo</div>
+                        <div class="field-value">
+                            <a href="mailto:@Model.CorreoCorporativo" class="field-link">@Model.CorreoCorporativo</a>
+                        </div>
+
+                        <div class="field-label">Teléfono Particular</div>
+                        <div class="field-value">
+                            <a href="tel:@Model.TelefonoParticular" class="field-link">@(string.IsNullOrWhiteSpace(Model.TelefonoParticular) ? "-" : Model.TelefonoParticular)</a>
+                        </div>
+
+                        <div class="field-label">Teléfono Oficina</div>
+                        <div class="field-value">
+                            <a href="tel:@Model.TelefonoOficina" class="field-link">@(string.IsNullOrWhiteSpace(Model.TelefonoOficina) ? "-" : Model.TelefonoOficina)</a>
+                        </div>
+
+                        <div class="field-label">Cumpleaños</div>
+                        <div class="field-value">@Model.FechaNacimiento.ToString("dd-MM-yyyy") (@Model.Edad años)</div>
+
+                        <div class="field-label">Dirección</div>
+                        <div class="field-value">@(string.IsNullOrWhiteSpace(Model.Direccion) ? "-" : Model.Direccion)</div>
+
+                        <div class="field-label">Fecha de Ingreso</div>
+                        <div class="field-value">@Model.FechaIngreso.ToString("dd-MM-yyyy")</div>
+                    </div>
+
+                    <hr class="text-muted" style="opacity: 0.15;" />
+
+                    <!-- Sección 2: Previsión y Pago -->
+                    <div class="section-title" data-bs-toggle="collapse" data-bs-target="#secPrevision" aria-expanded="true">
+                        <span>Previsión y Pago</span>
+                        <i class="bi bi-chevron-down" style="font-size: 0.75rem;"></i>
+                    </div>
+
+                    <div id="secPrevision" class="collapse show">
+                        <div class="field-label"><i class="bi bi-heart me-1 text-danger"></i> Previsión</div>
+                        <div class="field-value">@(string.IsNullOrWhiteSpace(Model.EpsPrevision) ? "-" : Model.EpsPrevision)</div>
+
+                        <div class="field-label"><i class="bi bi-shield-check me-1 text-primary"></i> Fondo de Pensiones</div>
+                        <div class="field-value">@(string.IsNullOrWhiteSpace(Model.FondoPensiones) ? "-" : Model.FondoPensiones)</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= COLUMNA DERECHA: PESTAÑAS Y DETALLES ================= -->
+        <div class="col-lg-9 col-md-8">
+            <div class="card-custom">
+
+                <!-- Barra de Pestañas -->
+                <ul class="nav custom-tabs border-bottom mb-3" id="profileTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="resumen-tab" data-bs-toggle="tab" href="#resumen" role="tab">Resumen</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="comprobantes-tab" data-bs-toggle="tab" href="#comprobantes" role="tab">Comprobantes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="documentos-tab" data-bs-toggle="tab" href="#documentos" role="tab">Documentos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="vacaciones-tab" data-bs-toggle="tab" href="#vacaciones" role="tab">Vacaciones</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="profileTabContent">
+
+                    <!-- 1. PESTAÑA: RESUMEN -->
+                    <div class="tab-pane fade show active" id="resumen" role="tabpanel">
+                        <table class="table-details">
+                            <tbody>
+                                <tr>
+                                    <td class="label-cell">Cargo</td>
+                                    <td class="value-cell fw-semibold">@Model.Cargo</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Área</td>
+                                    <td class="value-cell">@Model.Area</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">División</td>
+                                    <td class="value-cell">@Model.Division</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Empresa</td>
+                                    <td class="value-cell">@Model.Empresa</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Centro de Costos</td>
+                                    <td class="value-cell"><span class="badge bg-light text-dark border">@Model.CentroCostos</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Supervisor</td>
+                                    <td class="value-cell">@Model.Supervisor</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Suplente</td>
+                                    <td class="value-cell">@Model.Suplente</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Tipo Contrato</td>
+                                    <td class="value-cell">@Model.TipoContrato</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Jornada Laboral</td>
+                                    <td class="value-cell">@Model.JornadaLaboral</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Fecha Ingreso Compañía</td>
+                                    <td class="value-cell">@Model.AntiguedadTexto</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Saldo vacaciones</td>
+                                    <td class="value-cell fw-bold text-primary">@Model.SaldoVacacionesDias.ToString("N1") días</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 2. PESTAÑA: COMPROBANTES DE PAGO -->
+                    <div class="tab-pane fade" id="comprobantes" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small">Liquidaciones registradas para el período</span>
+                            <div class="ui icon input small" style="max-width: 220px;">
+                                <input type="text" id="txtFiltroComprobantes" placeholder="Filtrar mes..." />
+                                <i class="search icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="tblComprobantes" style="font-size: 0.85rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mes</th>
+                                        <th>Sueldo Bruto</th>
+                                        <th>Total Neto</th>
+                                        <th>Aporte Patronal</th>
+                                        <th>H. Extras</th>
+                                        <th>Recargos</th>
+                                        <th>H. No Trab.</th>
+                                        <th>Días No Trab.</th>
+                                        <th class="text-center">PDF</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Comprobantes != null && Model.Comprobantes.Any())
+                                    {
+                                        foreach (var c in Model.Comprobantes)
+                                        {
+                                            <tr>
+                                                <td class="fw-bold text-primary">@c.PeriodoMes</td>
+                                                <td>@(c.SueldoBruto > 0 ? c.SueldoBruto.ToString("C0", culturaCol) : "$ 0")</td>
+                                                <td class="fw-bold text-success">@(c.TotalNeto > 0 ? c.TotalNeto.ToString("C0", culturaCol) : "$ 0")</td>
+                                                <td>@(c.AportePatronal > 0 ? c.AportePatronal.ToString("C0", culturaCol) : "$ 0")</td>
+                                                <td>@c.HorasExtras.ToString("N1") hrs</td>
+                                                <td>@c.HorasRecargos.ToString("N1") hrs</td>
+                                                <td>@c.HorasNoTrabajadas.ToString("N2") hrs</td>
+                                                <td>@c.DiasNoTrabajados.ToString("N2") días</td>
+                                                <td class="text-center">
+                                                    @if (!string.IsNullOrEmpty(c.RutaArchivoPdf))
+                                                    {
+                                                        <a href="@c.RutaArchivoPdf" target="_blank" class="btn btn-sm btn-outline-danger py-0 px-2" title="Descargar Liquidación">
+                                                            <i class="bi bi-file-earmark-pdf"></i>
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="9" class="text-center py-4 text-muted">
+                                                <i class="bi bi-receipt display-6 d-block mb-2 text-secondary" style="opacity: 0.3;"></i>
+                                                No hay comprobantes de pago registrados en esta ficha.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 3. PESTAÑA: DOCUMENTOS DEL EXPEDIENTE -->
+                    <div class="tab-pane fade" id="documentos" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small">Expediente digital y contratos</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" style="font-size: 0.85rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Documento</th>
+                                        <th>Categoría</th>
+                                        <th>Fecha Carga</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Documentos != null && Model.Documentos.Any())
+                                    {
+                                        foreach (var doc in Model.Documentos)
+                                        {
+                                            <tr>
+                                                <td class="fw-semibold"><i class="bi bi-file-text me-2 text-primary"></i>@doc.NombreDocumento</td>
+                                                <td><span class="badge bg-light text-dark border">@doc.Categoria</span></td>
+                                                <td>@doc.FechaCarga.ToString("dd/MM/yyyy HH:mm")</td>
+                                                <td class="text-center">
+                                                    <a href="@doc.RutaArchivo" target="_blank" class="ui mini basic button">
+                                                        <i class="eye icon"></i> Ver
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4 text-muted">
+                                                <i class="bi bi-folder2-open display-6 d-block mb-2 text-secondary" style="opacity: 0.3;"></i>
+                                                No hay documentos cargados en el expediente.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 4. PESTAÑA: VACACIONES -->
+                    <div class="tab-pane fade" id="vacaciones" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <span class="text-muted small">Días acumulados disponibles:</span>
+                                <strong class="text-primary ms-1">@Model.SaldoVacacionesDias.ToString("N1") días</strong>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" style="font-size: 0.85rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Período</th>
+                                        <th>Días Disfrutados</th>
+                                        <th>Fecha Inicio</th>
+                                        <th>Fecha Fin</th>
+                                        <th>Fecha Retorno</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Vacaciones != null && Model.Vacaciones.Any())
+                                    {
+                                        foreach (var v in Model.Vacaciones)
+                                        {
+                                            <tr>
+                                                <td class="fw-semibold">@v.PeriodoCalculo</td>
+                                                <td><strong>@v.DiasTomados.ToString("N1")</strong> días</td>
+                                                <td>@v.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                                <td>@v.FechaFin.ToString("dd/MM/yyyy")</td>
+                                                <td>@v.FechaRetorno.ToString("dd/MM/yyyy")</td>
+                                                <td>
+                                                    <span class="badge @(v.Estado == "Aprobado" ? "bg-success" : (v.Estado == "Pendiente" ? "bg-warning text-dark" : "bg-danger"))">
+                                                        @v.Estado
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="text-center py-4 text-muted">
+                                                <i class="bi bi-sun display-6 d-block mb-2 text-secondary" style="opacity: 0.3;"></i>
+                                                No se registran solicitudes o períodos de vacaciones tomados.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // Soporte de navegación por pestañas en vistas cargadas dinámicamente vía AJAX
+        $('#profileTab a').on('click', function (e) {
+            e.preventDefault();
+            $('#profileTab .nav-link').removeClass('active');
+            $(this).addClass('active');
+
+            var target = $(this).attr('href');
+            $('#profileTabContent .tab-pane').removeClass('show active');
+            $(target).addClass('show active');
+        });
+
+        // Filtro rápido de comprobantes
+        $('#txtFiltroComprobantes').on('keyup', function () {
+            var val = $(this).val().toLowerCase();
+            $('#tblComprobantes tbody tr').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(val) > -1);
+            });
+        });
+    });
+
+
+</script>

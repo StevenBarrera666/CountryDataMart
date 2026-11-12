@@ -25,43 +25,25 @@ namespace WebApplication1.Controllers
         {
             SessionModels sessionModels = base.Session["SessionUser"] as SessionModels;
             sessionModels.ModuloSeleccionado = modulo;
-            //string Welcome = string.Empty;
-            //string invite = string.Empty;
-            //string textopp1 = string.Empty;
-            //string textopp2 = string.Empty;
-            //string textopp3 = string.Empty;
-            //string textopp4 = string.Empty;
-
-
-
-
-
-
-            //ViewBag.pathImage = _pathImge;
-            //var model = _homeBo.GetBannerImages(Server.MapPath(_pathImge));
             return View();
         }
 
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
-
             return PartialView();
         }
-
-
         public ActionResult AdministradorP(string modulo)
         {
             SessionModels sessionModels = base.Session["SessionUser"] as SessionModels;
             sessionModels.ModuloSeleccionado = modulo;
             return View();
         }
-
-
-            //public ActionResult Contact()
-            //{
-            //    return View();
-            //}
-
+        public ActionResult AdministradorTraza(string modulo)
+        {
+            SessionModels sessionModels = base.Session["SessionUser"] as SessionModels;
+            sessionModels.ModuloSeleccionado = modulo;
+            return View();
         }
     }
+}

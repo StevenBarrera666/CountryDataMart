@@ -16,6 +16,9 @@ namespace WebApplication1
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            ModelBinders.Binders.Add(typeof(decimal), new WebApplication1.Models.InvariantDecimalModelBinder());
+            ModelBinders.Binders.Add(typeof(decimal?), new WebApplication1.Models.InvariantDecimalModelBinder());
         }
     }
 }

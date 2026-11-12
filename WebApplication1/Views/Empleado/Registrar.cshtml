@@ -1,0 +1,672 @@
+@model WebApplication1.Models.EmpleadoFormViewModel
+@{
+    Layout = null;
+    bool esEdicion = Model != null && Model.Id > 0;
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+<style>
+    .container-registro-empleado {
+        padding: 24px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        padding: 28px 32px;
+        margin-bottom: 24px;
+    }
+
+    .section-header {
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .section-header h6 {
+            margin: 0;
+            font-weight: 700;
+            color: #0f2942;
+            font-size: 0.92rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section-header i {
+            color: #0284c7;
+            font-size: 1.1rem;
+        }
+
+    .form-label-custom {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .form-control-custom,
+    .form-select-custom {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 7px 12px;
+        font-size: 0.88rem;
+        color: #1e293b;
+        background-color: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+        .form-control-custom:focus,
+        .form-select-custom:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+            outline: none;
+        }
+
+    .ficha-check-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .ficha-check-card:hover {
+            border-color: #0284c7;
+            background-color: #f0f9ff;
+        }
+
+    .avatar-preview-box { overflow: hidden; }
+    .avatar-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+
+    .avatar-preview-box {
+        width: 85px;
+        height: 85px;
+        border-radius: 50%;
+        background-color: #0f2942;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0 auto 12px auto;
+        box-shadow: 0 4px 10px rgba(15, 41, 66, 0.2);
+    }
+
+    .reg-pane { display: none; }
+    .reg-pane.active { display: block; }
+</style>
+
+<div class="container-fluid container-registro-empleado">
+
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <a href="javascript:void(0)" class="ui mini basic button" onclick="cargarElement('@Url.Action("Empleados", "Empleado")')">
+            <i class="arrow left icon"></i> Volver a Empleados
+        </a>
+        <span class="text-muted small">
+            @(esEdicion ? "Modificando Registro ID: " + Model.Id : "Formulario de Alta de Personal")
+        </span>
+    </div>
+
+    <form id="frmRegistrarEmpleado" autocomplete="off">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="@(Model != null ? Model.Id : 0)" />
+
+        <div class="row">
+            <!-- Panel Lateral -->
+            <div class="col-lg-3 col-md-4">
+                <div class="form-card text-center mb-4">
+                    <div class="avatar-preview-box" id="avatarPreview">
+                        <img id="imgFoto" src="@Model.FotoUrl" alt="Foto" style="@(string.IsNullOrWhiteSpace(Model.FotoUrl) ? "display:none;" : "")" />
+                        <span id="avatarInicial" style="@(string.IsNullOrWhiteSpace(Model.FotoUrl) ? "" : "display:none;")">@(esEdicion && !string.IsNullOrWhiteSpace(Model.Nombres) ? Model.Nombres.Substring(0, 1).ToUpper() : "E")</span>
+                    </div>
+                    <label class="ui mini basic button mb-2" for="fileFoto" style="cursor:pointer;">
+                        <i class="camera icon"></i> Cambiar foto
+                    </label>
+                    <input type="file" id="fileFoto" accept="image/png,image/jpeg" style="display:none;" />
+                    <div class="text-muted small mb-2" style="font-size:0.72rem;">JPG o PNG</div>
+                    <h6 class="fw-bold mb-1 text-dark" id="txtPreviewNombre">@(esEdicion ? Model.Nombres + " " + Model.Apellidos : "Nuevo Empleado")</h6>
+                    <p class="text-muted small mb-0" id="txtPreviewCargo">@(esEdicion ? Model.Cargo : "Puesto a Definir")</p>
+                </div>
+
+                <div class="form-card">
+                    <div class="section-header">
+                        <i class="bi bi-tags"></i>
+                        <h6>Fichas Asignadas</h6>
+                    </div>
+                    <p class="text-muted small mb-3">Marque las fichas bajo las cuales operará este empleado:</p>
+
+                    <div class="d-flex flex-column gap-2">
+                        @if (Model != null && Model.FichasCatalogo != null && Model.FichasCatalogo.Any())
+                        {
+                            foreach (var f in Model.FichasCatalogo)
+                            {
+                                bool estaAsignada = Model.FichasSeleccionadas != null && Model.FichasSeleccionadas.Contains(f.FichaId);
+                                <div class="ficha-check-card">
+                                    <input class="form-check-input mt-0"
+                                           type="checkbox"
+                                           name="FichasSeleccionadas"
+                                           value="@f.FichaId"
+                                           id="chkFicha_@f.FichaId"
+                                           @(estaAsignada ? "checked" : "") />
+                                    <label class="form-check-label small mb-0 w-100" style="cursor:pointer;" for="chkFicha_@f.FichaId">
+                                        <strong>@f.FichaCodigo</strong> &nbsp;|&nbsp; @f.FichaNombre
+                                    </label>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-muted small py-2">No hay fichas configuradas en el catálogo maestro.</div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Campos -->
+            <div class="col-lg-9 col-md-8">
+                <!-- 1. Datos Personales -->
+                <div class="form-card mb-4">
+                    <div class="section-header">
+                        <i class="bi bi-person-vcard"></i>
+                        <h6>1. Datos Personales y de Contacto</h6>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Nombres <span class="text-danger">*</span></label>
+                            <input type="text" name="Nombres" id="inputNombres" class="form-control-custom" value="@(Model != null ? Model.Nombres : "")" required placeholder="Ej. Pablo Jose" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Apellidos <span class="text-danger">*</span></label>
+                            <input type="text" name="Apellidos" id="inputApellidos" class="form-control-custom" value="@(Model != null ? Model.Apellidos : "")" required placeholder="Ej. Santos Castellanos" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Tipo de Identificación <span class="text-danger">*</span></label>
+                            <select name="TipoIdentificacion" class="form-select-custom" required>
+                                <option value="Cédula de Ciudadanía" @(Model != null && Model.TipoIdentificacion == "Cédula de Ciudadanía" ? "selected" : "")>Cédula de Ciudadanía</option>
+                                <option value="Cédula de Extranjería" @(Model != null && Model.TipoIdentificacion == "Cédula de Extranjería" ? "selected" : "")>Cédula de Extranjería</option>
+                                <option value="Pasaporte" @(Model != null && Model.TipoIdentificacion == "Pasaporte" ? "selected" : "")>Pasaporte</option>
+                                <option value="NIT" @(Model != null && Model.TipoIdentificacion == "NIT" ? "selected" : "")>NIT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Número de Documento <span class="text-danger">*</span></label>
+                            <input type="text" name="NumeroIdentificacion" class="form-control-custom" value="@(Model != null ? Model.NumeroIdentificacion : "")" required placeholder="Ej. 1.015.482.537" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Fecha de Nacimiento <span class="text-danger">*</span></label>
+                            <input type="date" name="FechaNacimiento" class="form-control-custom" value="@(Model != null && Model.FechaNacimiento != DateTime.MinValue ? Model.FechaNacimiento.ToString("yyyy-MM-dd") : "1995-01-01")" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Correo Corporativo <span class="text-danger">*</span></label>
+                            <input type="email" name="CorreoCorporativo" class="form-control-custom" value="@(Model != null ? Model.CorreoCorporativo : "")" required placeholder="usuario@viajescountry.com" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-custom">Teléfono Particular</label>
+                            <input type="text" name="TelefonoParticular" class="form-control-custom" value="@(Model != null ? Model.TelefonoParticular : "")" placeholder="Ej. 316 6661710" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-custom">Teléfono Oficina</label>
+                            <input type="text" name="TelefonoOficina" class="form-control-custom" value="@(Model != null ? Model.TelefonoOficina : "")" placeholder="Ej. (601) 7562989" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label-custom">Dirección de Residencia</label>
+                            <input type="text" name="Direccion" class="form-control-custom" value="@(Model != null ? Model.Direccion : "")" placeholder="Ej. CR 62 83 02, Bogotá" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Cargo y Organización -->
+                <div class="form-card mb-4">
+                    <div class="section-header">
+                        <i class="bi bi-briefcase"></i>
+                        <h6>2. Cargo y Estructura Organizacional</h6>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Cargo <span class="text-danger">*</span></label>
+                            <input type="text" name="Cargo" id="inputCargo" class="form-control-custom" value="@(Model != null ? Model.Cargo : "")" required placeholder="Ej. Ingeniero de Soporte" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Área <span class="text-danger">*</span></label>
+                            <input type="text" name="Area" class="form-control-custom" value="@(Model != null ? Model.Area : "")" required placeholder="Ej. Transport & Infrastructure" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">División / Empresa</label>
+                            <input type="text" name="Empresa" class="form-control-custom" value="@(Model != null ? Model.Empresa : "")" placeholder="Ej. WSP Ingenieria Colombia SAS" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Centro de Costos</label>
+                            <input type="text" name="CentroCostos" class="form-control-custom" value="@(Model != null ? Model.CentroCostos : "")" placeholder="Ej. COW3DLY" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Supervisor Inmediato</label>
+                            <input type="text" name="Supervisor" class="form-control-custom" value="@(Model != null ? Model.Supervisor : "")" placeholder="Ej. Amar, Oscar Alejandro" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Suplente</label>
+                            <input type="text" name="Suplente" class="form-control-custom" value="@(Model != null ? Model.Suplente : "")" placeholder="Ej. Sin Suplencia" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Tipo de Contrato</label>
+                            <input type="text" name="TipoContrato" class="form-control-custom" value="@(Model != null ? Model.TipoContrato : "")" placeholder="Ej. Plazo fijo (F.T.: 2026-11-01)" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Jornada Laboral</label>
+                            <input type="text" name="JornadaLaboral" class="form-control-custom" value="@(Model != null ? Model.JornadaLaboral : "")" placeholder="Ej. Mensual 42.0 hrs. (L, M, M, J, V)" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Fecha de Ingreso <span class="text-danger">*</span></label>
+                            <input type="date" name="FechaIngreso" class="form-control-custom" value="@(Model != null && Model.FechaIngreso != DateTime.MinValue ? Model.FechaIngreso.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd"))" required />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Previsión Social -->
+                <div class="form-card mb-4">
+                    <div class="section-header">
+                        <i class="bi bi-shield-plus"></i>
+                        <h6>3. Previsión y Seguridad Social</h6>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Previsión de Salud (EPS)</label>
+                            <select name="EpsPrevisionId" class="form-select-custom">
+                                <option value="">-- Seleccione una EPS --</option>
+                                @if (Model != null && Model.EpsCatalogo != null)
+                                {
+                                    foreach (var eps in Model.EpsCatalogo)
+                                    {
+                                        bool seleccionada = Model.EpsPrevisionId.HasValue && Model.EpsPrevisionId.Value == eps.Id;
+                                        <option value="@eps.Id" @(seleccionada ? "selected" : "")>
+                                            @eps.Nombre
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Fondo de Pensiones (AFP)</label>
+                            <input type="text" name="FondoPensiones" class="form-control-custom" value="@(Model != null ? Model.FondoPensiones : "")" placeholder="Ej. Colpensiones (AFP)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mb-5">
+                    <button type="button" class="ui mini basic button" onclick="cargarElement('@Url.Action("Empleados", "Empleado")')">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="ui mini blue button" id="btnGuardar">
+                        <i class="save icon"></i> @(esEdicion ? "Actualizar Empleado" : "Guardar Empleado")
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    <!-- 4. Comprobantes, Documentos y Vacaciones (requieren empleado ya guardado) -->
+    <div class="form-card mb-5">
+        <div class="section-header">
+            <i class="bi bi-folder2-open"></i>
+            <h6>4. Comprobantes, Documentos y Vacaciones</h6>
+        </div>
+
+        @if (!esEdicion)
+        {
+            <div class="text-muted small py-2">
+                <i class="bi bi-info-circle me-1"></i>
+                Guarde primero el empleado para poder agregar comprobantes, documentos y vacaciones.
+            </div>
+        }
+        else
+        {
+            <ul class="nav nav-tabs mb-3" id="regTabs">
+                <li class="nav-item"><a class="nav-link @(Model.TabActiva == "comprobantes" ? "active" : "")" href="#regComprobantes">Comprobantes</a></li>
+                <li class="nav-item"><a class="nav-link @(Model.TabActiva == "documentos" ? "active" : "")" href="#regDocumentos">Documentos</a></li>
+                <li class="nav-item"><a class="nav-link @(Model.TabActiva == "vacaciones" ? "active" : "")" href="#regVacaciones">Vacaciones</a></li>
+            </ul>
+
+            <div id="regTabsContent">
+                <!-- Comprobantes -->
+                <div class="reg-pane @(Model.TabActiva == "comprobantes" ? "active" : "")" id="regComprobantes">
+                    <form class="frm-extra" data-url="@Url.Action("GuardarComprobante", "Empleado")" data-tab="comprobantes" enctype="multipart/form-data">
+                        <input type="hidden" name="EmpleadoId" value="@Model.Id" />
+                        <input type="hidden" name="FichaId" value="@(Model.FichaIdActual.HasValue ? Model.FichaIdActual.Value.ToString() : "")" />
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Período (MM-AAAA) <span class="text-danger">*</span></label>
+                                <input type="text" name="PeriodoMes" class="form-control-custom" placeholder="09-2026" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Sueldo Bruto</label>
+                                <input type="number" step="0.01" min="0" name="SueldoBruto" class="form-control-custom" value="0" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Total Neto</label>
+                                <input type="number" step="0.01" min="0" name="TotalNeto" class="form-control-custom" value="0" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Aporte Patronal</label>
+                                <input type="number" step="0.01" min="0" name="AportePatronal" class="form-control-custom" value="0" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Horas Extras</label>
+                                <input type="number" step="0.01" min="0" name="HorasExtras" class="form-control-custom" value="0" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Horas Recargos</label>
+                                <input type="number" step="0.01" min="0" name="HorasRecargos" class="form-control-custom" value="0" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Horas No Trabajadas</label>
+                                <input type="number" step="0.01" min="0" name="HorasNoTrabajadas" class="form-control-custom" value="0" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Días No Trabajados</label>
+                                <input type="number" step="0.01" min="0" name="DiasNoTrabajados" class="form-control-custom" value="0" />
+                            </div>
+                            <div class="col-md-9">
+                                <label class="form-label-custom">Archivo PDF</label>
+                                <input type="file" name="ArchivoPdf" accept="application/pdf" class="form-control-custom" />
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end justify-content-end">
+                                <button type="submit" class="ui mini blue button"><i class="plus icon"></i> Agregar Comprobante</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm table-hover align-middle" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr><th>Período</th><th>Sueldo Bruto</th><th>Total Neto</th><th>Aporte Patronal</th><th class="text-center">PDF</th></tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Comprobantes != null && Model.Comprobantes.Any())
+                                {
+                                    foreach (var c in Model.Comprobantes)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold text-primary">@c.PeriodoMes</td>
+                                            <td>@c.SueldoBruto.ToString("N0")</td>
+                                            <td>@c.TotalNeto.ToString("N0")</td>
+                                            <td>@c.AportePatronal.ToString("N0")</td>
+                                            <td class="text-center">
+                                                @if (!string.IsNullOrEmpty(c.RutaArchivoPdf))
+                                                {
+                                                    <a href="@c.RutaArchivoPdf" target="_blank"><i class="bi bi-file-earmark-pdf"></i></a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="5" class="text-center text-muted py-3">Sin comprobantes registrados.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Documentos -->
+                <div class="reg-pane @(Model.TabActiva == "documentos" ? "active" : "")" id="regDocumentos">
+                    <form class="frm-extra" data-url="@Url.Action("GuardarDocumento", "Empleado")" data-tab="documentos" enctype="multipart/form-data">
+                        <input type="hidden" name="EmpleadoId" value="@Model.Id" />
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label-custom">Nombre del Documento <span class="text-danger">*</span></label>
+                                <input type="text" name="NombreDocumento" class="form-control-custom" placeholder="Ej. Contrato firmado" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Categoría</label>
+                                <select name="Categoria" class="form-select-custom">
+                                    <option>General</option>
+                                    <option>Identificación</option>
+                                    <option>Laboral</option>
+                                    <option>Salud</option>
+                                    <option>Académico</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom">Archivo <span class="text-danger">*</span></label>
+                                <input type="file" name="Archivo" class="form-control-custom" required />
+                            </div>
+                            <div class="col-md-12 text-end">
+                                <button type="submit" class="ui mini blue button"><i class="upload icon"></i> Adjuntar Documento</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm table-hover align-middle" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr><th>Documento</th><th>Categoría</th><th>Fecha de Carga</th><th class="text-center">Archivo</th></tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Documentos != null && Model.Documentos.Any())
+                                {
+                                    foreach (var d in Model.Documentos)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold"><i class="bi bi-file-text me-2 text-primary"></i>@d.NombreDocumento</td>
+                                            <td>@d.Categoria</td>
+                                            <td>@(d.FechaCarga == DateTime.MinValue ? "-" : d.FechaCarga.ToString("dd/MM/yyyy"))</td>
+                                            <td class="text-center">
+                                                @if (!string.IsNullOrEmpty(d.RutaArchivo))
+                                                {
+                                                    <a href="@d.RutaArchivo" target="_blank"><i class="bi bi-download"></i></a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Sin documentos adjuntos.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Vacaciones -->
+                <div class="reg-pane @(Model.TabActiva == "vacaciones" ? "active" : "")" id="regVacaciones">
+                    <form class="frm-extra" data-url="@Url.Action("GuardarVacaciones", "Empleado")" data-tab="vacaciones">
+                        <input type="hidden" name="EmpleadoId" value="@Model.Id" />
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label-custom">Período de Cálculo <span class="text-danger">*</span></label>
+                                <input type="text" name="PeriodoCalculo" class="form-control-custom" placeholder="2025 - 2026" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label-custom">Días <span class="text-danger">*</span></label>
+                                <input type="number" step="0.5" min="0.5" name="DiasTomados" class="form-control-custom" value="15" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label-custom">Inicio <span class="text-danger">*</span></label>
+                                <input type="date" name="FechaInicio" class="form-control-custom" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label-custom">Fin <span class="text-danger">*</span></label>
+                                <input type="date" name="FechaFin" class="form-control-custom" value="@DateTime.Today.AddDays(15).ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label-custom">Retorno <span class="text-danger">*</span></label>
+                                <input type="date" name="FechaRetorno" class="form-control-custom" value="@DateTime.Today.AddDays(16).ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label-custom">Observaciones</label>
+                                <input type="text" name="Observaciones" class="form-control-custom" />
+                            </div>
+                            <div class="col-md-12 text-end">
+                                <button type="submit" class="ui mini blue button"><i class="calendar plus icon"></i> Programar Vacaciones</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm table-hover align-middle" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr><th>Período</th><th>Días</th><th>Inicio</th><th>Fin</th><th>Retorno</th><th>Estado</th><th>Observaciones</th></tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Vacaciones != null && Model.Vacaciones.Any())
+                                {
+                                    foreach (var v in Model.Vacaciones)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold text-primary">@v.PeriodoCalculo</td>
+                                            <td>@v.DiasTomados.ToString("N1")</td>
+                                            <td>@(v.FechaInicio == DateTime.MinValue ? "-" : v.FechaInicio.ToString("dd/MM/yyyy"))</td>
+                                            <td>@(v.FechaFin == DateTime.MinValue ? "-" : v.FechaFin.ToString("dd/MM/yyyy"))</td>
+                                            <td>@(v.FechaRetorno == DateTime.MinValue ? "-" : v.FechaRetorno.ToString("dd/MM/yyyy"))</td>
+                                            <td>@v.Estado</td>
+                                            <td>@v.Observaciones</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td colspan="7" class="text-center text-muted py-3">Sin vacaciones registradas.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#fileFoto').on('change', function () {
+            if (!this.files || this.files.length === 0) return;
+            var fd = new FormData();
+            fd.append('foto', this.files[0]);
+            fd.append('id', '@(Model != null ? Model.Id : 0)');
+            var $input = $(this);
+            $.ajax({
+                url: '@Url.Action("UploadAvatar", "Empleado")', type: 'POST', data: fd, processData: false, contentType: false,
+                success: function (res) {
+                    if (res.result) {
+                        $('#imgFoto').attr('src', res.url).show();
+                        $('#avatarInicial').hide();
+                    } else {
+                        alert(res.message || 'No se pudo cargar la foto.');
+                    }
+                    $input.val('');
+                },
+                error: function (xhr, status, error) {
+                    alert('Error de comunicación con el servidor: ' + error);
+                    $input.val('');
+                }
+            });
+        });
+
+        $('#regTabs a').on('click', function (e) {
+            e.preventDefault();
+            $('#regTabs .nav-link').removeClass('active');
+            $(this).addClass('active');
+            $('#regTabsContent .reg-pane').removeClass('active');
+            $($(this).attr('href')).addClass('active');
+        });
+
+        $('.frm-extra').on('submit', function (e) {
+            e.preventDefault();
+            var $f = $(this), tab = $f.data('tab'), $btn = $f.find('button[type=submit]');
+            var fd = new FormData(this);
+            fd.append('__RequestVerificationToken', $('#frmRegistrarEmpleado input[name=__RequestVerificationToken]').val());
+            $btn.addClass('loading').prop('disabled', true);
+            $.ajax({
+                url: $f.data('url'), type: 'POST', data: fd, processData: false, contentType: false,
+                success: function (res) {
+                    $btn.removeClass('loading').prop('disabled', false);
+                    if (res.success) {
+                        cargarElement('@Url.Action("Registrar", "Empleado", new { id = Model.Id, tab = "__TAB__" })'.replace('__TAB__', tab));
+                    } else {
+                        alert(res.message || 'No se pudo guardar.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $btn.removeClass('loading').prop('disabled', false);
+                    alert('Error de comunicación con el servidor: ' + error);
+                }
+            });
+        });
+
+        $('#inputNombres, #inputApellidos').on('input', function () {
+            var nom = $('#inputNombres').val().trim();
+            var ape = $('#inputApellidos').val().trim();
+            var completo = (nom + " " + ape).trim();
+            $('#txtPreviewNombre').text(completo.length > 0 ? completo : "Nuevo Empleado");
+            $('#avatarInicial').text(nom.length > 0 ? nom.substring(0, 1).toUpperCase() : "E");
+        });
+
+        $('#inputCargo').on('input', function () {
+            var c = $(this).val().trim();
+            $('#txtPreviewCargo').text(c.length > 0 ? c : "Puesto a Definir");
+        });
+
+        $('#frmRegistrarEmpleado').on('submit', function (e) {
+            e.preventDefault();
+
+            if ($('input[name="FichasSeleccionadas"]:checked').length === 0) {
+                alert("Debe asignar al menos una Ficha al empleado.");
+                return;
+            }
+
+            var $btn = $('#btnGuardar');
+            $btn.addClass('loading').prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("Guardar", "Empleado")',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (res) {
+                    $btn.removeClass('loading').prop('disabled', false);
+                    if (res.success) {
+                        cargarElement('@Url.Action("Perfil", "Empleado")/' + res.id);
+                    } else {
+                        alert(res.message || "Error al procesar el registro.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $btn.removeClass('loading').prop('disabled', false);
+                    alert("Error de comunicación con el servidor: " + error);
+                }
+            });
+        });
+    });
+</script>

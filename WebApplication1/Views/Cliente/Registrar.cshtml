@@ -1,0 +1,585 @@
+@model LogicBo.ClienteRegistroViewModel
+@{
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+    bool esEdicion = Model != null && Model.Id > 0;
+    ViewBag.Title = esEdicion ? "Actualizar Cliente" : "Registrar Nuevo Cliente";
+
+    var ddlNaturalezas = ViewBag.DdlNaturalezas as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlTiposCliente = ViewBag.DdlTiposCliente as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlTiposDoc = ViewBag.DdlTiposDoc as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlOrigen = ViewBag.DdlOrigen as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlPaises = ViewBag.DdlPaises as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlDepartamentos = ViewBag.DdlDepartamentos as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlCiudades = ViewBag.DdlCiudades as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlTiposCobro = ViewBag.DdlTiposCobro as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlCategoriasTarifa = ViewBag.DdlCategoriasTarifa as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlActividades = ViewBag.DdlActividades as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlIndustrias = ViewBag.DdlIndustrias as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" />
+<link href="~/Scripts/dropzone/dropzone.css" rel="stylesheet" />
+<script src="~/Scripts/dropzone/dropzone.js"></script>
+
+<style>
+    .formulario-cliente {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow-x: auto;
+        background-color: #ffffff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-top: 15px;
+    }
+
+    .seccion-titulo {
+        color: #0284c7 !important;
+        border-bottom: 2px solid #e0e1e2;
+        padding-bottom: 6px;
+        margin-top: 25px !important;
+        margin-bottom: 15px !important;
+    }
+</style>
+
+<div class="formulario-cliente">
+    <h3 class="ui header dividing">
+        <i class="@(esEdicion ? "pencil alternate" : "building") icon"></i>
+        <div class="content">
+            @(esEdicion ? "ACTUALIZAR CLIENTE" : "REGISTRO DE NUEVO CLIENTE")
+            <div class="sub header">
+                @(esEdicion ? "Modifique los parámetros comerciales, fiscales o de cobro" : "Complete la información para dar de alta al cliente en la plataforma")
+            </div>
+        </div>
+    </h3>
+
+    @using (Ajax.BeginForm("GuardarCliente", "Cliente", null, new AjaxOptions()
+    {
+        HttpMethod = "POST",
+        OnBegin = "return onBeginRegistrarCliente()",
+        OnSuccess = "onSuccessRegistrarCliente",
+        OnFailure = "onFailureRegistrarCliente"
+    }, new { @id = "formRegistrarCliente", @class = "ui form" }))
+    {
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.RutaCamaraComercio, new { @id = "hdnRutaCamara" })
+        @Html.HiddenFor(m => m.RutaRut, new { @id = "hdnRutaRut" })
+
+        <!-- 1. IDENTIFICACIÓN DE FICHA -->
+        <div class="two fields">
+            <div class="field required">
+                <label>Estado</label>
+                @Html.TextBoxFor(m => m.EstadoEtiqueta, new { placeholder = "Activo / Inactivo", maxlength = "20", autocomplete = "off" })
+            </div>
+        </div>
+
+        <!-- SECCIÓN 1: DATOS PERSONALES -->
+        <h4 class="ui header seccion-titulo"><i class="id card outline icon"></i> 1. Datos Personales</h4>
+        <div class="two fields">
+            <div class="field required">
+                <label>Naturaleza</label>
+                @Html.DropDownListFor(m => m.NaturalezaId, ddlNaturalezas, "[-Seleccione Naturaleza-]", new { @class = "ui search dropdown", @id = "NaturalezaId" })
+            </div>
+            <div class="field required">
+                <label>Tipo</label>
+                @Html.DropDownListFor(m => m.TipoId, ddlTiposCliente, "[-Seleccione Tipo-]", new { @class = "ui search dropdown", @id = "TipoId" })
+            </div>
+        </div>
+
+        <div class="three fields">
+            <div class="field required">
+                <label>Razón Social</label>
+                @Html.TextBoxFor(m => m.RazonSocial, new { placeholder = "Razón social completa", maxlength = "200", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Establecimiento Comercial</label>
+                @Html.TextBoxFor(m => m.EstablecimientoComercial, new { placeholder = "Ej: Sede Principal", maxlength = "150", autocomplete = "off" })
+            </div>
+            <div class="field required">
+                <label>Nombre Comercial</label>
+                @Html.TextBoxFor(m => m.NombreComercial, new { placeholder = "Nombre de marca/fantasía", maxlength = "150", autocomplete = "off" })
+            </div>
+        </div>
+
+        <div class="two fields">
+            <div class="field required">
+                <label>Tipo de documento</label>
+                @Html.DropDownListFor(m => m.TipoDocumentoId, ddlTiposDoc, "[-Seleccione Tipo Documento-]", new { @class = "ui search dropdown", @id = "TipoDocumentoId" })
+            </div>
+            <div class="field required">
+                <label>Número de documento</label>
+                @Html.TextBoxFor(m => m.NumeroDocumento, new { placeholder = "Ej: 901.458.789-2", maxlength = "50", autocomplete = "off" })
+            </div>
+        </div>
+
+        <div class="two fields">
+            <div class="field required">
+                <label>Teléfono 1</label>
+                @Html.TextBoxFor(m => m.Telefono1, new { placeholder = "PBX o teléfono fijo", maxlength = "30", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Teléfono 2</label>
+                @Html.TextBoxFor(m => m.Telefono2, new { placeholder = "Móvil alternativo", maxlength = "30", autocomplete = "off" })
+            </div>
+        </div>
+
+        <div class="two fields">
+            <div class="field required">
+                <label>Correo Principal</label>
+                @Html.TextBoxFor(m => m.CorreoPrincipal, new { type = "email", placeholder = "contacto@empresa.com", maxlength = "150", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Correo 2</label>
+                @Html.TextBoxFor(m => m.Correo2, new { type = "email", placeholder = "facturacion@empresa.com", maxlength = "150", autocomplete = "off" })
+            </div>
+        </div>
+
+        <div class="field required">
+            <label>Dirección</label>
+            @Html.TextBoxFor(m => m.Direccion, new { placeholder = "Dirección completa comercial", maxlength = "200", autocomplete = "off" })
+        </div>
+
+        <!-- SECCIÓN 2: DATOS UBICACIÓN -->
+        <h4 class="ui header seccion-titulo"><i class="map marker alternate icon"></i> 2. Datos Ubicación</h4>
+        <div class="four fields">
+            <div class="field required">
+                <label>Origen</label>
+                @Html.DropDownListFor(m => m.Origen, ddlOrigen, "[-Seleccione Origen-]", new { @class = "ui search dropdown", @id = "Origen" })
+            </div>
+            <div class="field required">
+                <label>País</label>
+                @Html.DropDownListFor(m => m.PaisId, ddlPaises, "[-Seleccione País-]", new { @class = "ui search dropdown", @id = "PaisId" })
+            </div>
+            <div class="field required">
+                <label>Departamento</label>
+                @Html.DropDownListFor(m => m.DepartamentoId, ddlDepartamentos, "[-Seleccione Departamento-]", new { @class = "ui search dropdown", @id = "DepartamentoId" })
+            </div>
+            <div class="field required">
+                <label>Ciudad</label>
+                @Html.DropDownListFor(m => m.CiudadId, ddlCiudades, "[-Seleccione Ciudad-]", new { @class = "ui search dropdown", @id = "CiudadId" })
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: COBROS Y TARIFAS ADMINISTRATIVAS -->
+        <h4 class="ui header seccion-titulo"><i class="money bill alternate outline icon"></i> 3. Cobros y Tarifas</h4>
+
+        <!-- Tipo de Cobro General -->
+        <div class="field required" style="max-width: 50%;">
+            <label>Tipo de Cobro</label>
+            @Html.DropDownListFor(m => m.TipoCobroId, ddlTiposCobro, "[-Seleccione Cobro-]", new { @class = "ui search dropdown", @id = "TipoCobroId" })
+        </div>
+
+        <!-- Panel para agregar tarifas dinámicas -->
+        <div class="ui segment secondary" style="border-radius: 8px; margin-top: 15px;">
+            <h5 class="ui header" style="color: #0284c7; margin-bottom: 10px;">
+                <i class="plus circle icon"></i> Asignar Categorías de Tarifa Administrativa
+            </h5>
+
+            <div class="three fields align-items-end">
+                <div class="field required">
+                    <label>Categoría Tarifa</label>
+                    @Html.DropDownList("tempCategoriaTarifaId", ddlCategoriasTarifa, "[-Seleccione Categoría-]", new { @class = "ui search dropdown", @id = "tempCategoriaTarifaId" })
+                </div>
+                <div class="field required">
+                    <label>Tarifa Administrativa ($ COP)</label>
+                    <input type="number" step="0.01" id="tempTarifaAdministrativa" placeholder="Ej: 12500" />
+                </div>
+                <div class="field">
+                    <label>Descuentos (%)</label>
+                    <div class="ui action input">
+                        <input type="number" step="0.1" id="tempDescuento" value="0" placeholder="0.0" />
+                        <button type="button" class="ui teal button" id="btnAgregarTarifa" onclick="agregarFilaTarifa()">
+                            <i class="plus icon"></i> Agregar Tarifa
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla interactiva de tarifas agregadas -->
+            <div class="table-responsive" style="margin-top: 15px;">
+                <table class="ui celled table" id="tablaTarifasCliente" style="font-size: 0.88rem;">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Categoría de Tarifa</th>
+                            <th class="right aligned">Tarifa Administrativa ($ COP)</th>
+                            <th class="center aligned">Descuento (%)</th>
+                            <th class="center aligned" style="width: 80px;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyTarifas">
+                        @if (Model != null && Model.Tarifas != null && Model.Tarifas.Any())
+                        {
+                            for (int i = 0; i < Model.Tarifas.Count; i++)
+                            {
+                                <tr data-categoria-id="@Model.Tarifas[i].CategoriaTarifaId">
+                                    <td>
+                                        <strong>@Model.Tarifas[i].CategoriaTarifaNombre</strong>
+                                        <input type="hidden" name="Tarifas[@i].CategoriaTarifaId" value="@Model.Tarifas[i].CategoriaTarifaId" />
+                                        <input type="hidden" name="Tarifas[@i].CategoriaTarifaNombre" value="@Model.Tarifas[i].CategoriaTarifaNombre" />
+                                    </td>
+                                    <td class="right aligned">
+                                        $ @Model.Tarifas[i].TarifaAdministrativa.ToString("N0")
+                                        <input type="hidden" name="Tarifas[@i].TarifaAdministrativa" value="@Model.Tarifas[i].TarifaAdministrativa" />
+                                    </td>
+                                    <td class="center aligned">
+                                        @Model.Tarifas[i].Descuento.ToString("N1")%
+                                        <input type="hidden" name="Tarifas[@i].Descuento" value="@Model.Tarifas[i].Descuento" />
+                                    </td>
+                                    <td class="center aligned">
+                                        <button type="button" class="ui mini red icon button" onclick="eliminarFilaTarifa(this)">
+                                            <i class="trash icon"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr id="filaSinTarifas">
+                                <td colspan="4" class="center aligned text-muted py-3">
+                                    <em>No se han agregado tarifas administrativas para este cliente.</em>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 4: DATOS FISCALES -->
+        <h4 class="ui header seccion-titulo"><i class="file alternate outline icon"></i> 4. Datos Fiscales</h4>
+        <div class="two fields">
+            <div class="field required">
+                <label>Actividad económica</label>
+                @Html.DropDownListFor(m => m.ActividadEconomicaId, ddlActividades, "[-Seleccione Actividad CIIU-]", new { @class = "ui search dropdown", @id = "ActividadEconomicaId" })
+            </div>
+            <div class="field required">
+                <label>Industria</label>
+                @Html.DropDownListFor(m => m.IndustriaId, ddlIndustrias, "[-Seleccione Industria-]", new { @class = "ui search dropdown", @id = "IndustriaId" })
+            </div>
+        </div>
+
+        <div class="two fields">
+            <div class="field">
+                <label>Cámara de Comercio (PDF)</label>
+                <div class="ui action input">
+                    <input type="file" id="fileCamaraComercio" accept=".pdf" />
+                    <button class="ui teal button" type="button" onclick="subirDocumento('CamaraComercio', '#fileCamaraComercio', '#hdnRutaCamara', '#lblCamaraStatus')">
+                        <i class="upload icon"></i> Adjuntar
+                    </button>
+                </div>
+                <small id="lblCamaraStatus" class="text-muted">
+                    @(string.IsNullOrEmpty(Model.RutaCamaraComercio) ? "No se ha subido archivo." : "Archivo actual: Cargado previamente.")
+                </small>
+            </div>
+
+            <div class="field">
+                <label>RUT (PDF)</label>
+                <div class="ui action input">
+                    <input type="file" id="fileRut" accept=".pdf" />
+                    <button class="ui blue button" type="button" onclick="subirDocumento('RUT', '#fileRut', '#hdnRutaRut', '#lblRutStatus')">
+                        <i class="upload icon"></i> Adjuntar
+                    </button>
+                </div>
+                <small id="lblRutStatus" class="text-muted">
+                    @(string.IsNullOrEmpty(Model.RutaRut) ? "No se ha subido archivo." : "Archivo actual: Cargado previamente.")
+                </small>
+            </div>
+        </div>
+    }
+
+    <!-- 5. LOGOTIPO / IMAGEN DE EMPRESA -->
+    <div class="ui form" style="margin-top: 15px;">
+        <h4 class="ui header seccion-titulo"><i class="image outline icon"></i> Logotipo del Cliente (Opcional)</h4>
+        <div class="field">
+            <form action="@Url.Action("UploadLogoCliente", "Cliente")" method="POST" id="logoDropzone" style="border: 2px dashed #0284c7; border-radius: 5px; background: #fafafa; padding: 20px; text-align: center; cursor: pointer;">
+                <input type="hidden" name="type" value="logo" />
+                <div class="dz-message" data-dz-message>
+                    <i class="cloud upload icon massive blue"></i>
+                    <p style="font-size: 1.1em; color: #555;">Haga clic o arrastre aquí el Logotipo (.PNG, .JPG)</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BOTONERA INFERIOR -->
+    <div style="margin-top: 25px;">
+        <button class="ui primary button" type="button" id="btnGuardarCliente">
+            <i class="save icon"></i> @(esEdicion ? "Guardar Cambios" : "Registrar Cliente")
+        </button>
+        <button class="ui button" type="button" onclick="cargarElement('@(esEdicion ? Url.Action("Perfil", "Cliente", new { id = Model.Id }) : Url.Action("ListadoClientes", "Cliente"))')">
+            Cancelar
+        </button>
+    </div>
+
+    <!-- MENSAJE DE ESTADO -->
+    <div class="ui floating warning message" style="width: 60%; margin: 20px auto; text-align: center; display: none;" id="messageRegistrarCliente">
+        <div class="header">Atención</div>
+        <p id="textMessageRegistrarCliente"></p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    Dropzone.autoDiscover = false;
+
+    $(document).ready(function () {
+        // Inicializar desplegables
+        $('.ui.dropdown').dropdown({ fullTextSearch: true });
+
+        // Sincronizar preselección de valores en modo edición
+        $('#NaturalezaId').dropdown('set selected', '@Model.NaturalezaId');
+        $('#TipoId').dropdown('set selected', '@Model.TipoId');
+        $('#TipoDocumentoId').dropdown('set selected', '@Model.TipoDocumentoId');
+        $('#Origen').dropdown('set selected', '@Model.Origen');
+        $('#PaisId').dropdown('set selected', '@Model.PaisId');
+        $('#DepartamentoId').dropdown('set selected', '@Model.DepartamentoId');
+        $('#CiudadId').dropdown('set selected', '@Model.CiudadId');
+        $('#TipoCobroId').dropdown('set selected', '@Model.TipoCobroId');
+        $('#CategoriaTarifaId').dropdown('set selected', '@Model.CategoriaTarifaId');
+        $('#ActividadEconomicaId').dropdown('set selected', '@Model.ActividadEconomicaId');
+        $('#IndustriaId').dropdown('set selected', '@Model.IndustriaId');
+    });
+
+    // Configuración de Dropzone para el Logo
+    var myLogoDropzone;
+    var logoCargado = false;
+
+    if (Dropzone.instances.length > 0) {
+        Dropzone.instances.forEach(function (dz) {
+            if (dz.element.id === "logoDropzone") dz.destroy();
+        });
+    }
+
+    $("#logoDropzone").dropzone({
+        url: '@Url.Action("UploadLogoCliente", "Cliente")',
+        autoProcessQueue: false,
+        addRemoveLinks: true,
+        maxFiles: 1,
+        acceptedFiles: ".png,.jpg,.jpeg",
+        init: function () {
+            myLogoDropzone = this;
+
+            this.on("addedfile", function () { logoCargado = true; });
+            this.on("removedfile", function () {
+                if (myLogoDropzone.files.length === 0) logoCargado = false;
+            });
+
+            this.on("success", function (file, response) {
+                var res = typeof response === "string" ? JSON.parse(response) : response;
+                if (res.result) {
+                    enviarFormularioDirecto();
+                } else {
+                    $('#facadeContent').removeClass("loading");
+                    mostrarNotificacion("Error al subir el logo: " + res.message, false);
+                }
+            });
+
+            this.on("error", function () {
+                $('#facadeContent').removeClass("loading");
+                mostrarNotificacion("Ocurrió un error al procesar el logo.", false);
+            });
+        }
+    });
+
+    // Validación Semantic UI
+    $('#formRegistrarCliente').form({
+        fields: {
+            CodigoFicha: { identifier: 'CodigoFicha', rules: [{ type: 'empty', prompt: 'Ingrese código de ficha' }] },
+            NaturalezaId: { identifier: 'NaturalezaId', rules: [{ type: 'empty', prompt: 'Seleccione naturaleza' }] },
+            TipoId: { identifier: 'TipoId', rules: [{ type: 'empty', prompt: 'Seleccione tipo de cliente' }] },
+            RazonSocial: { identifier: 'RazonSocial', rules: [{ type: 'empty', prompt: 'Ingrese razón social' }] },
+            NombreComercial: { identifier: 'NombreComercial', rules: [{ type: 'empty', prompt: 'Ingrese nombre comercial' }] },
+            TipoDocumentoId: { identifier: 'TipoDocumentoId', rules: [{ type: 'empty', prompt: 'Seleccione tipo de documento' }] },
+            NumeroDocumento: { identifier: 'NumeroDocumento', rules: [{ type: 'empty', prompt: 'Ingrese número de documento' }] },
+            Telefono1: { identifier: 'Telefono1', rules: [{ type: 'empty', prompt: 'Ingrese teléfono principal' }] },
+            CorreoPrincipal: { identifier: 'CorreoPrincipal', rules: [{ type: 'email', prompt: 'Ingrese un correo electrónico válido' }] },
+            Direccion: { identifier: 'Direccion', rules: [{ type: 'empty', prompt: 'Ingrese dirección' }] },
+            CiudadId: { identifier: 'CiudadId', rules: [{ type: 'empty', prompt: 'Seleccione ciudad' }] },
+            TipoCobroId: { identifier: 'TipoCobroId', rules: [{ type: 'empty', prompt: 'Seleccione tipo de cobro' }] },
+            CategoriaTarifaId: { identifier: 'CategoriaTarifaId', rules: [{ type: 'empty', prompt: 'Seleccione categoría de tarifa' }] },
+            ActividadEconomicaId: { identifier: 'ActividadEconomicaId', rules: [{ type: 'empty', prompt: 'Seleccione actividad económica' }] },
+            IndustriaId: { identifier: 'IndustriaId', rules: [{ type: 'empty', prompt: 'Seleccione industria' }] }
+        },
+        inline: true,
+        on: 'blur'
+    });
+
+    // Subida Asíncrona de PDF (Cámara de Comercio y RUT)
+    function subirDocumento(tipoDoc, inputSelector, hiddenSelector, statusSelector) {
+        var files = $(inputSelector).get(0).files;
+        if (files.length === 0) {
+            alert("Por favor seleccione un archivo PDF.");
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append("file", files[0]);
+        formData.append("tipoDoc", tipoDoc);
+
+        $(statusSelector).text("Subiendo documento...");
+
+        $.ajax({
+            url: '@Url.Action("UploadDocumentoFiscal", "Cliente")',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                var data = typeof res === "string" ? JSON.parse(res) : res;
+                if (data.result) {
+                    $(hiddenSelector).val(data.filePath);
+                    $(statusSelector).html('<span class="text-success"><i class="check green icon"></i> Archivo listo para guardar</span>');
+                } else {
+                    $(statusSelector).html('<span class="text-danger">' + data.message + '</span>');
+                }
+            },
+            error: function () {
+                $(statusSelector).html('<span class="text-danger">Error de comunicación.</span>');
+            }
+        });
+    }
+
+    // Botón Guardar
+    $('#btnGuardarCliente').off('click').on('click', function (e) {
+        e.preventDefault();
+
+        if (!$('#formRegistrarCliente').form('is valid')) {
+            return false;
+        }
+
+        $('#facadeContent').addClass("loading");
+
+        if (logoCargado && myLogoDropzone.getQueuedFiles().length > 0) {
+            myLogoDropzone.processQueue();
+        } else {
+            enviarFormularioDirecto();
+        }
+    });
+
+    function enviarFormularioDirecto() {
+        $.ajax({
+            url: '@Url.Action("GuardarCliente", "Cliente")',
+            type: 'POST',
+            data: $('#formRegistrarCliente').serialize(),
+            success: function (data) {
+                $('#facadeContent').removeClass("loading");
+                var res = typeof data === "string" ? JSON.parse(data) : data;
+
+                if (res.result) {
+                    mostrarNotificacion("Cliente registrado con éxito. Redirigiendo a su ficha...", true);
+                    setTimeout(function () {
+                        cargarElement('@Url.Action("Perfil", "Cliente")?id=' + res.idGenerado);
+                    }, 1000);
+                } else {
+                    mostrarNotificacion(res.message, false);
+                }
+            },
+            error: function (xhr, status, error) {
+                $('#facadeContent').removeClass("loading");
+                mostrarNotificacion("Error en la solicitud: " + error, false);
+            }
+        });
+    }
+
+    function mostrarNotificacion(mensaje, esExito) {
+        var $div = $('#messageRegistrarCliente');
+        $div.removeClass("warning info").addClass(esExito ? "info" : "warning");
+        $('#textMessageRegistrarCliente').text(mensaje);
+        $div.stop(true, true).fadeIn();
+    }
+    function agregarFilaTarifa() {
+        var categoriaId = $('#tempCategoriaTarifaId').val();
+        var categoriaTexto = $('#tempCategoriaTarifaId option:selected').text();
+        var tarifaValor = parseFloat($('#tempTarifaAdministrativa').val());
+        var descuentoValor = parseFloat($('#tempDescuento').val()) || 0;
+
+        // Validaciones
+        if (!categoriaId || categoriaId === "") {
+            alert("Seleccione una Categoría de Tarifa.");
+            return;
+        }
+        if (isNaN(tarifaValor) || tarifaValor < 0) {
+            alert("Ingrese un valor numérico válido para la tarifa.");
+            return;
+        }
+
+        // Evitar duplicar la misma categoría
+        var existe = false;
+        $('#tbodyTarifas tr').each(function () {
+            if ($(this).data('categoria-id') == categoriaId) {
+                existe = true;
+            }
+        });
+
+        if (existe) {
+            alert("La categoría seleccionada ya se encuentra en la lista.");
+            return;
+        }
+
+        // Quitar la fila de placeholder vacío si existe
+        $('#filaSinTarifas').remove();
+
+        var filaIndex = $('#tbodyTarifas tr').length;
+        var tarifaFormateada = Number(tarifaValor).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+        var htmlFila = `
+        <tr data-categoria-id="${categoriaId}">
+            <td>
+                <strong>${categoriaTexto}</strong>
+                <input type="hidden" name="Tarifas[${filaIndex}].CategoriaTarifaId" value="${categoriaId}" />
+                <input type="hidden" name="Tarifas[${filaIndex}].CategoriaTarifaNombre" value="${categoriaTexto}" />
+            </td>
+            <td class="right aligned">
+                $ ${tarifaFormateada}
+                <input type="hidden" name="Tarifas[${filaIndex}].TarifaAdministrativa" value="${tarifaValor}" />
+            </td>
+            <td class="center aligned">
+                ${descuentoValor.toFixed(1)}%
+                <input type="hidden" name="Tarifas[${filaIndex}].Descuento" value="${descuentoValor}" />
+            </td>
+            <td class="center aligned">
+                <button type="button" class="ui mini red icon button" onclick="eliminarFilaTarifa(this)">
+                    <i class="trash icon"></i>
+                </button>
+            </td>
+        </tr>`;
+
+        $('#tbodyTarifas').append(htmlFila);
+
+        // Limpiar inputs temporales
+        $('#tempCategoriaTarifaId').dropdown('clear');
+        $('#tempTarifaAdministrativa').val('');
+        $('#tempDescuento').val('0');
+    }
+
+    function eliminarFilaTarifa(btn) {
+        $(btn).closest('tr').remove();
+        reindexarFilasTarifa();
+
+        if ($('#tbodyTarifas tr').length === 0) {
+            $('#tbodyTarifas').html(`
+            <tr id="filaSinTarifas">
+                <td colspan="4" class="center aligned text-muted py-3">
+                    <em>No se han agregado tarifas administrativas para este cliente.</em>
+                </td>
+            </tr>`);
+        }
+    }
+
+    // Reindexar nombres para que el Model Binder no pierda la secuencia
+    function reindexarFilasTarifa() {
+        $('#tbodyTarifas tr').each(function (index, fila) {
+            if ($(fila).attr('id') !== 'filaSinTarifas') {
+                $(fila).find('input[type="hidden"]').each(function () {
+                    var name = $(this).attr('name');
+                    if (name) {
+                        var nuevoName = name.replace(/Tarifas\[\d+\]/, `Tarifas[${index}]`);
+                        $(this).attr('name', nuevoName);
+                    }
+                });
+            }
+        });
+    }
+</script>

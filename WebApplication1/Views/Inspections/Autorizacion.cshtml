@@ -75,14 +75,22 @@
     <table class="ui selectable celled table ui center aligned tablesInitial" id="tablesIndexDocumentacion">
         <thead>
             <tr>
+                <th colspan="12" style="text-align:center; border:double">Tiquete</th>
+                <th colspan="9" style="text-align:center; border:double">Tarifa Administradora</th>
+                <th colspan="2" style="text-align:center; border:double">Acciones</th>
+            </tr>
+            <tr>
                 @foreach (System.Data.DataColumn col in Model.Columns)
                 {
                     if (col.ColumnName != "CustomerID" && col.ColumnName != "FiledetailID" && col.ColumnName != "SubProductId" && col.ColumnName != "estado1")
                     {
+                        if (col.ColumnName == "Tarifa TA")
+                        {
+                            <th>Tarifas Asignadas (Cliente)</th>
+                        }
                         <th>@col.ColumnName</th>
                     }
                 }
-                <th>Porcentaje TA</th>
                 <th>Estado</th>
                 <th>Acción</th>
             </tr>
@@ -98,7 +106,7 @@
                 /* EXTRAER Y EVALUAR SUBPRODUCTID */
                 string subProductId = row["SubProductId"] != DBNull.Value ? row["SubProductId"].ToString().Trim() : "0";
 
-                bool debeDeshabilitar = (estadoid == "1") || (subProductId == "3" || subProductId == "12");
+                bool debeDeshabilitar = (estadoid == "1");
                 bool esFilaPadre = (subProductId == "3" || subProductId == "12");
                 bool estaDocumentado = (estadoid == "1");
 
@@ -127,14 +135,57 @@
                                         listFormaPagoFinal = listFormaPagoOriginal ?? new SelectList(Enumerable.Empty<SelectListItem>());
                                     }
                                 }
+                                @Html.DropDownList("cbxFP", listFormaPagoFinal, "Seleccione una forma de pago", new { @class = "ui search dropdown fp-select", disabled = "disabled" })
 
+                            </td>
+                        }
+
+                        else if (col.ColumnName == "Forma de Pago")
+                        {
+                            <td>
+                                @{
+                                    string valorFormaPago = row["Forma de Pago"] != DBNull.Value ? row["Forma de Pago"].ToString().Trim() : "0";
+                                    var listFormaPagoOriginal = ViewBag.FormaPagoDictionary as SelectList;
+                                    SelectList listFormaPagoFinal;
+
+                                    if (listFormaPagoOriginal != null && !string.IsNullOrEmpty(valorFormaPago) && valorFormaPago != "0")
+                                    {
+                                        listFormaPagoFinal = new SelectList(listFormaPagoOriginal.Items, "Key", "Value", valorFormaPago);
+                                    }
+                                    else
+                                    {
+                                        listFormaPagoFinal = listFormaPagoOriginal ?? new SelectList(Enumerable.Empty<SelectListItem>());
+                                    }
+                                }
+                                @Html.DropDownList("cbxFP", listFormaPagoFinal, "Seleccione una forma de pago", new { @class = "ui search dropdown fp-select", disabled = "disabled" })
+
+                            </td>
+                        }
+
+                        else if (col.ColumnName == "Forma de Pago TA")
+                        {
+                            <td>
+                                @{
+                                    string valorFormaPago = row["Forma de Pago TA"] != DBNull.Value ? row["Forma de Pago TA"].ToString().Trim() : "0";
+                                    var listFormaPagoOriginal = ViewBag.FormaPagoDictionary as SelectList;
+                                    SelectList listFormaPagoFinal;
+
+                                    if (listFormaPagoOriginal != null && !string.IsNullOrEmpty(valorFormaPago) && valorFormaPago != "0")
+                                    {
+                                        listFormaPagoFinal = new SelectList(listFormaPagoOriginal.Items, "Key", "Value", valorFormaPago);
+                                    }
+                                    else
+                                    {
+                                        listFormaPagoFinal = listFormaPagoOriginal ?? new SelectList(Enumerable.Empty<SelectListItem>());
+                                    }
+                                }
                                 @if (debeDeshabilitar)
                                 {
-                                    @Html.DropDownList("cbxFP", listFormaPagoFinal, "Seleccione una forma de pago", new { @class = "ui search dropdown fp-select", disabled = "disabled" })
+                                    @Html.DropDownList("cbxFPTA", listFormaPagoFinal, "Seleccione una forma de pago", new { @class = "ui search dropdown fp-select", disabled = "disabled" })
                                 }
                                 else
                                 {
-                                    @Html.DropDownList("cbxFP", listFormaPagoFinal, "Seleccione una forma de pago", new { @class = "ui search dropdown fp-select" })
+                                    @Html.DropDownList("cbxFPTA", listFormaPagoFinal, "Seleccione una forma de pago", new { @class = "ui search dropdown fp-select" })
                                 }
                             </td>
                         }
@@ -145,15 +196,8 @@
                                     decimal valorTotal = row["Total"] != DBNull.Value ? Convert.ToDecimal(row["Total"].ToString().Trim()) : 0;
                                     string valorTotalFormateado = valorTotal.ToString("C2", new System.Globalization.CultureInfo("en-US"));
                                 }
+                                <input type="text" name="txbTotal" class="total-input" autocomplete="off" maxlength="50" placeholder="Total" value="@valorTotalFormateado" disabled="disabled">
 
-                                @if (debeDeshabilitar)
-                                {
-                                    <input type="text" name="txbTotal" class="total-input" autocomplete="off" maxlength="50" placeholder="Total" value="@valorTotalFormateado" disabled="disabled">
-                                }
-                                else
-                                {
-                                    <input type="text" name="txbTotal" class="total-input" autocomplete="off" maxlength="50" placeholder="Total" value="@valorTotalFormateado">
-                                }
                             </td>
                         }
                         else if (col.ColumnName == "Numero Tarjeta Credito")
@@ -191,17 +235,190 @@
                                     bool habilitarTC = tieneElementosTC && !debeDeshabilitar && esTarjetaCredito;
                                     string claseBloqueoEstado = debeDeshabilitar ? "deshabilitado-por-estado" : "";
                                 }
+                                @Html.DropDownList("cbxTC", listTCFinal, "Seleccione una TC", new { @class = "ui search dropdown tc-select " + claseBloqueoEstado, disabled = "disabled" })
 
-                                @if (habilitarTC)
+                            </td>
+                        }
+
+
+
+                        else if (col.ColumnName == "Numero Tarjeta Credito TA")
+                        {
+                            <td>
+                                @{
+                                    string valorTC = row["Numero Tarjeta Credito TA"] != DBNull.Value ? row["Numero Tarjeta Credito TA"].ToString().Trim() : "0";
+                                    string valorFormaPagoFila = row["Forma de Pago TA"] != DBNull.Value ? row["Forma de Pago TA"].ToString().Trim() : "0";
+
+                                    var dict = ViewBag.TcDict as Dictionary<string, SelectList>;
+                                    SelectList listTCOriginal = (dict != null && dict.ContainsKey(customerId))
+                                                                    ? dict[customerId]
+                                                                    : null;
+
+                                    bool tieneElementosTC = listTCOriginal != null && listTCOriginal.Any();
+                                    SelectList listTCFinal;
+
+                                    if (tieneElementosTC)
+                                    {
+                                        if (!string.IsNullOrEmpty(valorTC) && valorTC != "0")
+                                        {
+                                            listTCFinal = new SelectList(listTCOriginal.Items, "Key", "Value", valorTC);
+                                        }
+                                        else
+                                        {
+                                            listTCFinal = listTCOriginal;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        listTCFinal = new SelectList(Enumerable.Empty<SelectListItem>());
+                                    }
+
+                                    var tcIds = ViewBag.FormaPagoTcIds as HashSet<string>;
+                                    bool esTarjetaCredito = tcIds != null ? tcIds.Contains(valorFormaPagoFila) : (valorFormaPagoFila == "1");
+                                    bool habilitarTC = tieneElementosTC && !debeDeshabilitar && esTarjetaCredito;
+                                    string claseBloqueoEstado = debeDeshabilitar ? "deshabilitado-por-estado" : "";
+                                }
+                                @if (debeDeshabilitar || !esTarjetaCredito)
                                 {
-                                    @Html.DropDownList("cbxTC", listTCFinal, "Seleccione una TC", new { @class = "ui search dropdown tc-select " + claseBloqueoEstado })
+                                    @Html.DropDownList("cbxTCTA", listTCFinal, "Seleccione una TC", new { @class = "ui search dropdown tc-select " + claseBloqueoEstado, disabled = "disabled" })
                                 }
                                 else
                                 {
-                                    @Html.DropDownList("cbxTC", listTCFinal, "Seleccione una TC", new { @class = "ui search dropdown tc-select " + claseBloqueoEstado, disabled = "disabled" })
+                                    @Html.DropDownList("cbxTCTA", listTCFinal, "Seleccione una TC", new { @class = "ui search dropdown tc-select " + claseBloqueoEstado })
+                                }
+
+                            </td>
+                        }
+
+
+                        else if (col.ColumnName == "Tarifa TA")
+                        {
+                            <td>
+                                @{
+                                    var tarifasPorDoc = ViewBag.TarifasPorDocumento as Dictionary<string, List<KeyValuePair<string, decimal>>>;
+                                    string docCol = ViewBag.DocColumn as string;
+                                    string docNorm = (docCol != null && Model.Columns.Contains(docCol) && row[docCol] != DBNull.Value)
+                                        ? new string(row[docCol].ToString().Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant()
+                                        : "";
+                                    // Tarifa TA ya almacenada: preselecciona la tarifa asignada que coincida con ese valor
+                                    decimal tarifaGuardada = Model.Columns.Contains("Tarifa TA") && row["Tarifa TA"] != DBNull.Value ? Convert.ToDecimal(row["Tarifa TA"].ToString().Trim()) : -1;
+                                    List<KeyValuePair<string, decimal>> tarifasCliente = null;
+                                    if (tarifasPorDoc != null) { tarifasPorDoc.TryGetValue(docNorm, out tarifasCliente); }
+                                }
+                                @if (tarifasCliente != null && tarifasCliente.Count > 0)
+                                {
+                                    <select name="cbxTarifasAsignadas" class="ui search dropdown tarifas-asignadas-select" @(debeDeshabilitar ? "disabled=disabled" : "")>
+                                        <option value="">Seleccione una tarifa</option>
+                                        @foreach (var t in tarifasCliente)
+                                        {
+                                            <option value="@t.Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" @(t.Value == tarifaGuardada ? "selected=selected" : "")>@t.Key - @t.Value.ToString("C2", new System.Globalization.CultureInfo("en-US"))</option>
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    <select name="cbxTarifasAsignadas" class="ui dropdown tarifas-asignadas-select" disabled="disabled" data-sin-tarifas="1">
+                                        <option value="">Sin tarifas asignadas</option>
+                                    </select>
+                                }
+                            </td>
+                            <td>
+                                @{
+                                    decimal valorTarifaTA = row["Tarifa TA"] != DBNull.Value ? Convert.ToDecimal(row["Tarifa TA"].ToString().Trim()) : 0;
+                                    string valorTarifaFormateadoTA = valorTarifaTA.ToString("C2", new System.Globalization.CultureInfo("en-US"));
+                                    string claseTarifa = esFilaPadre ? "tarifa-padre" : "tarifa-input";
+                                }
+                                @if (debeDeshabilitar)
+                                {
+                                    <input type="text" name="txbTarifaTA" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Valor de la Tarifa" value="@valorTarifaFormateadoTA" disabled="disabled">
+                                }
+                                else
+                                {
+                                    <input type="text" name="txbTarifaTA" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Valor de la Tarifa" value="@valorTarifaFormateadoTA">
                                 }
                             </td>
                         }
+                        else if (col.ColumnName == "Iva Tarifa TA")
+                        {
+                            <td>
+                                @{
+                                    decimal valorTarifaTA = row["Iva Tarifa TA"] != DBNull.Value ? Convert.ToDecimal(row["Iva Tarifa TA"].ToString().Trim()) : 0;
+                                    string valorTarifaFormateadoTA = valorTarifaTA.ToString("C2", new System.Globalization.CultureInfo("en-US"));
+                                    string claseTarifa = esFilaPadre ? "tarifa-padre" : "tarifa-input";
+                                }
+                                @if (debeDeshabilitar)
+                                {
+                                    <input type="text" name="txbIVATarifaTA" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Valor del IVA de la Tarifa" value="@valorTarifaFormateadoTA" disabled="disabled">
+                                }
+                                else
+                                {
+                                    <input type="text" name="txbIVATarifaTA" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Valor del IVA de la Tarifa" value="@valorTarifaFormateadoTA">
+                                }
+                            </td>
+                        }
+
+                        else if (col.ColumnName == "Total tarifa TA")
+                        {
+                            <td>
+                                @{
+                                    decimal valorTarifaTA = row["Total tarifa TA"] != DBNull.Value ? Convert.ToDecimal(row["Total tarifa TA"].ToString().Trim()) : 0;
+                                    // Si el total no viene almacenado, se reconstruye como Tarifa TA + IVA Tarifa TA
+                                    if (valorTarifaTA <= 0 && Model.Columns.Contains("Tarifa TA") && Model.Columns.Contains("Iva Tarifa TA"))
+                                    {
+                                        decimal tBase = row["Tarifa TA"] != DBNull.Value ? Convert.ToDecimal(row["Tarifa TA"].ToString().Trim()) : 0;
+                                        decimal tIva = row["Iva Tarifa TA"] != DBNull.Value ? Convert.ToDecimal(row["Iva Tarifa TA"].ToString().Trim()) : 0;
+                                        valorTarifaTA = tBase + tIva;
+                                    }
+                                    string valorTarifaFormateadoTA = valorTarifaTA.ToString("C2", new System.Globalization.CultureInfo("en-US"));
+                                    string claseTarifa = esFilaPadre ? "tarifa-padre" : "tarifa-input";
+                                }
+                                @if (debeDeshabilitar)
+                                {
+                                    <input type="text" name="txbTotalTarifaTA" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Valor del IVA de la Tarifa" value="@valorTarifaFormateadoTA" disabled="disabled">
+                                }
+                                else
+                                {
+                                    <input type="text" name="txbTotalTarifaTA" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Valor del IVA de la Tarifa" value="@valorTarifaFormateadoTA">
+                                }
+                            </td>
+                        }
+
+                        else if (col.ColumnName == "Autorización Agencia")
+                        {
+                            <td>
+                                @{
+                                    string valorVAgencia = row["Autorización Agencia"] != DBNull.Value ? row["Autorización Agencia"].ToString().Trim() : "";
+                                    string claseTarifa = esFilaPadre ? "tarifa-padre" : "tarifa-input";
+                                }
+                                @if (debeDeshabilitar)
+                                {
+                                    <input type="text" name="txbAutgencia" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Autorización Agencia" value="@valorVAgencia" disabled="disabled">
+                                }
+                                else
+                                {
+                                    <input type="text" name="txbAutAgencia" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Autorización Agencia" value="@valorVAgencia">
+                                }
+                            </td>
+                        }
+
+                        else if (col.ColumnName == "Voucher Agencia")
+                        {
+                            <td>
+                                @{
+                                    string valorVAgencia = row["Voucher Agencia"] != DBNull.Value ? row["Voucher Agencia"].ToString().Trim() : "0";
+                                    string claseTarifa = esFilaPadre ? "tarifa-padre" : "tarifa-input";
+                                }
+                                @if (debeDeshabilitar)
+                                {
+                                    <input type="text" name="txbVoucherAgencia" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Voucher Agencia" value="@valorVAgencia" disabled="disabled">
+                                }
+                                else
+                                {
+                                    <input type="text" name="txbVoucherAgencia" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Voucher Agencia" value="@valorVAgencia">
+                                }
+                            </td>
+                        }                       
+
                         else if (col.ColumnName == "Tarifa")
                         {
                             <td>
@@ -210,15 +427,7 @@
                                     string valorTarifaFormateado = valorTarifa.ToString("C2", new System.Globalization.CultureInfo("en-US"));
                                     string claseTarifa = esFilaPadre ? "tarifa-padre" : "tarifa-input";
                                 }
-
-                                @if (debeDeshabilitar)
-                                {
-                                    <input type="text" name="txbTarifa" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Valor de la Tarifa" value="@valorTarifaFormateado" disabled="disabled">
-                                }
-                                else
-                                {
-                                    <input type="text" name="txbTarifa" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Valor de la Tarifa" value="@valorTarifaFormateado">
-                                }
+                                <input type="text" name="txbTarifa" class="@claseTarifa" autocomplete="off" maxlength="50" placeholder="Valor de la Tarifa" value="@valorTarifaFormateado" disabled="disabled">
                             </td>
                         }
                         else if (col.ColumnName == "Impuestos")
@@ -228,15 +437,7 @@
                                     decimal valorImpuestos = row["Impuestos"] != DBNull.Value ? Convert.ToDecimal(row["Impuestos"].ToString().Trim()) : 0;
                                     string valorImpuestosFormateado = valorImpuestos.ToString("C2", new System.Globalization.CultureInfo("en-US"));
                                 }
-
-                                @if (debeDeshabilitar)
-                                {
-                                    <input type="text" name="txbImpuestos" class="impuestos-input" autocomplete="off" maxlength="50" placeholder="Valor IVA" value="@valorImpuestosFormateado" disabled="disabled">
-                                }
-                                else
-                                {
-                                    <input type="text" name="txbImpuestos" class="impuestos-input" autocomplete="off" maxlength="50" placeholder="Valor IVA" value="@valorImpuestosFormateado">
-                                }
+                                <input type="text" name="txbImpuestos" class="impuestos-input" autocomplete="off" maxlength="50" placeholder="Valor IVA" value="@valorImpuestosFormateado" disabled="disabled">
                             </td>
                         }
                         else if (col.ColumnName == "Pedido Agencia")
@@ -266,16 +467,6 @@
                         }
                     }
                     <!-- Celdas fijas -->
-                    <td>
-                        @if (debeDeshabilitar)
-                        {
-                            @Html.DropDownList("cbxPorcentaje", (SelectList)ViewBag.PorcentajeDictionary, "% TA", new { @class = "ui search dropdown por-select", disabled = "disabled" })
-                        }
-                        else
-                        {
-                            @Html.DropDownList("cbxPorcentaje", (SelectList)ViewBag.PorcentajeDictionary, "% TA", new { @class = "ui search dropdown por-select" })
-                        }
-                    </td>
 
                     <td class="celda-estado">
                         @(estaDocumentado || debeDeshabilitar ? "Autorizado" : "No Autorizado")
@@ -316,8 +507,11 @@
 </div>
 
 <script type="text/javascript">
-
-    // Listener dinámico para cambios en la Forma de Pago
+    $(document).ready(function () {
+        $('#tablesIndexDocumentacion').dynatable();
+    }
+    
+    @*// Listener dinámico para cambios en la Forma de Pago
     $(document).on('change', '.fp-select', function () {
         var $tr = $(this).closest('tr');
         var $cbxTC = $tr.find('.tc-select');
@@ -422,8 +616,7 @@
     });
 
 
-    $(document).ready(function () {
-        $('#tablesIndexDocumentacion').dynatable();
+   
 
         // Formatear automáticamente todas las tarifas, impuestos y totales iniciales
         $('#tablesIndexDocumentacion tbody tr').each(function () {
@@ -450,7 +643,7 @@
 
             var $btn = $(this);
             var $tr = $btn.closest('tr');
-                       
+
             var $formaPago = $tr.find('.fp-select');
             var $tc = $tr.find('.tc-select');
             var $porcentaje = $tr.find('.por-select');
@@ -496,7 +689,7 @@
             }
 
             var v1 = esInvalido($formaPago, "Forma de pago es requerido");
-           
+
 
             if (v1) {
                 return;
@@ -506,7 +699,7 @@
             var dataFila = {
                 FileId: $btn.data('file-id'),
                 CustomerId: $btn.data('customer-id'),
-                FileDetailID: $btn.data('filedetail-id'),                
+                FileDetailID: $btn.data('filedetail-id'),
                 PaymentMethodId: obtenerValor($formaPago),
                 PaymentCardId: obtenerValor($tc),
                 FareTA: limpiarMoneda($tr.find('.tarifa-input')),
@@ -622,5 +815,236 @@
         $element.find($('#type').text(type));
         $('.renderImages').append('<div class="ui card cardTest"> ' + $element.html() + '</div>');
         $('.renderImages').show('slow');
-    }
+    }*@
+</script>
+
+<script type="text/javascript">
+    // Habilita la lista de Tarjetas de Crédito TA solo cuando la Forma de Pago TA es "Tarjeta de Crédito"
+    // La vista se inyecta por AJAX varias veces: se quitan los manejadores anteriores para no duplicar llamadas
+    $(document).off('.autorizacion');
+    $(document).on('change.autorizacion', 'select[name="cbxFPTA"]', function () {
+        var $sel = $(this);
+        var $tr = $sel.closest('tr');
+        var $tc = $tr.find('select[name="cbxTCTA"]');
+        if ($tc.length === 0 || $tc.hasClass('deshabilitado-por-estado')) return;
+
+        var texto = ($sel.find('option:selected').text() || '').toLowerCase();
+        var esTarjeta = texto.indexOf('tarjeta') !== -1;
+
+        $tc.prop('disabled', !esTarjeta);
+        $tc.closest('.ui.dropdown').toggleClass('disabled', !esTarjeta);
+
+        if (!esTarjeta) {
+            // Limpia la selección y cualquier marca de error previa
+            $tc.val('');
+            if ($tc.closest('.ui.dropdown').length) { try { $tc.closest('.ui.dropdown').dropdown('clear'); } catch (e) { } }
+            $tc.removeClass('campo-error').removeAttr('title');
+            $tc.closest('td').removeClass('error').removeAttr('data-tooltip data-position data-variation');
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    // Al elegir una tarifa asignada al cliente: llena "Tarifa TA" y calcula "IVA TA" (19%)
+    $(document).on('change.autorizacion', 'select[name="cbxTarifasAsignadas"]', function () {
+        var $tr = $(this).closest('tr');
+        var $tarifa = $tr.find('input[name="txbTarifaTA"]');
+        var $iva = $tr.find('input[name="txbIVATarifaTA"]');
+        if ($tarifa.length === 0 || $tarifa.is(':disabled')) return;
+
+        var valor = parseFloat($(this).val());
+        if (isNaN(valor)) return;
+
+        function moneda(n) {
+            return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        var $total = $tr.find('input[name="txbTotalTarifaTA"]');
+        var iva = Math.round(valor * 19) / 100;
+
+        $tarifa.val(moneda(valor)).trigger('change');
+        if ($iva.length > 0 && !$iva.is(':disabled')) {
+            $iva.val(moneda(iva)).trigger('change');
+        }
+        // Total tarifa TA = Tarifa TA + IVA TA
+        if ($total.length > 0 && !$total.is(':disabled')) {
+            $total.val(moneda(valor + iva)).trigger('change');
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    // Guardar (Autorizar) por fila: valida los campos obligatorios y marca el expediente como Autorizado
+    (function () {
+        function aNumero(txt) {
+            return parseFloat((txt || '').toString().replace(/[^0-9.-]+/g, '')) || 0;
+        }
+
+        function toast(mensaje, exito) {
+            var $t = $('<div style="position: fixed; top: 25px; right: 25px; z-index: 999999; color: white; ' +
+                'padding: 15px 25px; border-radius: 8px; box-shadow: 0px 4px 12px rgba(0,0,0,0.3); ' +
+                'font-family: sans-serif; font-size: 14px; max-width: 420px; background-color: ' + (exito ? '#21ba45' : '#db2828') + ';">' +
+                '<i class="' + (exito ? 'check circle' : 'exclamation triangle') + ' icon"></i> <span></span></div>');
+            $t.find('span').text(mensaje);
+            $('body').append($t);
+            setTimeout(function () { $t.fadeOut(400, function () { $t.remove(); }); }, exito ? 3000 : 5000);
+        }
+
+        function marcar($el, mensaje) {
+            var $td = $el.closest('td');
+            $el.addClass('campo-error').attr('title', mensaje);
+            $td.addClass('error');
+        }
+
+        function limpiarMarcas($tr) {
+            $tr.find('.campo-error').removeClass('campo-error').removeAttr('title');
+            $tr.find('td.error').removeClass('error');
+        }
+
+        $(document).on('click.autorizacion', '#tablesIndexDocumentacion .btn-guardar-fila', function (e) {
+            e.preventDefault();
+            var $btn = $(this);
+            if ($btn.is(':disabled') || $btn.hasClass('loading')) return;
+            var $tr = $btn.closest('tr');
+            limpiarMarcas($tr);
+
+            var $fp = $tr.find('select[name="cbxFPTA"]');
+            var $tc = $tr.find('select[name="cbxTCTA"]');
+            var $tarifaAsignada = $tr.find('select[name="cbxTarifasAsignadas"]');
+            var $tarifa = $tr.find('input[name="txbTarifaTA"]');
+            var $iva = $tr.find('input[name="txbIVATarifaTA"]');
+            var $total = $tr.find('input[name="txbTotalTarifaTA"]');
+            var $pedido = $tr.find('input[name="txbPedido"]');
+            var $voucher = $tr.find('input[name="txbVoucherAgencia"]');
+            var $autAgencia = $tr.find('input[name="txbAutAgencia"]');
+
+            var errores = [];
+            function vacio(v) { v = (v === null || v === undefined) ? '' : v.toString().trim(); return v === '' || v === '0'; }
+
+            // 1. Forma de pago TA (y tarjeta si corresponde)
+            var textoFp = ($fp.find('option:selected').text() || '').toLowerCase();
+            var esTarjeta = textoFp.indexOf('tarjeta') !== -1;
+            if (vacio($fp.val())) {
+                marcar($fp, 'Forma de pago TA es requerida'); errores.push('Forma de Pago TA');
+            } else if (esTarjeta && vacio($tc.val())) {
+                marcar($tc, 'Seleccione la tarjeta de crédito'); errores.push('Número Tarjeta Crédito TA');
+            }
+
+            // 2. Tarifa asignada al cliente
+            var sinTarifas = $tarifaAsignada.attr('data-sin-tarifas') === '1';
+            if (!sinTarifas && vacio($tarifaAsignada.val())) {
+                marcar($tarifaAsignada, 'Seleccione una tarifa asignada al cliente'); errores.push('Tarifa asignada al cliente');
+            }
+
+            // 3. Tarifa TA, IVA y Total pobladas
+            [[$tarifa, 'Tarifa TA'], [$iva, 'Iva Tarifa TA'], [$total, 'Total tarifa TA']].forEach(function (c) {
+                if (aNumero(c[0].val()) <= 0) { marcar(c[0], c[1] + ' es requerido'); errores.push(c[1]); }
+            });
+
+            // 4. Pedido agencia
+            if (vacio($pedido.val())) { marcar($pedido, 'Pedido Agencia es requerido'); errores.push('Pedido Agencia'); }
+
+            // 5. Con tarjeta de crédito: voucher y autorización agencia
+            if (esTarjeta) {
+                if (vacio($voucher.val())) { marcar($voucher, 'Voucher Agencia es requerido'); errores.push('Voucher Agencia'); }
+                if (vacio($autAgencia.val())) { marcar($autAgencia, 'Autorización Agencia es requerida'); errores.push('Autorización Agencia'); }
+            }
+
+            if (errores.length > 0) {
+                toast('Complete los campos obligatorios: ' + errores.join(', '), false);
+                return;
+            }
+
+            var dataFila = {
+                FileId: $btn.data('file-id'),
+                CustomerId: $btn.data('customer-id'),
+                FileDetailID: $btn.data('filedetail-id'),
+                PaymentMethodId: $fp.val(),
+                PaymentCardId: esTarjeta ? $tc.val() : '0',
+                FareTA: aNumero($tarifa.val()),
+                IVATA: aNumero($iva.val()),
+                FareWithTaxes: aNumero($total.val()),
+                TarifaAsignada: $tarifaAsignada.val(),
+                SinTarifasAsignadas: sinTarifas,
+                PedidoAgencia: $pedido.val(),
+                VoucherAgencia: $voucher.val(),
+                AutorizacionAgencia: $autAgencia.val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("GuardarAutorizacionFila", "Inspections")',
+                type: 'POST',
+                data: JSON.stringify(dataFila),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                beforeSend: function () { $btn.addClass('loading disabled'); },
+                success: function (response) {
+                    $btn.removeClass('loading');
+                    if (response.success) {
+                        $tr.find('.celda-estado').text('Autorizado');
+                        $btn.removeClass('primary').addClass('disabled').prop('disabled', true)
+                            .html('<i class="check icon"></i> Guardado');
+                        // Bloquea la fila ya autorizada
+                        $tr.find('select, input').prop('disabled', true);
+                        $tr.find('.ui.dropdown').addClass('disabled');
+                        toast('Expediente Autorizado', true);
+                    } else {
+                        $btn.removeClass('disabled');
+                        toast(response.message || 'No se pudo guardar el registro.', false);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $btn.removeClass('loading disabled');
+                    toast('Error de comunicación con el servidor: ' + error, false);
+                }
+            });
+        });
+    })();
+</script>
+
+<script type="text/javascript">
+    // Clientes sin tarifas asignadas: la Tarifa TA se digita (solo números) y se calculan IVA (19%) y Total
+    (function () {
+        function filaSinTarifas($input) {
+            var $s = $input.closest('tr').find('select[name="cbxTarifasAsignadas"]');
+            return $s.attr('data-sin-tarifas') === '1';
+        }
+        function moneda(n) {
+            return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        function aNumero(txt) {
+            return parseFloat((txt || '').toString().replace(/[^0-9.]+/g, '')) || 0;
+        }
+
+        // Solo dígitos y un punto decimal; recalcula IVA y Total mientras se digita
+        $(document).on('input.autorizacion', 'input[name="txbTarifaTA"]', function () {
+            var $in = $(this);
+            if ($in.is(':disabled') || !filaSinTarifas($in)) return;
+
+            var limpio = $in.val().replace(/[^0-9.]/g, '');
+            var partes = limpio.split('.');
+            if (partes.length > 2) limpio = partes[0] + '.' + partes.slice(1).join('');
+            if (limpio !== $in.val()) $in.val(limpio);
+
+            var valor = parseFloat(limpio) || 0;
+            var iva = Math.round(valor * 19) / 100;
+            var $tr = $in.closest('tr');
+            $tr.find('input[name="txbIVATarifaTA"]').val(valor > 0 ? moneda(iva) : '');
+            $tr.find('input[name="txbTotalTarifaTA"]').val(valor > 0 ? moneda(valor + iva) : '');
+        });
+
+        // Al entrar al campo se muestra el número plano; al salir se formatea como moneda
+        $(document).on('focus.autorizacion', 'input[name="txbTarifaTA"]', function () {
+            var $in = $(this);
+            if ($in.is(':disabled') || !filaSinTarifas($in)) return;
+            var n = aNumero($in.val());
+            $in.val(n > 0 ? n.toString() : '');
+        });
+        $(document).on('blur.autorizacion', 'input[name="txbTarifaTA"]', function () {
+            var $in = $(this);
+            if ($in.is(':disabled') || !filaSinTarifas($in)) return;
+            var n = aNumero($in.val());
+            $in.val(n > 0 ? moneda(n) : '');
+        });
+    })();
 </script>

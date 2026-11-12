@@ -1,0 +1,77 @@
+﻿@model WebApplication1.Controllers.PanelConfiguracionViewModel
+
+<div class="ui grid stackable">
+
+    @* 1. Tabla de Centros de Costos *@
+    @if (Model.CentrosCosto != null && Model.CentrosCosto.Any())
+    {
+        <div class="sixteen wide column">
+            <h4 class="ui dividing header"><i class="building icon"></i> Centros de Costo</h4>
+            <table class="ui compact table celled striped">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cc in Model.CentrosCosto)
+                    {
+                        <tr>
+                            <td>@cc.Codigo</td>
+                            <td>@cc.Nombre</td>
+                            <td>@cc.Descripcion</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @* 2. Tabla de Tarjetas de Crédito + Dropdown *@
+    @if (Model.TarjetasCredito != null && Model.TarjetasCredito.Any())
+    {
+        <div class="sixteen wide column">
+            <h4 class="ui dividing header"><i class="credit card icon"></i> Tarjetas de Crédito</h4>
+
+            <div class="ui form style="margin-bottom: 15px;">
+                <div class="field">
+                    <label>Seleccionar Opción / Categoría:</label>
+                    @Html.DropDownList("ddlOpcionesTarjetas", Model.OpcionesDropdown, "-- Seleccione una opción --", new { @class = "ui search dropdown" })
+                </div>
+            </div>
+
+            <table class="ui compact table celled striped">
+                <thead>
+                    <tr>
+                        <th>Franquicia</th>
+                        <th>Número (Mascara)</th>
+                        <th>Fecha Expiración</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tc in Model.TarjetasCredito)
+                    {
+                        <tr>
+                            <td>@tc.Franquicia</td>
+                            <td>**** **** **** @tc.UltimosDigitos</td>
+                            <td>@tc.FechaExpiracion</td>
+                            <td>@tc.Estado</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if ((Model.CentrosCosto == null || !Model.CentrosCosto.Any()) && (Model.TarjetasCredito == null || !Model.TarjetasCredito.Any()))
+    {
+        <div class="sixteen wide column">
+            <div class="ui info message">
+                <p><i class="info circle icon"></i> No se encontraron Centros de Costo ni Tarjetas de Crédito registrados.</p>
+            </div>
+        </div>
+    }
+</div>

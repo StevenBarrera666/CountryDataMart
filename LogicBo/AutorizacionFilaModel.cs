@@ -14,7 +14,15 @@ namespace LogicBo
         public string PaymentCardId { get; set; }
         public decimal FareTA { get; set; }
         public decimal IVATA { get; set; }
+        public decimal TotalTA { get; set; }
         public decimal FareWithTaxes { get; set; }
+
+        // Datos adicionales de la fila (validados al guardar)
+        public string TarifaAsignada { get; set; }
+        public bool SinTarifasAsignadas { get; set; }
+        public string PedidoAgencia { get; set; }
+        public string VoucherAgencia { get; set; }
+        public string AutorizacionAgencia { get; set; }
 
         
     }

@@ -1,0 +1,511 @@
+﻿@using System.Globalization
+@{
+    var culturaCol = new CultureInfo("es-CO");
+}
+@model WebApplication1.Models.ClientePerfilViewModel
+@{
+    ViewBag.Title = Model.RazonSocial + " - Ficha de Cliente";
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Hojas de estilo requeridas -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    body {
+        background-color: #f1f3f7;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .card-custom {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e5e9f2;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+
+    /* Columna Perfil Izquierda */
+    .avatar-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .avatar-circle {
+        width: 105px;
+        height: 105px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: #e0f2fe;
+    }
+
+    .badge-estado {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: #d1fae5;
+        color: #065f46;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 6px;
+    }
+
+    font-weight: 700;
+    .user-name {
+        font-size: 1.15rem;
+        color: #1e293b;
+        margin-top: 12px;
+        margin-bottom: 2px;
+        line-height: 1.3;
+    }
+
+    .user-role {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+
+    .btn-outline-custom {
+        border-radius: 20px;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 6px 16px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.2s ease;
+    }
+
+        .btn-outline-custom:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border-color: #94a3b8;
+        }
+
+    /* Secciones informativas */
+    .section-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #334155;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .field-label {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin-bottom: 1px;
+        font-weight: 600;
+    }
+
+    .field-value {
+        font-size: 0.88rem;
+        color: #1e293b;
+        margin-bottom: 12px;
+    }
+
+    .field-link {
+        color: #2563eb;
+        text-decoration: none;
+    }
+
+        .field-link:hover {
+            text-decoration: underline;
+        }
+
+    /* Pestañas */
+    .custom-tabs .nav-link {
+        color: #64748b;
+        border: none;
+        border-bottom: 2px solid transparent;
+        font-weight: 500;
+        font-size: 0.9rem;
+        padding: 10px 18px;
+        cursor: pointer;
+    }
+
+        .custom-tabs .nav-link.active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            background: transparent;
+            font-weight: 600;
+        }
+
+    /* Tablas de detalle */
+    .table-details {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+        .table-details tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+            .table-details tr:last-child {
+                border-bottom: none;
+            }
+
+        .table-details td {
+            padding: 12px 6px;
+            font-size: 0.88rem;
+            vertical-align: middle;
+        }
+
+            .table-details td.label-cell {
+                color: #475569;
+                font-weight: 600;
+                width: 30%;
+            }
+
+            .table-details td.value-cell {
+                color: #1e293b;
+            }
+
+    /* Ajuste al panel de AdministradorP */
+    .container-fluid { max-width: 100%; box-sizing: border-box; min-width: 0; }
+    .card-custom { min-width: 0; overflow-x: auto; }
+    .table-details { table-layout: fixed; word-break: break-word; }
+</style>
+
+<div class="container-fluid py-4 px-4">
+    <!-- Barra Superior -->
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <a href="/Cliente/Clientes" class="ui mini basic button" onclick="loadProceduresTable(this); return false;">
+            <i class="arrow left icon"></i> Volver a Clientes
+        </a>
+        <span class="text-muted small">Ficha Cliente: <strong>@Model.CodigoFicha</strong></span>
+    </div>
+
+    <div class="row">
+        <!-- Panel Lateral Izquierdo: Información Resumida del Cliente -->
+        <div class="col-lg-3 col-md-4">
+            <div class="card-custom text-center">
+                <div class="avatar-wrapper mb-2">
+                    <img src="@Model.LogoUrl"
+                         onerror="this.src='https://ui-avatars.com/api/?name=@Url.Encode(Model.NombreComercial)&background=0284c7&color=fff&size=128';"
+                         alt="Logo Cliente" class="avatar-circle shadow-sm" />
+                    <span class="badge-estado">@Model.EstadoEtiqueta</span>
+                </div>
+
+                <h2 class="user-name">@Model.NombreComercial</h2>
+                <p class="user-role">@Model.RazonSocial</p>
+
+                <!-- Selector de ficha -->
+                <div class="mb-3">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" style="border-radius: 8px; font-size: 0.8rem;">
+                        Código: @Model.CodigoFicha
+                    </button>
+                </div>
+
+                <!-- Botón Actualizar Datos -->
+                <div class="mb-4">
+                    <a href="javascript:void(0)"
+                       class="btn-outline-custom"
+                       onclick="cargarElement('@Url.Action("Registrar", "Cliente", new { id = Model.Id })')">
+                        <i class="bi bi-pencil me-1"></i> Actualizar Datos
+                    </a>
+                </div>
+
+                <hr class="text-muted" style="opacity: 0.15;" />
+
+                <!-- Información Rápida de Contacto -->
+                <div class="text-start">
+                    <div class="section-title">
+                        <span>Documentación & Contacto</span>
+                        <i class="bi bi-building text-muted"></i>
+                    </div>
+
+                    <div class="field-label">Documento Principal</div>
+                    <div class="field-value">@Model.TipoDocumento: <strong>@Model.NumeroDocumento</strong></div>
+
+                    <div class="field-label">Correo Principal</div>
+                    <div class="field-value">
+                        <a href="mailto:@Model.CorreoPrincipal" class="field-link">@Model.CorreoPrincipal</a>
+                    </div>
+
+                    <div class="field-label">Teléfono de Contacto</div>
+                    <div class="field-value">
+                        <a href="tel:@Model.Telefono1" class="field-link">@Model.Telefono1</a>
+                    </div>
+
+                    <div class="field-label">Dirección Comercial</div>
+                    <div class="field-value">@Model.Direccion</div>
+
+                    <div class="field-label">Ubicación</div>
+                    <div class="field-value">@Model.Ciudad, @Model.Pais</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Principal Derecho: Pestañas de la Ficha Técnica -->
+        <div class="col-lg-9 col-md-8">
+            <div class="card-custom">
+                <!-- Pestañas de navegación -->
+                <ul class="nav custom-tabs border-bottom mb-3" id="clienteTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="tab-personales-link" data-bs-toggle="tab" href="#tab-personales" role="tab">
+                            <i class="bi bi-person-vcard me-1"></i> Datos Personales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="tab-ubicacion-link" data-bs-toggle="tab" href="#tab-ubicacion" role="tab">
+                            <i class="bi bi-geo-alt me-1"></i> Datos Ubicación
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="tab-cobros-link" data-bs-toggle="tab" href="#tab-cobros" role="tab">
+                            <i class="bi bi-cash-coin me-1"></i> Cobros
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="tab-fiscales-link" data-bs-toggle="tab" href="#tab-fiscales" role="tab">
+                            <i class="bi bi-file-earmark-check me-1"></i> Datos Fiscales
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Contenedores de las Pestañas -->
+                <div class="tab-content" id="clienteTabContent">
+
+                    <!-- 1. PESTAÑA: DATOS PERSONALES -->
+                    <div class="tab-pane fade show active" id="tab-personales" role="tabpanel">
+                        <table class="table-details">
+                            <tbody>
+                                <tr>
+                                    <td class="label-cell">Naturaleza</td>
+                                    <td class="value-cell"><span class="badge bg-light text-dark border">@Model.Naturaleza</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Tipo</td>
+                                    <td class="value-cell">@Model.Tipo</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Razón Social</td>
+                                    <td class="value-cell fw-semibold">@Model.RazonSocial</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Establecimiento Comercial</td>
+                                    <td class="value-cell">@Model.EstablecimientoComercial</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Nombre Comercial</td>
+                                    <td class="value-cell">@Model.NombreComercial</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Tipo de documento</td>
+                                    <td class="value-cell">@Model.TipoDocumento</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Número de documento</td>
+                                    <td class="value-cell fw-semibold">@Model.NumeroDocumento</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Teléfono 1</td>
+                                    <td class="value-cell">
+                                        <a href="tel:@Model.Telefono1" class="field-link">@Model.Telefono1</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Teléfono 2</td>
+                                    <td class="value-cell">
+                                        @(string.IsNullOrWhiteSpace(Model.Telefono2) ? "-" : Model.Telefono2)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Correo Principal</td>
+                                    <td class="value-cell">
+                                        <a href="mailto:@Model.CorreoPrincipal" class="field-link">@Model.CorreoPrincipal</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Correo 2</td>
+                                    <td class="value-cell">
+                                        @(string.IsNullOrWhiteSpace(Model.Correo2) ? "-" : Model.Correo2)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Dirección</td>
+                                    <td class="value-cell">@Model.Direccion</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 2. PESTAÑA: DATOS UBICACIÓN -->
+                    <div class="tab-pane fade" id="tab-ubicacion" role="tabpanel">
+                        <table class="table-details">
+                            <tbody>
+                                <tr>
+                                    <td class="label-cell">Origen</td>
+                                    <td class="value-cell">
+                                        <span class="badge bg-primary text-white">@Model.Origen</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">País</td>
+                                    <td class="value-cell">@Model.Pais</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Departamento</td>
+                                    <td class="value-cell">@Model.Departamento</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Ciudad</td>
+                                    <td class="value-cell">@Model.Ciudad</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 3. PESTAÑA: COBROS -->
+                    <div class="tab-pane fade" id="tab-cobros" role="tabpanel">
+                        <table class="table-details mb-4">
+                            <tbody>
+                                <tr>
+                                    <td class="label-cell">Tipo de Cobro</td>
+                                    <td class="value-cell fw-semibold">@Model.TipoCobro</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h6 class="text-secondary fw-bold mb-2" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="bi bi-tags me-1"></i> Tarifas Administrativas Asignadas
+                        </h6>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered align-middle" style="font-size: 0.85rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Categoría de Tarifa</th>
+                                        <th class="text-end">Tarifa Administrativa</th>
+                                        <th class="text-center">Descuento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Tarifas != null && Model.Tarifas.Any())
+                                    {
+                                        foreach (var tarifa in Model.Tarifas)
+                                        {
+                                            <tr>
+                                                <td class="fw-semibold">@tarifa.CategoriaTarifaNombre</td>
+                                                <td class="text-end text-success fw-bold">
+                                                    @tarifa.TarifaAdministrativa.ToString("C0", culturaCol)
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                                        @tarifa.Descuento.ToString("N1")%
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted py-3">
+                                                <em>No se registran tarifas administrativas asociadas a este cliente.</em>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 4. PESTAÑA: DATOS FISCALES -->
+                    <div class="tab-pane fade" id="tab-fiscales" role="tabpanel">
+                        <table class="table-details">
+                            <tbody>
+                                <tr>
+                                    <td class="label-cell">Actividad económica</td>
+                                    <td class="value-cell">@Model.ActividadEconomica</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Industria</td>
+                                    <td class="value-cell">@Model.Industria</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Cámara de Comercio</td>
+                                    <td class="value-cell">
+                                        @if (!string.IsNullOrEmpty(Model.RutaCamaraComercio))
+                                        {
+                                            <a href="@Model.RutaCamaraComercio" target="_blank" class="ui mini blue button">
+                                                <i class="file pdf outline icon"></i> Ver Cámara de Comercio
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <button class="ui mini basic button" onclick="cargarDocumentoFiscal('CamaraComercio', @Model.Id)">
+                                                <i class="upload icon"></i> Adjuntar Archivo
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">RUT</td>
+                                    <td class="value-cell">
+                                        @if (!string.IsNullOrEmpty(Model.RutaRut))
+                                        {
+                                            <a href="@Model.RutaRut" target="_blank" class="ui mini teal button">
+                                                <i class="file alternate outline icon"></i> Ver RUT
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <button class="ui mini basic button" onclick="cargarDocumentoFiscal('RUT', @Model.Id)">
+                                                <i class="upload icon"></i> Adjuntar Archivo
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        
+        $.ajax({
+         url: url,
+         beforeSend: function () {
+             $('#facadeContent').html('').addClass("loading").css("height", 500);
+         },
+         success: function (data) {
+             $('#facadeContent').html(data);
+             $('.titlesPages').html('@ViewBag.ApplicationName | ' + $('.titlesPages').html());
+         },
+         complete: function () {
+             $('#facadeContent').removeClass("loading").css("height", "inherit");
+             LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+    $(document).ready(function () {
+        // Soporte de navegación por pestañas para contenedores inyectados por AJAX
+        $('#clienteTab a').on('click', function (e) {
+            e.preventDefault();
+            $('#clienteTab .nav-link').removeClass('active');
+            $(this).addClass('active');
+
+            var target = $(this).attr('href');
+            $('#clienteTabContent .tab-pane').removeClass('show active');
+            $(target).addClass('show active');
+        });
+    });
+
+    function cargarDocumentoFiscal(tipo, clienteId) {
+        alert("Abriendo diálogo para adjuntar documento: " + tipo + " para el cliente ID: " + clienteId);
+    }
+</script>
