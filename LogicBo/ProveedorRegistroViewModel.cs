@@ -32,6 +32,7 @@ namespace LogicBo
         public string Correo2 { get; set; }
         [Required]
         public string Direccion { get; set; }
+        public string CodigoPostal { get; set; }
 
         // 2. Datos Ubicación
         [Required]

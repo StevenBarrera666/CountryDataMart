@@ -1,11 +1,12 @@
 ﻿@using System.Data
+@using WebApplication1.Filters
+@using WebApplication1.Models
 @model DataTable
 @{
+    bool soloLectura = Permisos.EsSoloLectura(Session["SessionUser"] as SessionModels, "Empleado", "Empleados");
     // Columnas a mostrar (en orden); solo se muestran las que devuelva sp_ListarEmpleados
     var deseadas = new[]
     {
-        new KeyValuePair<string, string>("Id", "Id"),
-        new KeyValuePair<string, string>("FotoUrl", "Foto"),
         new KeyValuePair<string, string>("NombreCompleto", "Nombre"),
         new KeyValuePair<string, string>("NumeroIdentificacion", "Identificación"),
         new KeyValuePair<string, string>("FichaCodigo", "Ficha"),
@@ -296,11 +297,12 @@
         </div>
         <!-- Botón Crear empleado -->
         <div class="eight wide right aligned column">
-            <a href="javascript:void(0)"
-               class="btn-outline-custom"
-               onclick="cargarElement('@Url.Action("Registrar", "Empleado")')">
-                <i class="bi bi-pencil me-1"></i> Crear empleado
-            </a>
+            @if (!soloLectura)
+            {
+                <a href="javascript:void(0)" class="btn-outline-custom" onclick="cargarElement('@Url.Action("Registrar", "Empleado")')">
+                <i class="bi bi-pencil me-1"></i> Crear/Modificar/Inactivar Empleado
+                </a>
+            }
         </div>
     </div>
 
@@ -347,6 +349,15 @@
                                     <img src="@(string.IsNullOrWhiteSpace(urlImg) ? "https://ui-avatars.com/api/?name=" + Url.Encode(nombreImg) + "&background=0284c7&color=fff&size=64" : urlImg)"
                                          onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=@Url.Encode(nombreImg)&background=0284c7&color=fff&size=64';"
                                          alt="" class="lista-avatar" />
+                                </td>
+                            }
+                            else if (c.Key == "NombreCompleto")
+                            {
+                                <td class="left aligned fw-bold">
+                                    <a href="javascript:void(0)"
+                                       onclick="cargarElement('@Url.Action("Perfil", "Empleado", new { id = row["Id"].ToString(), fichaid = Model.Columns.Contains("fichaid") ? row["fichaid"].ToString() : "" })')">
+                                        @row[c.Key]
+                                    </a>
                                 </td>
                             }
                             else if (row[c.Key] is DateTime)

@@ -1,0 +1,23 @@
+@using WebApplication1.Models
+@model string
+@{
+    var session = Session["SessionUser"] as SessionModels;
+    var opciones = new List<LogicBo.SecurityBo.OpcionModel>();
+    if (session != null && session.Opciones != null)
+    {
+        opciones = session.Opciones.Where(o => o.Menu == Model).OrderBy(o => o.Orden).ToList();
+    }
+}
+<nav class="sidebar-menu">
+    @foreach (var o in opciones)
+    {
+        var accion = string.IsNullOrEmpty(o.Action) ? "Index" : o.Action.Split(',')[0].Trim();
+        var url = o.Ajax ? Url.Action(accion, o.Controller) : Url.Action(accion, o.Controller, new { modulo = "AP" });
+        <a href="@url"
+           class="sidebar-link"
+           @Html.Raw(o.Ajax ? "onclick=\"loadProceduresTable(this); return false;\"" : "")>
+            <i class="bi @o.Icono"></i>
+            <span>@o.Nombre</span>
+        </a>
+    }
+</nav>

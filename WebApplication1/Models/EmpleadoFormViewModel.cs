@@ -15,6 +15,7 @@ namespace WebApplication1.Models
         public int Id { get; set; }
         public string Nombres { get; set; }
         public string Apellidos { get; set; }
+        public string EtiquetaEstado { get; set; } = "Activo";
         public string TipoIdentificacion { get; set; } = "Cédula de Ciudadanía";
         public string NumeroIdentificacion { get; set; }
         public string CorreoCorporativo { get; set; }
@@ -22,6 +23,7 @@ namespace WebApplication1.Models
         public string TelefonoOficina { get; set; }
         public DateTime FechaNacimiento { get; set; } = DateTime.Today.AddYears(-25);
         public string Direccion { get; set; }
+        public string CodigoPostal { get; set; }
         public DateTime FechaIngreso { get; set; } = DateTime.Today;
 
         public string Cargo { get; set; }
@@ -40,6 +42,7 @@ namespace WebApplication1.Models
         public List<int> FichasSeleccionadas { get; set; } = new List<int>();
         public List<FichaItemViewModel> FichasCatalogo { get; set; } = new List<FichaItemViewModel>();
         public List<CatalogoItem> EpsCatalogo { get; set; } = new List<CatalogoItem>();
+        public List<CatalogoItem> TiposDocumentoCatalogo { get; set; } = new List<CatalogoItem>();
 
         // Secciones adicionales (solo en edición): se cargan desde el perfil del empleado
         public int? FichaIdActual { get; set; }

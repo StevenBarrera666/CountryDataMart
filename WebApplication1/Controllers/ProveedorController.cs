@@ -1,25 +1,30 @@
 ﻿using LogicBo;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Web;
 using System.Web.Mvc;
+using WebApplication1.Filters;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
+    [Access]
     public class ProveedorController : Controller
     {
         InspectionsBo _inspectionsBo = new InspectionsBo();
         // GET: Cliente/Perfil/1
       
+        [EscrituraVista("Proveedor", "Proveedores")]
         public ActionResult Registrar(int? id)
         {
             Response.Charset = "utf-8";
             Response.ContentEncoding = System.Text.Encoding.UTF8;
 
             var model = new ProveedorRegistroViewModel();
+            string paisNombre = null; // nombre del pais del perfil (dbo.Paises), para ubicarlo en dbo.Countries
 
             // 1. Carga o inicialización de datos
             if (id.HasValue && id.Value > 0)
@@ -45,9 +50,11 @@ namespace WebApplication1.Controllers
                     model.CorreoPrincipal = row.Field<string>("CorreoPrincipal");
                     model.Correo2 = row.Field<string>("Correo2");
                     model.Direccion = row.Field<string>("Direccion");
+                    model.CodigoPostal = _inspectionsBo.ObtenerCodigoPostal("Proveedores", id.Value);
 
                     model.Origen = row.Field<string>("Origen");
                     model.PaisId = Convert.ToInt32(row["PaisId"]);
+                    paisNombre = row.Table.Columns.Contains("Pais") && row["Pais"] != DBNull.Value ? row["Pais"].ToString() : null;
                     model.DepartamentoId = Convert.ToInt32(row["DepartamentoId"]);
                     model.CiudadId = Convert.ToInt32(row["CiudadId"]);
 
@@ -79,8 +86,8 @@ namespace WebApplication1.Controllers
 
             // 2. Catálogos Maestros (SelectLists)
             ViewBag.DdlNaturalezas = new SelectList(new[] {
-                new { Id = 1, Nombre = "Persona Jurídica" },
-                new { Id = 2, Nombre = "Persona Natural" }
+                new { Id = 1, Nombre = "Jurídica" },
+                new { Id = 2, Nombre = "Natural" }
             }, "Id", "Nombre", model.NaturalezaId);
 
             ViewBag.DdlTiposCliente = new SelectList(new[] {
@@ -100,17 +107,35 @@ namespace WebApplication1.Controllers
 
 
 
-            ViewBag.DdlTiposDoc = new SelectList(new[] {
-                new { Id = 1, Nombre = "NIT - Número Identificación Tributaria" },
-                new { Id = 2, Nombre = "CC - Cédula de Ciudadanía" },
-                new { Id = 3, Nombre = "CE - Cédula de Extranjería" }
-            }, "Id", "Nombre", model.TipoDocumentoId);
+            var tiposDoc = new List<object>();
+            DataTable dtTiposDoc = _inspectionsBo.CargarTiposDocumento();
+            if (dtTiposDoc != null)
+            {
+                foreach (DataRow rt in dtTiposDoc.Rows)
+                    tiposDoc.Add(new { Id = Convert.ToInt32(rt["Id"]), Nombre = rt["Nombre"].ToString() });
+            }
+            ViewBag.DdlTiposDoc = new SelectList(tiposDoc, "Id", "Nombre", model.TipoDocumentoId);
 
             ViewBag.DdlOrigen = new SelectList(new[] { "Nacional", "Internacional" }, model.Origen);
 
-            ViewBag.DdlPaises = new SelectList(new[] {
-                new { Id = 1, Nombre = "Colombia" }
-            }, "Id", "Nombre", model.PaisId);
+            // Paises desde dbo.Countries; al editar se ubica por nombre y, en un alta, se preselecciona Colombia
+            var paises = new List<object>();
+            int? idColombia = null, idPaisPerfil = null;
+            DataTable dtPaises = _inspectionsBo.ListarCountries();
+            if (dtPaises != null)
+            {
+                foreach (DataRow rp in dtPaises.Rows)
+                {
+                    int idPais = Convert.ToInt32(rp["ID"]);
+                    string nombrePais = rp["Name"].ToString().Trim();
+                    paises.Add(new { Id = idPais, Nombre = nombrePais });
+                    if (string.Equals(nombrePais, "Colombia", StringComparison.OrdinalIgnoreCase)) idColombia = idPais;
+                    if (paisNombre != null && string.Equals(nombrePais, paisNombre.Trim(), StringComparison.OrdinalIgnoreCase)) idPaisPerfil = idPais;
+                }
+            }
+            if (id.HasValue && id.Value > 0) { if (idPaisPerfil.HasValue) model.PaisId = idPaisPerfil.Value; }
+            else if (idColombia.HasValue) model.PaisId = idColombia.Value;
+            ViewBag.DdlPaises = new SelectList(paises, "Id", "Nombre", model.PaisId);
 
             ViewBag.DdlDepartamentos = new SelectList(new[] {
                 new { Id = 1, Nombre = "Bogotá D.C." },
@@ -124,23 +149,32 @@ namespace WebApplication1.Controllers
                 new { Id = 3, Nombre = "Cali" }
             }, "Id", "Nombre", model.CiudadId);
 
-            ViewBag.DdlTiposCobro = new SelectList(new[] {
-                new { Id = 1, Nombre = "Facturación Mensual Vencida" },
-                new { Id = 2, Nombre = "Pago Anticipado" },
-                new { Id = 3, Nombre = "Contra Entrega" }
-            }, "Id", "Nombre", model.TipoCobroId);
+            var tiposCobro = new List<object>();
+            DataTable dtTiposCobro = _inspectionsBo.CargarMetodosPago();
+            if (dtTiposCobro != null)
+            {
+                foreach (DataRow rp in dtTiposCobro.Rows)
+                    tiposCobro.Add(new { Id = Convert.ToInt32(rp["ID"]), Nombre = rp["name"].ToString() });
+            }
+            ViewBag.DdlTiposCobro = new SelectList(tiposCobro, "Id", "Nombre", model.TipoCobroId);
 
-            ViewBag.DdlCategoriasTarifa = new SelectList(new[] {
-                new { Id = 1, Nombre = "Tarifa Estándar" },
-                new { Id = 2, Nombre = "Tarifa Especial A" },
-                new { Id = 3, Nombre = "Tarifa Preferencial Corporativa" }
-            }, "Id", "Nombre", model.CategoriaTarifaId);
+            var categoriasTarifa = new List<object>();
+            DataTable dtCategorias = _inspectionsBo.CargarCategoriasTarifa();
+            if (dtCategorias != null)
+            {
+                foreach (DataRow rc in dtCategorias.Rows)
+                    categoriasTarifa.Add(new { Id = Convert.ToInt32(rc["Id"]), Nombre = rc["Nombre"].ToString() });
+            }
+            ViewBag.DdlCategoriasTarifa = new SelectList(categoriasTarifa, "Id", "Nombre", model.CategoriaTarifaId);
 
-            ViewBag.DdlActividades = new SelectList(new[] {
-                new { Id = 1, Nombre = "7110 - Arquitectura e ingeniería" },
-                new { Id = 2, Nombre = "6201 - Desarrollo informático" },
-                new { Id = 3, Nombre = "4690 - Comercio no especializado" }
-            }, "Id", "Nombre", model.ActividadEconomicaId);
+            var actividades = new List<object>();
+            DataTable dtActividades = _inspectionsBo.CargarActividades();
+            if (dtActividades != null)
+            {
+                foreach (DataRow ra in dtActividades.Rows)
+                    actividades.Add(new { Id = Convert.ToInt32(ra["Id"]), Nombre = ra["Nombre"].ToString() });
+            }
+            ViewBag.DdlActividades = new SelectList(actividades, "Id", "Nombre", model.ActividadEconomicaId);
 
             ViewBag.DdlIndustrias = new SelectList(new[] {
                 new { Id = 1, Nombre = "Ingeniería y Construcción" },
@@ -157,6 +191,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        [Escritura("Proveedor", "Proveedores")]
         public JsonResult UploadLogoCliente()
         {
             try
@@ -185,6 +220,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        [Escritura("Proveedor", "Proveedores")]
         public JsonResult UploadDocumentoFiscal(string tipoDoc)
         {
             try
@@ -213,6 +249,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        [Escritura("Proveedor", "Proveedores")]
         public JsonResult GuardarProveedor(ProveedorRegistroViewModel model)
         {
             if (!ModelState.IsValid)
@@ -238,6 +275,7 @@ namespace WebApplication1.Controllers
 
                     if (idGenerado > 0)
                     {
+                        _inspectionsBo.GuardarCodigoPostal("Proveedores", idGenerado, model.CodigoPostal);
                         Session.Remove("ClienteLogoUrl");
                         return Json(new { result = true, idGenerado = idGenerado });
                     }
@@ -328,26 +366,6 @@ namespace WebApplication1.Controllers
             try
             {
                 var result = _inspectionsBo.GetlistProveedores();
-
-                // Si el listado no trae LogoUrl, se consulta el perfil de cada registro para obtenerlo
-                if (result != null && result.Columns.Contains("Id") && !result.Columns.Contains("LogoUrl"))
-                {
-                    result.Columns.Add("LogoUrl", typeof(string));
-                    foreach (DataRow r in result.Rows)
-                    {
-                        try
-                        {
-                            int rid;
-                            if (!int.TryParse(r["Id"].ToString(), out rid)) continue;
-                            DataTable perfil = _inspectionsBo.ObtenerPerfilProveedorDataTable(rid);
-                            if (perfil != null && perfil.Rows.Count > 0 && perfil.Columns.Contains("LogoUrl") && perfil.Rows[0]["LogoUrl"] != DBNull.Value)
-                            {
-                                r["LogoUrl"] = perfil.Rows[0]["LogoUrl"].ToString();
-                            }
-                        }
-                        catch (Exception) { /* sin logo para este registro */ }
-                    }
-                }
 
                 // Alias de columnas para que la vista las reconozca (si el SP las trae con otro nombre)
                 if (result != null)

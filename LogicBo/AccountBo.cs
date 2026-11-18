@@ -54,9 +54,8 @@ namespace LogicBo
 
                 //busqueda del usuario 
                 var user = (from us in entities.Usuario
-                            join usSe in entities.Usuario_Sede on us.Usuario_ID equals usSe.UsuarioID
                             join rol in entities.usuario_Rol on us.Usuario_ID equals rol.UsuarioID
-                            where us.Usuario1 == nameUser && us.PasswordMD5 == passwordEncrypt
+                            where us.Usuario1 == nameUser && us.PasswordMD5 == passwordEncrypt && us.Activo == 1
                             select new { us.Usuario_ID, us.Usuario1, us.Nombres, us.Apellidos, rol.RolId }).FirstOrDefault();
                 if (user != null)
                 {

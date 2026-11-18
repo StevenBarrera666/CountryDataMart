@@ -11,6 +11,7 @@ namespace WebApplication1.Models
         public string LoginUser { get; set; }
         public int? SedeCategoriaId { get; set; }
         public int? RolId { get; set; }
+        public List<LogicBo.SecurityBo.OpcionModel> Opciones { get; set; } = new List<LogicBo.SecurityBo.OpcionModel>();
         public string Pais { get; set; }
         public string Bandera { get; set; }
         public string Welcome { get; set; }

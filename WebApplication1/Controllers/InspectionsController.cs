@@ -965,11 +965,6 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-
-
-
-
-
         [HttpPost]
         public PartialViewResult Documentacion(FormCollection collection)
         {
@@ -1163,6 +1158,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        [Escritura("Inspections", "Facturacion")]
         public JsonResult RemisionarFila(int fileDetailId)
         {
             try
@@ -1238,6 +1234,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        [Escritura("Inspections", "Documentacion")]
         public JsonResult GuardarDocumentacionFila(DocumentacionFilaModel model)
         {
             try
@@ -1299,6 +1296,7 @@ namespace WebApplication1.Controllers
 
 
         [HttpPost]
+        [Escritura("Inspections", "Autorizacion")]
         public JsonResult GuardarAutorizacionFila(AutorizacionFilaModel model)
         {
             try

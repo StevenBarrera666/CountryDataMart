@@ -1,0 +1,102 @@
+﻿@model LogicBo.ViajeroRegistroViewModel
+@using WebApplication1.Filters
+@using WebApplication1.Models
+@{
+    bool soloLectura = Permisos.EsSoloLectura(Session["SessionUser"] as SessionModels, "Viajero", "Viajeros");
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Perfil del Viajero";
+
+    Func<DateTime?, string> f = d => d.HasValue ? d.Value.ToString("dd/MM/yyyy") : "";
+    Func<string, string, KeyValuePair<string, string>> kv = (k, v) => new KeyValuePair<string, string>(k, v ?? "");
+
+    var secciones = new[]
+    {
+        new { Titulo = "Datos del Pasajero", Icono = "user", Campos = new[] {
+            kv("Título", Model.Pasajero_Titulo), kv("Apellido", Model.Pasajero_Apellido), kv("Nombre", Model.Pasajero_Nombre),
+            kv("Sexo", Model.Pasajero_Sexo), kv("Fecha de Nacimiento", f(Model.Pasajero_FechaNacimiento)),
+            kv("País de Nacimiento", (ViewBag.PaisNacimientoTexto as string) ?? Model.Pasajero_PaisNacimiento), kv("Nacionalidad", Model.Pasajero_Nacionalidad),
+            kv("Ciudad de Residencia", Model.Pasajero_CiudadResidencia), kv("Cargo", Model.Pasajero_Cargo),
+            kv("Tipo de Pasajero", (ViewBag.TipoPasajeroTexto as string) ?? Model.Pasajero_Tipo), kv("Ficha", ViewBag.FichaTexto as string) } },
+        new { Titulo = "Datos del Cliente", Icono = "building", Campos = new[] {
+            kv("Cuenta", Model.Cliente_Cuenta), kv("ID", Model.Cliente_ID), kv("Estación", Model.Cliente_Estacion),
+            kv("Orden Interna", Model.Cliente_OrdenInterna), kv("Vicepresidencia", Model.Cliente_Vicepresidencia),
+            kv("Gerencia", Model.Cliente_Gerencia), kv("Correo", Model.Cliente_Correo) } },
+        new { Titulo = "Identificación", Icono = "id card", Campos = new[] {
+            kv("Tipo", Model.Identificacion_Tipo), kv("Número", Model.Identificacion_Numero) } },
+        new { Titulo = "Pasaporte", Icono = "book", Campos = new[] {
+            kv("Número", Model.Pasaporte_Numero), kv("País de Emisión", (ViewBag.PaisPasaporteTexto as string) ?? Model.Pasaporte_PaisEmision),
+            kv("Fecha de Emisión", f(Model.Pasaporte_FechaEmision)), kv("Fecha de Caducidad", f(Model.Pasaporte_FechaCaducidad)) } },
+        new { Titulo = "Visa", Icono = "globe", Campos = new[] {
+            kv("Número", Model.Visa_Numero), kv("País de Emisión", (ViewBag.PaisVisaTexto as string) ?? Model.Visa_PaisEmision),
+            kv("Fecha de Emisión", f(Model.Visa_FechaEmision)), kv("Fecha de Caducidad", f(Model.Visa_FechaCaducidad)) } },
+        new { Titulo = "Contacto y Preferencias", Icono = "phone", Campos = new[] {
+            kv("Celular", Model.Pasajero_Celular), kv("WhatsApp", Model.Pasajero_Whatsapp), kv("Correo", Model.Pasajero_Correo),
+            kv("Cabina", (ViewBag.CabinaTexto as string) ?? Model.Pasajero_Cabina), kv("Clase", (ViewBag.ClaseTexto as string) ?? Model.Pasajero_Clase), kv("Silla", (ViewBag.SillaTexto as string) ?? Model.Pasajero_Silla),
+            kv("Aerolínea Viajero Frecuente", (ViewBag.AerolineaTexto as string) ?? Model.Pasajero_ViajeroFrecuenteAero),
+            kv("Número Viajero Frecuente", Model.Pasajero_ViajeroFrecuenteNumero), kv("Nombre Amadeus", Model.Amadeus_Nombre) } }
+    };
+}
+
+<div class="ui container fluid" style="padding: 15px;">
+    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="@Url.Action("Viajeros", "Viajero")" class="ui mini basic button" onclick="loadProceduresTable(this); return false;">
+            <i class="arrow left icon"></i> Volver a Viajeros
+        </a>
+        <span class="text-muted small">Viajero Id: <strong>@Model.Id</strong></span>
+    </div>
+
+    <div class="ui segment">
+        <h3 class="ui header">
+            <i class="plane icon"></i>
+            <div class="content">
+                @Model.Pasajero_Nombre @Model.Pasajero_Apellido
+                <div class="sub header">
+                    <span class="ui small @(Model.Activo ? "green" : "grey") label">@(Model.Activo ? "Activo" : "Inactivo")</span>
+                </div>
+            </div>
+        </h3>
+
+        @if (!soloLectura)
+        {
+            <a href="javascript:void(0)" class="ui primary button" onclick="cargarElement('@Url.Action("Registrar", "Viajero", new { id = Model.Id })')">
+            <i class="pencil icon"></i> Actualizar Datos
+            </a>
+        }
+    </div>
+
+    @foreach (var s in secciones)
+    {
+        <div class="ui segment">
+            <h4 class="ui header"><i class="@s.Icono icon"></i> @s.Titulo</h4>
+            <table class="ui very basic table">
+                <tbody>
+                    @foreach (var c in s.Campos)
+                    {
+                        <tr>
+                            <td class="collapsing"><strong>@c.Key</strong></td>
+                            <td>@c.Value</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+</script>

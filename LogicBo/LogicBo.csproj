@@ -64,6 +64,7 @@
     <Compile Include="CategoriaIzajeBo.cs" />
     <Compile Include="ProveedorRegistroViewModel.cs" />
     <Compile Include="ClienteRegistroViewModel.cs" />
+    <Compile Include="ViajeroRegistroViewModel.cs" />
     <Compile Include="ClienteTarifaItemViewModel.cs" />
     <Compile Include="ComprobanteItemViewModel.cs" />
     <Compile Include="CronogramaIzajeBo.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="CategoryBo.cs" />
     <Compile Include="PersonBo.cs" />
     <Compile Include="TechnicalInformationBo.cs" />
+    <Compile Include="SecurityBo.cs" />
     <Compile Include="UsersAndRolesBo.cs" />
     <Compile Include="TrainningBo.cs" />
     <Compile Include="InspectionsBo.cs" />

@@ -212,39 +212,11 @@
                              alt="Logo"
                              class="brand-logo-img"
                              onerror="this.src='/Content/Images/logo-default.png';" />
-                        <h5 class="sidebar-title">Administrador de Perfiles</h5>
+                        <h5 class="sidebar-title">Administración de Perfiles</h5>
                     </div>
 
                     <!-- Enlaces del módulo de perfiles con sus respectivos iconos -->
-                    <nav class="sidebar-menu">
-                        <a href="@Url.Action("Clientes", "Cliente")"
-                           class="sidebar-link"
-                           onclick="loadProceduresTable(this); return false;">
-                            <i class="bi bi-people"></i>
-                            <span>Clientes</span>
-                        </a>
-
-                        <a href="@Url.Action("Empleados", "Empleado")"
-                           class="sidebar-link"
-                           onclick="loadProceduresTable(this); return false;">
-                            <i class="bi bi-person-badge"></i>
-                            <span>Empleados</span>
-                        </a>
-
-                        <a href="@Url.Action("Proveedores", "Proveedor")"
-                           class="sidebar-link"
-                           onclick="loadProceduresTable(this); return false;">
-                            <i class="bi bi-truck"></i>
-                            <span>Proveedores</span>
-                        </a>
-
-                        <a href="@Url.Action("Opciones", "Inspections")"
-                           class="sidebar-link"
-                           onclick="loadProceduresTable(this); return false;">
-                            <i class="bi bi-sliders"></i>
-                            <span>Opciones</span>
-                        </a>
-                    </nav>
+                    @Html.Partial("_MenuOpciones", "ADMIN")
                 </div>
 
                 <!-- Botón Inferior de Regreso -->

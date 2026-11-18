@@ -1,0 +1,323 @@
+﻿@model LogicBo.ViajeroRegistroViewModel
+@{
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+    bool esEdicion = Model != null && Model.Id > 0;
+    ViewBag.Title = esEdicion ? "Actualizar Viajero" : "Registrar Nuevo Viajero";
+
+    var ddlFichas = ViewBag.DdlFichas as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlTiposDoc = ViewBag.DdlTiposDoc as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlClases = ViewBag.DdlClases as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlCabinas = ViewBag.DdlCabinas as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlSillas = ViewBag.DdlSillas as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlAerolineas = ViewBag.DdlAerolineas as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlSexos =ViewBag.DdlSexos as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlPaisNacimiento =ViewBag.DdlPaisNacimiento as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlPaisPasaporte = ViewBag.DdlPaisPasaporte as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlPaisVisa = ViewBag.DdlPaisVisa as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    var ddlTiposPasajero =ViewBag.DdlTiposPasajero as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>());
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" />
+
+<div id="wrapRegistrar" style="padding: 15px; width: 100%; box-sizing: border-box;">
+    <h3 class="ui header dividing">
+        <i class="@(esEdicion ? "pencil alternate" : "plane") icon"></i>
+        <div class="content">
+            @(esEdicion ? "ACTUALIZAR VIAJERO" : "REGISTRO DE NUEVO VIAJERO")
+            <div class="sub header">Complete la información del pasajero</div>
+        </div>
+    </h3>
+
+    <form id="formRegistrarViajero" class="ui form" onsubmit="return false;">
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.Activo, new { id = "hdnActivo" })
+
+        <div class="two fields">
+            <div class="field">
+                <label>Estado</label>
+                <div class="ui toggle checkbox" id="chkActivo">
+                    <input type="checkbox" @(Model.Activo ? "checked" : "") />
+                    <label id="lblActivo">@(Model.Activo ? "Activo" : "Inactivo")</label>
+                </div>
+            </div>
+            <div class="field">
+                <label>Ficha</label>
+                @Html.DropDownListFor(m => m.FichaId, ddlFichas, "[-Seleccione Ficha-]", new { @class = "ui search dropdown", @id = "FichaId" })
+            </div>
+        </div>
+
+        <h4 class="ui header seccion-titulo"><i class="user icon"></i> 1. Datos del Pasajero</h4>
+        <div class="three fields">
+            <div class="field">
+                <label>Título</label>
+                @Html.TextBoxFor(m => m.Pasajero_Titulo, new { maxlength = "20", placeholder = "Ej. Sr., Sra., Dr.", autocomplete = "off" })
+            </div>
+            <div class="field required">
+                <label>Apellido</label>
+                @Html.TextBoxFor(m => m.Pasajero_Apellido, new { maxlength = "100", autocomplete = "off" })
+            </div>
+            <div class="field required">
+                <label>Nombre</label>
+                @Html.TextBoxFor(m => m.Pasajero_Nombre, new { maxlength = "100", autocomplete = "off" })
+            </div>
+        </div>
+        <div class="three fields">
+            <div class="field">
+                <label>Sexo</label>
+                @Html.DropDownListFor(m => m.Pasajero_Sexo, ddlSexos, "[-Seleccione Sexo-]", new { @class = "ui search dropdown", @id = "Pasajero_Sexo" })
+            </div>
+            <div class="field">
+                <label>Fecha de Nacimiento</label>
+                @Html.TextBoxFor(m => m.Pasajero_FechaNacimiento, "{0:yyyy-MM-dd}", new { type = "date" })
+            </div>
+            <div class="field">
+                <label>Tipo de Pasajero</label>
+                @Html.DropDownListFor(m => m.Pasajero_Tipo, ddlTiposPasajero, "[-Seleccione Tipo-]", new { @class = "ui search dropdown", @id = "Pasajero_Tipo" })
+            </div>
+        </div>
+        <div class="three fields">
+            <div class="field">
+                <label>País de Nacimiento</label>
+                @Html.DropDownListFor(m => m.Pasajero_PaisNacimiento, ddlPaisNacimiento, "[-Seleccione País-]", new { @class = "ui search dropdown", @id = "Pasajero_PaisNacimiento" })
+            </div>
+            <div class="field">
+                <label>Nacionalidad</label>
+                @Html.TextBoxFor(m => m.Pasajero_Nacionalidad, new { maxlength = "80", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Ciudad de Residencia</label>
+                @Html.TextBoxFor(m => m.Pasajero_CiudadResidencia, new { maxlength = "100", autocomplete = "off" })
+            </div>
+        </div>
+        <div class="field">
+            <label>Cargo</label>
+            @Html.TextBoxFor(m => m.Pasajero_Cargo, new { maxlength = "150", autocomplete = "off" })
+        </div>
+
+        <h4 class="ui header seccion-titulo"><i class="building icon"></i> 2. Datos del Cliente</h4>
+        <div class="three fields">
+            <div class="field">
+                <label>Cuenta</label>
+                @Html.TextBoxFor(m => m.Cliente_Cuenta, new { maxlength = "100", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>ID</label>
+                @Html.TextBoxFor(m => m.Cliente_ID, new { maxlength = "50", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Estación</label>
+                @Html.TextBoxFor(m => m.Cliente_Estacion, new { maxlength = "100", autocomplete = "off" })
+            </div>
+        </div>
+        <div class="three fields">
+            <div class="field">
+                <label>Orden Interna</label>
+                @Html.TextBoxFor(m => m.Cliente_OrdenInterna, new { maxlength = "80", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Vicepresidencia</label>
+                @Html.TextBoxFor(m => m.Cliente_Vicepresidencia, new { maxlength = "150", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Gerencia</label>
+                @Html.TextBoxFor(m => m.Cliente_Gerencia, new { maxlength = "150", autocomplete = "off" })
+            </div>
+        </div>
+        <div class="field">
+            <label>Correo del Cliente</label>
+            @Html.TextBoxFor(m => m.Cliente_Correo, new { type = "email", maxlength = "150", autocomplete = "off" })
+        </div>
+
+        <h4 class="ui header seccion-titulo"><i class="id card icon"></i> 3. Identificación</h4>
+        <div class="two fields">
+            <div class="field required">
+                <label>Tipo de Identificación</label>
+                @Html.DropDownListFor(m => m.Identificacion_Tipo, ddlTiposDoc, "[-Seleccione Tipo-]", new { @class = "ui search dropdown", @id = "Identificacion_Tipo" })
+            </div>
+            <div class="field required">
+                <label>Número de Identificación</label>
+                @Html.TextBoxFor(m => m.Identificacion_Numero, new { maxlength = "40", autocomplete = "off" })
+            </div>
+        </div>
+
+        <h4 class="ui header seccion-titulo"><i class="book icon"></i> 4. Pasaporte</h4>
+        <div class="four fields">
+            <div class="field">
+                <label>Número</label>
+                @Html.TextBoxFor(m => m.Pasaporte_Numero, new { maxlength = "50", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>País de Emisión</label>
+                @Html.DropDownListFor(m => m.Pasaporte_PaisEmision, ddlPaisPasaporte, "[-Seleccione País-]", new { @class = "ui search dropdown", @id = "Pasaporte_PaisEmision" })
+            </div>
+            <div class="field">
+                <label>Fecha de Emisión</label>
+                @Html.TextBoxFor(m => m.Pasaporte_FechaEmision, "{0:yyyy-MM-dd}", new { type = "date" })
+            </div>
+            <div class="field">
+                <label>Fecha de Caducidad</label>
+                @Html.TextBoxFor(m => m.Pasaporte_FechaCaducidad, "{0:yyyy-MM-dd}", new { type = "date" })
+            </div>
+        </div>
+
+        <h4 class="ui header seccion-titulo"><i class="globe icon"></i> 5. Visa</h4>
+        <div class="four fields">
+            <div class="field">
+                <label>Número</label>
+                @Html.TextBoxFor(m => m.Visa_Numero, new { maxlength = "50", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>País de Emisión</label>
+                @Html.DropDownListFor(m => m.Visa_PaisEmision, ddlPaisVisa, "[-Seleccione País-]", new { @class = "ui search dropdown", @id = "Visa_PaisEmision" })
+            </div>
+            <div class="field">
+                <label>Fecha de Emisión</label>
+                @Html.TextBoxFor(m => m.Visa_FechaEmision, "{0:yyyy-MM-dd}", new { type = "date" })
+            </div>
+            <div class="field">
+                <label>Fecha de Caducidad</label>
+                @Html.TextBoxFor(m => m.Visa_FechaCaducidad, "{0:yyyy-MM-dd}", new { type = "date" })
+            </div>
+        </div>
+
+        <h4 class="ui header seccion-titulo"><i class="phone icon"></i> 6. Contacto y Preferencias</h4>
+        <div class="three fields">
+            <div class="field">
+                <label>Celular</label>
+                @Html.TextBoxFor(m => m.Pasajero_Celular, new { maxlength = "30", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>WhatsApp</label>
+                @Html.TextBoxFor(m => m.Pasajero_Whatsapp, new { maxlength = "30", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Correo</label>
+                @Html.TextBoxFor(m => m.Pasajero_Correo, new { type = "email", maxlength = "150", autocomplete = "off" })
+            </div>
+        </div>
+        <div class="three fields">
+            <div class="field">
+                <label>Cabina</label>
+                @Html.DropDownListFor(m => m.Pasajero_Cabina, ddlCabinas, "[-Seleccione Cabina-]", new { @class = "ui search dropdown", @id = "Pasajero_Cabina" })
+            </div>
+            <div class="field">
+                <label>Clase</label>
+                @Html.DropDownListFor(m => m.Pasajero_Clase, ddlClases, "[-Seleccione Clase-]", new { @class = "ui search dropdown", @id = "Pasajero_Clase" })
+            </div>
+            <div class="field">
+                <label>Silla</label>
+                @Html.DropDownListFor(m => m.Pasajero_Silla, ddlSillas, "[-Seleccione Silla-]", new { @class = "ui search dropdown", @id = "Pasajero_Silla" })
+            </div>
+        </div>
+        <div class="three fields">
+            <div class="field">
+                <label>Aerolínea Viajero Frecuente</label>
+                @Html.DropDownListFor(m => m.Pasajero_ViajeroFrecuenteAero, ddlAerolineas, "[-Seleccione Aerolínea-]", new { @class = "ui search dropdown", @id = "Pasajero_ViajeroFrecuenteAero" })
+            </div>
+            <div class="field">
+                <label>Número Viajero Frecuente</label>
+                @Html.TextBoxFor(m => m.Pasajero_ViajeroFrecuenteNumero, new { maxlength = "60", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Nombre Amadeus</label>
+                @Html.TextBoxFor(m => m.Amadeus_Nombre, new { maxlength = "200", autocomplete = "off" })
+            </div>
+        </div>
+    </form>
+
+    <div style="margin-top: 25px;">
+        <button class="ui primary button" type="button" id="btnGuardarViajero">
+            <i class="save icon"></i> @(esEdicion ? "Guardar Cambios" : "Registrar Viajero")
+        </button>
+        <button class="ui button" type="button"
+                onclick="cargarElement('@(esEdicion ? Url.Action("Perfil", "Viajero", new { id = Model.Id }) : Url.Action("Viajeros", "Viajero"))')">
+            Cancelar
+        </button>
+    </div>
+
+    <div class="ui floating warning message" style="width: 60%; margin: 20px auto; text-align: center; display: none;" id="messageRegistrarViajero">
+        <div class="header">Atención</div>
+        <p id="textMessageRegistrarViajero"></p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+
+    function mostrarNotificacion(mensaje, esExito) {
+        var $div = $('#messageRegistrarViajero');
+        $div.removeClass("warning info").addClass(esExito ? "info" : "warning");
+        $('#textMessageRegistrarViajero').text(mensaje);
+        $div.stop(true, true).fadeIn();
+    }
+
+    $(document).ready(function () {
+        $('.ui.dropdown').dropdown({ fullTextSearch: true });
+
+        // Nombre Amadeus = Apellido/Nombre, se completa mientras se digitan apellido y nombre.
+        // Si la persona edita el campo a mano, deja de sobrescribirse.
+        var amadeusManual = false;
+        $('#Amadeus_Nombre').on('input', function () { amadeusManual = true; });
+        $('#Pasajero_Apellido, #Pasajero_Nombre').on('input', function () {
+            if (amadeusManual) return;
+            var apellido = $.trim($('#Pasajero_Apellido').val());
+            var nombre = $.trim($('#Pasajero_Nombre').val());
+            $('#Amadeus_Nombre').val(apellido || nombre ? (apellido + '/' + nombre).toUpperCase() : '');
+        });
+
+        $('#chkActivo input').on('change', function () {
+            // HiddenFor(bool) envía "True"/"False"
+            $('#hdnActivo').val(this.checked ? 'True' : 'False');
+            $('#lblActivo').text(this.checked ? 'Activo' : 'Inactivo');
+        }).trigger('change');
+    });
+
+    $('#btnGuardarViajero').off('click').on('click', function (e) {
+        e.preventDefault();
+
+        if (!$.trim($('#Pasajero_Apellido').val()) || !$.trim($('#Pasajero_Nombre').val()) ||
+            !$('#Identificacion_Tipo').val() || !$.trim($('#Identificacion_Numero').val())) {
+            mostrarNotificacion('Complete los campos obligatorios: apellido, nombre y tipo y número de identificación.', false);
+            return;
+        }
+
+        $('#facadeContent').addClass("loading");
+        $.ajax({
+            url: '@Url.Action("GuardarViajero", "Viajero")',
+            type: 'POST',
+            data: $('#formRegistrarViajero').serialize(),
+            success: function (data) {
+                $('#facadeContent').removeClass("loading");
+                var res = typeof data === "string" ? JSON.parse(data) : data;
+                if (res.result) {
+                    mostrarNotificacion("Viajero guardado con éxito. Redirigiendo a su ficha...", true);
+                    setTimeout(function () {
+                        cargarElement('@Url.Action("Perfil", "Viajero")?id=' + res.idGenerado);
+                    }, 1000);
+                } else {
+                    mostrarNotificacion(res.message, false);
+                }
+            },
+            error: function (xhr, status, error) {
+                $('#facadeContent').removeClass("loading");
+                mostrarNotificacion("Error en la solicitud: " + error, false);
+            }
+        });
+    });
+</script>
+
+@Html.Partial("_SoloLectura", new ViewDataDictionary { { "controller", "Viajero" }, { "action", "Viajeros" }, { "tabla", "#wrapRegistrar" } })

@@ -1,4 +1,4 @@
-@model LogicBo.ClienteRegistroViewModel
+﻿@model LogicBo.ClienteRegistroViewModel
 @{
     Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
     bool esEdicion = Model != null && Model.Id > 0;
@@ -71,7 +71,12 @@
         <div class="two fields">
             <div class="field required">
                 <label>Estado</label>
-                @Html.TextBoxFor(m => m.EstadoEtiqueta, new { placeholder = "Activo / Inactivo", maxlength = "20", autocomplete = "off" })
+                @{ var estadoInactivo = string.Equals(Model.EstadoEtiqueta, "Inactivo", StringComparison.OrdinalIgnoreCase); }
+                @Html.HiddenFor(m => m.EstadoEtiqueta, new { id = "hdnEstado" })
+                <div class="ui toggle checkbox" id="chkEstado">
+                    <input type="checkbox" @(estadoInactivo ? "" : "checked") />
+                    <label id="lblEstado">@(estadoInactivo ? "Inactivo" : "Activo")</label>
+                </div>
             </div>
         </div>
 
@@ -90,15 +95,15 @@
 
         <div class="three fields">
             <div class="field required">
-                <label>Razón Social</label>
-                @Html.TextBoxFor(m => m.RazonSocial, new { placeholder = "Razón social completa", maxlength = "200", autocomplete = "off" })
+                <label>Razón Social o Nombre</label>
+                @Html.TextBoxFor(m => m.RazonSocial, new { placeholder = "Razón social o nombre completo", maxlength = "200", autocomplete = "off" })
             </div>
             <div class="field">
                 <label>Establecimiento Comercial</label>
                 @Html.TextBoxFor(m => m.EstablecimientoComercial, new { placeholder = "Ej: Sede Principal", maxlength = "150", autocomplete = "off" })
             </div>
             <div class="field required">
-                <label>Nombre Comercial</label>
+                <label>Nombre</label>
                 @Html.TextBoxFor(m => m.NombreComercial, new { placeholder = "Nombre de marca/fantasía", maxlength = "150", autocomplete = "off" })
             </div>
         </div>
@@ -141,6 +146,11 @@
             @Html.TextBoxFor(m => m.Direccion, new { placeholder = "Dirección completa comercial", maxlength = "200", autocomplete = "off" })
         </div>
 
+        <div class="field">
+            <label>Código Postal</label>
+            @Html.TextBoxFor(m => m.CodigoPostal, new { placeholder = "Ej. 110111", maxlength = "20", autocomplete = "off" })
+        </div>
+
         <!-- SECCIÓN 2: DATOS UBICACIÓN -->
         <h4 class="ui header seccion-titulo"><i class="map marker alternate icon"></i> 2. Datos Ubicación</h4>
         <div class="four fields">
@@ -166,9 +176,15 @@
         <h4 class="ui header seccion-titulo"><i class="money bill alternate outline icon"></i> 3. Cobros y Tarifas</h4>
 
         <!-- Tipo de Cobro General -->
-        <div class="field required" style="max-width: 50%;">
-            <label>Tipo de Cobro</label>
-            @Html.DropDownListFor(m => m.TipoCobroId, ddlTiposCobro, "[-Seleccione Cobro-]", new { @class = "ui search dropdown", @id = "TipoCobroId" })
+        <div class="two fields">
+            <div class="field required">
+                <label>Tipo de Cobro</label>
+                @Html.DropDownListFor(m => m.TipoCobroId, ddlTiposCobro, "[-Seleccione Cobro-]", new { @class = "ui search dropdown", @id = "TipoCobroId" })
+            </div>
+            <div class="field">
+                <label>Fecha de Cierre (día del mes)</label>
+                @Html.TextBoxFor(m => m.DiaCierreFacturacion, new { type = "number", min = "1", max = "31", step = "1", placeholder = "Día de cierre de facturación (1 - 31)", autocomplete = "off" })
+            </div>
         </div>
 
         <!-- Panel para agregar tarifas dinámicas -->
@@ -325,6 +341,11 @@
     Dropzone.autoDiscover = false;
 
     $(document).ready(function () {
+        $('#chkEstado input').on('change', function () {
+            $('#hdnEstado').val(this.checked ? 'Activo' : 'Inactivo');
+            $('#lblEstado').text(this.checked ? 'Activo' : 'Inactivo');
+        }).trigger('change');
+
         // Inicializar desplegables
         $('.ui.dropdown').dropdown({ fullTextSearch: true });
 
@@ -389,8 +410,8 @@
             CodigoFicha: { identifier: 'CodigoFicha', rules: [{ type: 'empty', prompt: 'Ingrese código de ficha' }] },
             NaturalezaId: { identifier: 'NaturalezaId', rules: [{ type: 'empty', prompt: 'Seleccione naturaleza' }] },
             TipoId: { identifier: 'TipoId', rules: [{ type: 'empty', prompt: 'Seleccione tipo de cliente' }] },
-            RazonSocial: { identifier: 'RazonSocial', rules: [{ type: 'empty', prompt: 'Ingrese razón social' }] },
-            NombreComercial: { identifier: 'NombreComercial', rules: [{ type: 'empty', prompt: 'Ingrese nombre comercial' }] },
+            RazonSocial: { identifier: 'RazonSocial', rules: [{ type: 'empty', prompt: 'Ingrese razón social o nombre' }] },
+            NombreComercial: { identifier: 'NombreComercial', rules: [{ type: 'empty', prompt: 'Ingrese nombre' }] },
             TipoDocumentoId: { identifier: 'TipoDocumentoId', rules: [{ type: 'empty', prompt: 'Seleccione tipo de documento' }] },
             NumeroDocumento: { identifier: 'NumeroDocumento', rules: [{ type: 'empty', prompt: 'Ingrese número de documento' }] },
             Telefono1: { identifier: 'Telefono1', rules: [{ type: 'empty', prompt: 'Ingrese teléfono principal' }] },
@@ -583,3 +604,4 @@
         });
     }
 </script>
+@Html.Partial("_SoloLectura", new ViewDataDictionary { { "controller", "Cliente" }, { "action", "Clientes" }, { "tabla", ".formulario-cliente" } })

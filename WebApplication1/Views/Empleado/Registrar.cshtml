@@ -1,4 +1,4 @@
-@model WebApplication1.Models.EmpleadoFormViewModel
+﻿@model WebApplication1.Models.EmpleadoFormViewModel
 @{
     Layout = null;
     bool esEdicion = Model != null && Model.Id > 0;
@@ -198,13 +198,25 @@
                             <input type="text" name="Apellidos" id="inputApellidos" class="form-control-custom" value="@(Model != null ? Model.Apellidos : "")" required placeholder="Ej. Santos Castellanos" />
                         </div>
 
+                        <div class="col-md-12">
+                            @{ var empActivo = Model == null || !string.Equals(Model.EtiquetaEstado, "Inactivo", StringComparison.OrdinalIgnoreCase); }
+                            <label class="form-label-custom d-block">Estado</label>
+                            <input type="hidden" name="EtiquetaEstado" id="hdnEstado" value="@(empActivo ? "Activo" : "Inactivo")" />
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="chkEstado" @(empActivo ? "checked" : "") />
+                                <label class="form-check-label" for="chkEstado" id="lblEstado">@(empActivo ? "Activo" : "Inactivo")</label>
+                            </div>
+                        </div>
                         <div class="col-md-4">
                             <label class="form-label-custom">Tipo de Identificación <span class="text-danger">*</span></label>
                             <select name="TipoIdentificacion" class="form-select-custom" required>
-                                <option value="Cédula de Ciudadanía" @(Model != null && Model.TipoIdentificacion == "Cédula de Ciudadanía" ? "selected" : "")>Cédula de Ciudadanía</option>
-                                <option value="Cédula de Extranjería" @(Model != null && Model.TipoIdentificacion == "Cédula de Extranjería" ? "selected" : "")>Cédula de Extranjería</option>
-                                <option value="Pasaporte" @(Model != null && Model.TipoIdentificacion == "Pasaporte" ? "selected" : "")>Pasaporte</option>
-                                <option value="NIT" @(Model != null && Model.TipoIdentificacion == "NIT" ? "selected" : "")>NIT</option>
+                                @if (Model != null && Model.TiposDocumentoCatalogo != null)
+                                {
+                                    foreach (var td in Model.TiposDocumentoCatalogo)
+                                    {
+                                        <option value="@td.Nombre" @(Model.TipoIdentificacion == td.Nombre ? "selected" : "")>@td.Nombre</option>
+                                    }
+                                }
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -232,6 +244,11 @@
                         <div class="col-md-12">
                             <label class="form-label-custom">Dirección de Residencia</label>
                             <input type="text" name="Direccion" class="form-control-custom" value="@(Model != null ? Model.Direccion : "")" placeholder="Ej. CR 62 83 02, Bogotá" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Código Postal</label>
+                            <input type="text" name="CodigoPostal" class="form-control-custom" maxlength="20" value="@(Model != null ? Model.CodigoPostal : "")" placeholder="Ej. 110111" />
                         </div>
                     </div>
                 </div>
@@ -570,6 +587,10 @@
 </div>
 
 <script type="text/javascript">
+    $(document).on('change', '#chkEstado', function () {
+        $('#hdnEstado').val(this.checked ? 'Activo' : 'Inactivo');
+        $('#lblEstado').text(this.checked ? 'Activo' : 'Inactivo');
+    });
     $(document).ready(function () {
         $('#fileFoto').on('change', function () {
             if (!this.files || this.files.length === 0) return;
@@ -670,3 +691,4 @@
         });
     });
 </script>
+@Html.Partial("_SoloLectura", new ViewDataDictionary { { "controller", "Empleado" }, { "action", "Empleados" }, { "tabla", ".container-registro-empleado" } })

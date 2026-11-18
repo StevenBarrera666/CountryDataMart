@@ -1,0 +1,129 @@
+﻿@model WebApplication1.Models.FichaViewModel
+@{
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+    bool esEdicion = Model != null && Model.Id > 0;
+    ViewBag.Title = esEdicion ? "Actualizar Ficha" : "Registrar Nueva Ficha";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" />
+
+<div id="wrapRegistrar" style="padding: 15px;">
+    <h3 class="ui header dividing">
+        <i class="@(esEdicion ? "pencil alternate" : "folder open outline") icon"></i>
+        <div class="content">
+            @(esEdicion ? "ACTUALIZAR FICHA" : "REGISTRO DE NUEVA FICHA")
+            <div class="sub header">Fichas disponibles para asignar a empleados y viajeros</div>
+        </div>
+    </h3>
+
+    <form id="formRegistrarFicha" class="ui form" onsubmit="return false;">
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.Activo, new { id = "hdnActivo" })
+
+        <div class="field">
+            <label>Estado</label>
+            <div class="ui toggle checkbox" id="chkActivo">
+                <input type="checkbox" @(Model.Activo ? "checked" : "") />
+                <label id="lblActivo">@(Model.Activo ? "Activo" : "Inactivo")</label>
+            </div>
+        </div>
+
+        <div class="two fields">
+            <div class="field required">
+                <label>Código</label>
+                @Html.TextBoxFor(m => m.Codigo, new { placeholder = "Ej. F4", maxlength = "20", autocomplete = "off" })
+            </div>
+            <div class="field required">
+                <label>Nombre</label>
+                @Html.TextBoxFor(m => m.Nombre, new { placeholder = "Nombre de la ficha", maxlength = "120", autocomplete = "off" })
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Descripción</label>
+            @Html.TextAreaFor(m => m.Descripcion, 3, 60, new { maxlength = "300" })
+        </div>
+    </form>
+
+    <div style="margin-top: 25px;">
+        <button class="ui primary button" type="button" id="btnGuardarFicha">
+            <i class="save icon"></i> @(esEdicion ? "Guardar Cambios" : "Registrar Ficha")
+        </button>
+        <button class="ui button" type="button"
+                onclick="cargarElement('@(esEdicion ? Url.Action("Perfil", "Fichas", new { id = Model.Id }) : Url.Action("Fichas", "Fichas"))')">
+            Cancelar
+        </button>
+    </div>
+
+    <div class="ui floating warning message" style="width: 60%; margin: 20px auto; text-align: center; display: none;" id="messageRegistrarFicha">
+        <div class="header">Atención</div>
+        <p id="textMessageRegistrarFicha"></p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+
+    function mostrarNotificacion(mensaje, esExito) {
+        var $div = $('#messageRegistrarFicha');
+        $div.removeClass("warning info").addClass(esExito ? "info" : "warning");
+        $('#textMessageRegistrarFicha').text(mensaje);
+        $div.stop(true, true).fadeIn();
+    }
+
+    $(document).ready(function () {
+        $('#chkActivo input').on('change', function () {
+            // HiddenFor(bool) envía "True"/"False"
+            $('#hdnActivo').val(this.checked ? 'True' : 'False');
+            $('#lblActivo').text(this.checked ? 'Activo' : 'Inactivo');
+        }).trigger('change');
+    });
+
+    $('#btnGuardarFicha').off('click').on('click', function (e) {
+        e.preventDefault();
+
+        if (!$.trim($('#Codigo').val()) || !$.trim($('#Nombre').val())) {
+            mostrarNotificacion('Ingrese el código y el nombre de la ficha.', false);
+            return;
+        }
+
+        $('#facadeContent').addClass("loading");
+        $.ajax({
+            url: '@Url.Action("GuardarFicha", "Fichas")',
+            type: 'POST',
+            data: $('#formRegistrarFicha').serialize(),
+            success: function (data) {
+                $('#facadeContent').removeClass("loading");
+                var res = typeof data === "string" ? JSON.parse(data) : data;
+                if (res.result) {
+                    mostrarNotificacion("Ficha guardada con éxito. Redirigiendo a su ficha...", true);
+                    setTimeout(function () {
+                        cargarElement('@Url.Action("Perfil", "Fichas")?id=' + res.idGenerado);
+                    }, 1000);
+                } else {
+                    mostrarNotificacion(res.message, false);
+                }
+            },
+            error: function (xhr, status, error) {
+                $('#facadeContent').removeClass("loading");
+                mostrarNotificacion("Error en la solicitud: " + error, false);
+            }
+        });
+    });
+</script>
+
+@Html.Partial("_SoloLectura", new ViewDataDictionary { { "controller", "Fichas" }, { "action", "Fichas" }, { "tabla", "#wrapRegistrar" } })

@@ -48,7 +48,7 @@ namespace LogicBo
         {
             object result = null;
 
-             string _connectionString = ConfigurationManager.AppSettings["conexP"].ToString();
+            string _connectionString = ConfigurationManager.AppSettings["conexP"].ToString();
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 using (SqlCommand command = new SqlCommand(storedProcedureOrQuery, connection))
@@ -202,7 +202,7 @@ namespace LogicBo
             return result;
         }
 
-        public DataTable FileFacturado(int fileDetailId,string ReferenceNumber,string InvoiceNumber,string Estado)
+        public DataTable FileFacturado(int fileDetailId, string ReferenceNumber, string InvoiceNumber, string Estado)
         {
             List<SqlParameter> parameters = new List<SqlParameter> {
                 new SqlParameter(){ ParameterName="FileDetailid", SqlDbType=SqlDbType.Int,Value=fileDetailId},
@@ -229,10 +229,10 @@ namespace LogicBo
             return result.Tables[5];
         }
 
-        
-        
-        
-     
+
+
+
+
 
         public DataTable ObtenerPerfilEmpleadoDataTable(int? empleadoId, int? fichaid)
         {
@@ -324,8 +324,10 @@ namespace LogicBo
         new SqlParameter { ParameterName = "@ActividadEconomicaId", SqlDbType = SqlDbType.Int, Value = model.ActividadEconomicaId },
         new SqlParameter { ParameterName = "@IndustriaId", SqlDbType = SqlDbType.Int, Value = model.IndustriaId },
         new SqlParameter { ParameterName = "@RutaCamaraComercio", SqlDbType = SqlDbType.NVarChar, Value = (object)model.RutaCamaraComercio ?? DBNull.Value },
-        new SqlParameter { ParameterName = "@RutaRut", SqlDbType = SqlDbType.NVarChar, Value = (object)model.RutaRut ?? DBNull.Value }
-    };
+        new SqlParameter { ParameterName = "@RutaRut", SqlDbType = SqlDbType.NVarChar, Value = (object)model.RutaRut ?? DBNull.Value },
+        new SqlParameter { ParameterName = "@CodigoPostal", SqlDbType = SqlDbType.NVarChar, Value = (object)model.CodigoPostal ?? DBNull.Value },
+        new SqlParameter { ParameterName = "@DiaCierre", SqlDbType = SqlDbType.Int, Value = (object)model.DiaCierreFacturacion ?? DBNull.Value }
+            };
 
             // Serialización XML de las tarifas
             string tarifasXml = null;
@@ -395,6 +397,276 @@ namespace LogicBo
 
             return executeProcedures.DataTable("sp_RegistrarOActualizarProveedor", parameters);
         }
+        // Dia del mes en que cierra la facturacion del cliente (dbo.Clientes.DiaCierreFacturacion, 1-31)
+        public int? ObtenerDiaCierreFacturacion(int clienteId)
+        {
+            object r = ExecuteScalar("SELECT DiaCierreFacturacion FROM dbo.Clientes WHERE Id = @Id",
+                new List<SqlParameter> { new SqlParameter("@Id", clienteId) }, CommandType.Text);
+            return r == null || r == DBNull.Value ? (int?)null : Convert.ToInt32(r);
+        }
+
+        public void GuardarDiaCierreFacturacion(int clienteId, int? dia)
+        {
+            ExecuteScalar("UPDATE dbo.Clientes SET DiaCierreFacturacion = @Dia WHERE Id = @Id",
+                new List<SqlParameter> {
+                    new SqlParameter("@Dia", dia.HasValue ? (object)dia.Value : DBNull.Value),
+                    new SqlParameter("@Id", clienteId) },
+                CommandType.Text);
+        }
+
+        public DataTable CargarAirClasses()
+        {
+            return executeProcedures.DataTable("SP_LOADAIRCLASSES", null);
+        }
+
+        // Cabinas de vuelo (dbo.CabinasVuelo: Id, Nombre [unico], NombreIngles, CodigoGDS, Orden, Activo)
+        public DataTable ListarCabinas()
+        {
+            return ExecuteDataTable("SELECT Id, Nombre, NombreIngles, CodigoGDS, Orden, Activo FROM dbo.CabinasVuelo ORDER BY Orden, Nombre",
+                null, CommandType.Text);
+        }
+
+        public DataTable ObtenerCabina(int id)
+        {
+            return ExecuteDataTable("SELECT Id, Nombre, NombreIngles, CodigoGDS, Orden, Activo FROM dbo.CabinasVuelo WHERE Id = @Id",
+                new List<SqlParameter> { new SqlParameter("@Id", id) }, CommandType.Text);
+        }
+
+        /// <summary>Crea (id = 0) o actualiza la cabina; devuelve el Id resultante.</summary>
+        public int GuardarCabina(int id, string nombre, string nombreIngles, string codigoGds, int? orden, bool activo)
+        {
+            var parametros = new List<SqlParameter>
+            {
+                new SqlParameter("@Nombre", nombre),
+                new SqlParameter("@NombreIngles", string.IsNullOrWhiteSpace(nombreIngles) ? (object)DBNull.Value : nombreIngles),
+                new SqlParameter("@CodigoGDS", string.IsNullOrWhiteSpace(codigoGds) ? (object)DBNull.Value : codigoGds),
+                new SqlParameter("@Orden", orden.HasValue ? (object)orden.Value : DBNull.Value),
+                new SqlParameter("@Activo", activo)
+            };
+            if (id > 0)
+            {
+                parametros.Add(new SqlParameter("@Id", id));
+                ExecuteScalar("UPDATE dbo.CabinasVuelo SET Nombre = @Nombre, NombreIngles = @NombreIngles, CodigoGDS = @CodigoGDS, Orden = @Orden, Activo = @Activo WHERE Id = @Id",
+                    parametros, CommandType.Text);
+                return id;
+            }
+            object nuevo = ExecuteScalar("INSERT INTO dbo.CabinasVuelo (Nombre, NombreIngles, CodigoGDS, Orden, Activo) OUTPUT INSERTED.Id VALUES (@Nombre, @NombreIngles, @CodigoGDS, @Orden, @Activo)",
+                parametros, CommandType.Text);
+            return Convert.ToInt32(nuevo);
+        }
+
+        // Aerolineas: proveedores con TipoId = 1 (dbo.TiposProveedor: 1 = Aerolinea). Activo = Estado distinto de 'Inactivo'
+        public DataTable ListarAerolineas()
+        {
+            return ExecuteDataTable(
+                "SELECT Id, NombreComercial AS Nombre, CAST(CASE WHEN Estado = 'Inactivo' THEN 0 ELSE 1 END AS BIT) AS Activo " +
+                "FROM dbo.Proveedores WHERE TipoId = 1 ORDER BY NombreComercial",
+                null, CommandType.Text);
+        }
+
+        // Paises (dbo.Countries: ID, Name, IATACode, DIANCode)
+        public DataTable ListarCountries()
+        {
+            return ExecuteDataTable("SELECT ID, Name FROM dbo.Countries WHERE Name IS NOT NULL ORDER BY Name",
+                null, CommandType.Text);
+        }
+
+        // Tipos de pasajero (dbo.TiposPasajero: Id, CodigoGDS, Nombre, Descripcion, Orden, Activo)
+        // Texto = "CodigoGDS - Descripcion" (si no hay descripcion, el Nombre)
+        public DataTable ListarTiposPasajero()
+        {
+            return ExecuteDataTable(
+                "SELECT Id, CodigoGDS + ' - ' + ISNULL(NULLIF(LTRIM(RTRIM(Descripcion)), ''), Nombre) AS Texto, CodigoGDS, Nombre, Descripcion, Orden, Activo " +
+                "FROM dbo.TiposPasajero ORDER BY Orden, CodigoGDS",
+                null, CommandType.Text);
+        }
+
+        // Sillas de preferencia (dbo.SillasPreferencia: Id, Nombre, CodigoGDS, Orden, Activo)
+        public DataTable ListarSillasPreferencia()
+        {
+            return ExecuteDataTable("SELECT Id, Nombre, CodigoGDS, Orden, Activo FROM dbo.SillasPreferencia ORDER BY Orden, Nombre",
+                null, CommandType.Text);
+        }
+
+        // Fichas (dbo.Fichas: Id, Codigo [unico], Nombre, Descripcion, FechaCreacion, Activo)
+        public DataTable ListarFichas()
+        {
+            return ExecuteDataTable("SELECT Id, Codigo, Nombre, Descripcion, FechaCreacion, Activo FROM dbo.Fichas ORDER BY Codigo",
+                null, CommandType.Text);
+        }
+
+        public DataTable ObtenerFicha(int id)
+        {
+            return ExecuteDataTable("SELECT Id, Codigo, Nombre, Descripcion, FechaCreacion, Activo FROM dbo.Fichas WHERE Id = @Id",
+                new List<SqlParameter> { new SqlParameter("@Id", id) }, CommandType.Text);
+        }
+
+        /// <summary>Crea (id = 0) o actualiza la ficha; devuelve el Id resultante.</summary>
+        public int GuardarFicha(int id, string codigo, string nombre, string descripcion, bool activo)
+        {
+            var parametros = new List<SqlParameter>
+            {
+                new SqlParameter("@Codigo", codigo),
+                new SqlParameter("@Nombre", nombre),
+                new SqlParameter("@Descripcion", string.IsNullOrWhiteSpace(descripcion) ? (object)DBNull.Value : descripcion),
+                new SqlParameter("@Activo", activo)
+            };
+            if (id > 0)
+            {
+                parametros.Add(new SqlParameter("@Id", id));
+                ExecuteScalar("UPDATE dbo.Fichas SET Codigo = @Codigo, Nombre = @Nombre, Descripcion = @Descripcion, Activo = @Activo WHERE Id = @Id",
+                    parametros, CommandType.Text);
+                return id;
+            }
+            object nuevo = ExecuteScalar("INSERT INTO dbo.Fichas (Codigo, Nombre, Descripcion, Activo) OUTPUT INSERTED.Id VALUES (@Codigo, @Nombre, @Descripcion, @Activo)",
+                parametros, CommandType.Text);
+            return Convert.ToInt32(nuevo);
+        }
+
+        // Viajeros (dbo.Viajeros): listado con sp_ListarViajeros, alta/edicion con sp_GuardarViajero
+        public DataTable ListarViajeros()
+        {
+            return executeProcedures.DataTable("sp_ListarViajeros", null);
+        }
+
+        public DataTable ObtenerViajero(int id)
+        {
+            return ExecuteDataTable("SELECT * FROM dbo.Viajeros WHERE Id = @Id",
+                new List<SqlParameter> { new SqlParameter("@Id", id) }, CommandType.Text);
+        }
+
+        /// <summary>Crea (Id = 0) o actualiza el viajero; devuelve el Id resultante.</summary>
+        public int GuardarViajero(ViajeroRegistroViewModel m)
+        {
+            Func<string, string, SqlParameter> txt = (nombre, valor) =>
+                new SqlParameter(nombre, SqlDbType.VarChar) { Value = string.IsNullOrWhiteSpace(valor) ? (object)DBNull.Value : valor.Trim() };
+            Func<string, DateTime?, SqlParameter> fecha = (nombre, valor) =>
+                new SqlParameter(nombre, SqlDbType.Date) { Value = valor.HasValue ? (object)valor.Value.Date : DBNull.Value };
+
+            var parameters = new List<SqlParameter>
+            {
+                new SqlParameter("@Id", SqlDbType.Int) { Value = m.Id },
+                new SqlParameter("@FichaId", SqlDbType.Int) { Value = m.FichaId.HasValue ? (object)m.FichaId.Value : DBNull.Value },
+                txt("@Pasajero_Titulo", m.Pasajero_Titulo),
+                txt("@Pasajero_Apellido", m.Pasajero_Apellido),
+                txt("@Pasajero_Nombre", m.Pasajero_Nombre),
+                txt("@Pasajero_Sexo", m.Pasajero_Sexo),
+                txt("@Pasajero_PaisNacimiento", m.Pasajero_PaisNacimiento),
+                txt("@Pasajero_Nacionalidad", m.Pasajero_Nacionalidad),
+                fecha("@Pasajero_FechaNacimiento", m.Pasajero_FechaNacimiento),
+                txt("@Pasajero_Cargo", m.Pasajero_Cargo),
+                txt("@Pasajero_Tipo", m.Pasajero_Tipo),
+                txt("@Pasajero_CiudadResidencia", m.Pasajero_CiudadResidencia),
+                txt("@Cliente_Cuenta", m.Cliente_Cuenta),
+                txt("@Cliente_ID", m.Cliente_ID),
+                txt("@Cliente_Estacion", m.Cliente_Estacion),
+                txt("@Cliente_OrdenInterna", m.Cliente_OrdenInterna),
+                txt("@Cliente_Vicepresidencia", m.Cliente_Vicepresidencia),
+                txt("@Cliente_Gerencia", m.Cliente_Gerencia),
+                txt("@Cliente_Correo", m.Cliente_Correo),
+                txt("@Identificacion_Tipo", m.Identificacion_Tipo),
+                txt("@Identificacion_Numero", m.Identificacion_Numero),
+                txt("@Pasaporte_Numero", m.Pasaporte_Numero),
+                txt("@Pasaporte_PaisEmision", m.Pasaporte_PaisEmision),
+                fecha("@Pasaporte_FechaEmision", m.Pasaporte_FechaEmision),
+                fecha("@Pasaporte_FechaCaducidad", m.Pasaporte_FechaCaducidad),
+                txt("@Visa_Numero", m.Visa_Numero),
+                txt("@Visa_PaisEmision", m.Visa_PaisEmision),
+                fecha("@Visa_FechaEmision", m.Visa_FechaEmision),
+                fecha("@Visa_FechaCaducidad", m.Visa_FechaCaducidad),
+                txt("@Pasajero_Celular", m.Pasajero_Celular),
+                txt("@Pasajero_Whatsapp", m.Pasajero_Whatsapp),
+                txt("@Pasajero_Correo", m.Pasajero_Correo),
+                txt("@Pasajero_Cabina", m.Pasajero_Cabina),
+                txt("@Pasajero_Clase", m.Pasajero_Clase),
+                txt("@Pasajero_Silla", m.Pasajero_Silla),
+                txt("@Pasajero_ViajeroFrecuenteAero", m.Pasajero_ViajeroFrecuenteAero),
+                txt("@Pasajero_ViajeroFrecuenteNumero", m.Pasajero_ViajeroFrecuenteNumero),
+                txt("@Amadeus_Nombre", m.Amadeus_Nombre)
+            };
+
+            DataTable dt = executeProcedures.DataTable("sp_GuardarViajero", parameters);
+            int id = dt != null && dt.Rows.Count > 0 ? Convert.ToInt32(dt.Rows[0][0]) : m.Id;
+
+            // El SP no maneja Activo: se actualiza aparte
+            ExecuteScalar("UPDATE dbo.Viajeros SET Activo = @Activo WHERE Id = @Id",
+                new List<SqlParameter> { new SqlParameter("@Activo", m.Activo), new SqlParameter("@Id", id) }, CommandType.Text);
+            return id;
+        }
+
+        public DataTable CargarMetodosPago()
+        {
+            return executeProcedures.DataTable("SP_LOADPaymentMethods", null);
+        }
+
+        public DataTable CargarTiposDocumento()
+        {
+            return executeProcedures.DataTable("SP_LOADTiposDocumento", null);
+        }
+
+        public DataTable CargarActividades()
+        {
+            return executeProcedures.DataTable("SP_LOAD_ACTIVIDADES", null);
+        }
+
+        // Categorias de tarifa administrativa (dbo.CategoriasTarifa: Id, Nombre)
+        public DataTable CargarCategoriasTarifa()
+        {
+            return executeProcedures.DataTable("SP_LOADTACATEGORIES", null);
+        }
+
+        public DataTable ObtenerCategoriaTarifa(int id)
+        {
+            return ExecuteDataTable("SELECT Id, Nombre FROM dbo.CategoriasTarifa WHERE Id = @Id",
+                new List<SqlParameter> { new SqlParameter("@Id", id) }, CommandType.Text);
+        }
+
+        /// <summary>Crea (id = 0) o actualiza la categoria con SP_TA_CATEGORIES; devuelve el Id resultante.</summary>
+        public int GuardarCategoriaTarifa(int id, string nombre)
+        {
+            // SP_TA_CATEGORIES: @opc = 1 crea, @opc = 2 actualiza
+            DataTable dt = ExecuteDataTable("SP_TA_CATEGORIES", new List<SqlParameter>
+            {
+                new SqlParameter("@opc", SqlDbType.Int) { Value = id > 0 ? 2 : 1 },
+                new SqlParameter("@id", SqlDbType.Int) { Value = id > 0 ? (object)id : DBNull.Value },
+                new SqlParameter("@nombreCat", SqlDbType.VarChar, 200) { Value = nombre }
+            });
+            if (id > 0) return id;
+
+            // Alta: se usa el Id que devuelva el SP; si no devuelve nada, se busca la categoria recien creada
+            int nuevoId;
+            if (dt != null && dt.Rows.Count > 0 && dt.Columns.Count > 0 && int.TryParse(dt.Rows[0][0].ToString(), out nuevoId) && nuevoId > 0)
+                return nuevoId;
+
+            object r = ExecuteScalar("SELECT TOP 1 Id FROM dbo.CategoriasTarifa WHERE Nombre = @Nombre ORDER BY Id DESC",
+                new List<SqlParameter> { new SqlParameter("@Nombre", nombre) }, CommandType.Text);
+            return r == null || r == DBNull.Value ? 0 : Convert.ToInt32(r);
+        }
+
+        // CodigoPostal se maneja fuera de los SP de guardado/consulta: tabla = Clientes | Proveedores | Empleados
+        private static string TablaCodigoPostal(string tabla)
+        {
+            if (tabla != "Clientes" && tabla != "Proveedores" && tabla != "Empleados")
+                throw new ArgumentException("Tabla no permitida: " + tabla);
+            return "dbo." + tabla;
+        }
+
+        public string ObtenerCodigoPostal(string tabla, int id)
+        {
+            object r = ExecuteScalar("SELECT CodigoPostal FROM " + TablaCodigoPostal(tabla) + " WHERE Id = @Id",
+                new List<SqlParameter> { new SqlParameter("@Id", id) }, CommandType.Text);
+            return r == null || r == DBNull.Value ? string.Empty : r.ToString();
+        }
+
+        public void GuardarCodigoPostal(string tabla, int id, string codigoPostal)
+        {
+            ExecuteScalar("UPDATE " + TablaCodigoPostal(tabla) + " SET CodigoPostal = @Cp WHERE Id = @Id",
+                new List<SqlParameter> {
+                    new SqlParameter("@Cp", string.IsNullOrWhiteSpace(codigoPostal) ? (object)DBNull.Value : codigoPostal.Trim()),
+                    new SqlParameter("@Id", id) },
+                CommandType.Text);
+        }
+
         public DataTable RegistrarPerfilEmpleado(EmpleadoRegistroViewModel model, string fotoFinal)
         {
             List<SqlParameter> parameters = new List<SqlParameter> {

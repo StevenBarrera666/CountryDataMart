@@ -12,6 +12,7 @@ using WebApplication1.Models;
 public class AccountController : Controller
 {
     private readonly AccountBo _accountBo = new AccountBo();
+    private readonly SecurityBo _securityBo = new SecurityBo();
     WorkingAtHeightBo _workingAtHeightBo = new WorkingAtHeightBo();
     private int sedecategoriaid;
 
@@ -53,20 +54,10 @@ public class AccountController : Controller
             }
             SessionModels sessionModels = base.Session["SessionUser"] as SessionModels;
             base.Session["CountryID"] = 1;
-            string pais = _workingAtHeightBo.GetCountryNameByID(1);
-            string bandera = _workingAtHeightBo.GetFlagNameByID(1);
-
+            
             string lang = "spain";
             string mess = string.Empty;
-            string Welcome = string.Empty;
-            string invite = string.Empty;
-            string textopp1 = string.Empty;
-            string textopp2 = string.Empty;
-            string textopp3 = string.Empty;
-            string textopp4 = string.Empty;
-            string modulos = string.Empty;
-            string subtitulos = string.Empty;            
-
+            
 
             if (sessionModels != null)
             {
@@ -74,6 +65,8 @@ public class AccountController : Controller
                 sessionModels.NameUser = userEntityAccount.NameUser + " " + userEntityAccount.SurNameUser;
                 sessionModels.SedeCategoriaId =1;
                 sessionModels.LoginUser = userEntityAccount.LoginUser;
+                sessionModels.RolId = userEntityAccount.RolId;
+                sessionModels.Opciones = _securityBo.GetOpcionesByUsuario(userEntityAccount.IdUser);
                 sessionModels.Idioma = lang;
                 sessionModels.Inicio = "Si";
                 sessionModels.Estado = 0;                
@@ -86,6 +79,8 @@ public class AccountController : Controller
                     IdUser = userEntityAccount.IdUser,
                     NameUser = userEntityAccount.NameUser + " " + userEntityAccount.SurNameUser,
                     LoginUser = userEntityAccount.LoginUser,
+                    RolId = userEntityAccount.RolId,
+                    Opciones = _securityBo.GetOpcionesByUsuario(userEntityAccount.IdUser),
                     Idioma = lang,
                     Inicio = "Si",
                     Estado = 0,

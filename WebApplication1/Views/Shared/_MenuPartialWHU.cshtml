@@ -196,7 +196,7 @@
   <header class="facade-topbar">
       <div class="topbar-left">
           <span class="topbar-breadcrumb">Configuración &nbsp;/&nbsp; Módulo Central</span>
-          <h4 class="topbar-title">Control total e Expedientes y admnistración</h4>
+          <h4 class="topbar-title">Control total de Expedientes y administración</h4>
       </div>
       <div class="topbar-right">
           <span class="badge-modulo"><i class="bi bi-shield-check"></i> Modo Operativo</span>
@@ -218,21 +218,7 @@
                     </div>
 
                     <!-- Menú de Módulos -->
-                    <nav class="sidebar-menu">
-                        <a href="javascript:void(0)"
-                           class="sidebar-link"
-                           onclick="AdministrarTraza(); return false;">
-                            <i class="bi bi-folder2-open"></i>
-                            <span>Administrar Expedientes</span>
-                        </a>
-
-                        <a href="javascript:void(0)"
-                           class="sidebar-link"
-                           onclick="AdministrarP(); return false;">
-                            <i class="bi bi-person-gear"></i>
-                            <span>Administrar Perfiles</span>
-                        </a>
-                    </nav>
+                    @Html.Partial("_MenuOpciones", "PRINCIPAL")
                 </div>
 
                 <!-- Botón Inferior de Regreso -->

@@ -8,11 +8,13 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using WebApplication1.Filters;
 using WebApplication1.Models;
 using System.Web.Mvc;
 
 namespace WebApplication1.Controllers
 {
+    [Access]
     public class EmpleadoController : Controller
     {
         InspectionsBo _inspectionsBo = new InspectionsBo();
@@ -24,21 +26,6 @@ namespace WebApplication1.Controllers
             try
             {
                 var result = _inspectionsBo.GetlistEmpleados();
-
-                // Columna FotoUrl para el listado (foto cargada por el usuario; vacía si no tiene)
-                if (result != null && result.Columns.Contains("Id"))
-                {
-                    if (!result.Columns.Contains("FotoUrl")) result.Columns.Add("FotoUrl", typeof(string));
-                    foreach (DataRow r in result.Rows)
-                    {
-                        int eid;
-                        if (int.TryParse(r["Id"].ToString(), out eid))
-                        {
-                            string foto = ObtenerFotoEmpleado(eid);
-                            if (foto != null) r["FotoUrl"] = foto;
-                        }
-                    }
-                }
 
                 // Agrega la columna FichaCodigo resolviendo fichaid contra el catálogo de fichas (si el SP no la trae)
                 if (result != null && !result.Columns.Contains("FichaCodigo") && result.Columns.Contains("fichaid"))
@@ -265,6 +252,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        [Escritura("Empleado", "Empleados")]
         public JsonResult UploadAvatar(int id = 0)
         {
             try
@@ -309,6 +297,7 @@ namespace WebApplication1.Controllers
         /// Inserta o actualiza el empleado y sincroniza sus fichas en dbo.EmpleadoFichas.
         /// </summary>
         [HttpPost]
+        [Escritura("Empleado", "Empleados")]
         [ValidateAntiForgeryToken]
         public JsonResult Guardar(EmpleadoFormViewModel form)
         {
@@ -362,6 +351,15 @@ namespace WebApplication1.Controllers
                 // Ejecuta sp_GuardarEmpleado que inserta/actualiza y retorna el Id resultante
                 object resId = _inspectionsBo.ExecuteScalar("dbo.sp_GuardarEmpleado", parametros);
                 int empleadoId = Convert.ToInt32(resId);
+
+                // sp_GuardarEmpleado no recibe el estado: se actualiza aparte
+                string estado = string.Equals(form.EtiquetaEstado, "Inactivo", StringComparison.OrdinalIgnoreCase) ? "Inactivo" : "Activo";
+                _inspectionsBo.ExecuteScalar("UPDATE dbo.Empleados SET EtiquetaEstado = @Estado WHERE Id = @Id",
+                    new List<SqlParameter> { new SqlParameter("@Estado", estado), new SqlParameter("@Id", empleadoId) },
+                    CommandType.Text);
+
+                _inspectionsBo.GuardarCodigoPostal("Empleados", empleadoId, form.CodigoPostal);
+
                 AsignarFotoTemporal(empleadoId);
 
                 return Json(new { success = true, id = empleadoId });
@@ -373,6 +371,7 @@ namespace WebApplication1.Controllers
         }
         // 1. Guardar Comprobante de Pago + Archivo PDF
         [HttpPost]
+        [Escritura("Empleado", "Empleados")]
         [ValidateAntiForgeryToken]
         public JsonResult GuardarComprobante(ComprobanteFormViewModel form)
         {
@@ -418,6 +417,7 @@ namespace WebApplication1.Controllers
 
         // 2. Guardar Documento Digital
         [HttpPost]
+        [Escritura("Empleado", "Empleados")]
         [ValidateAntiForgeryToken]
         public JsonResult GuardarDocumento(DocumentoFormViewModel form)
         {
@@ -457,6 +457,7 @@ namespace WebApplication1.Controllers
 
         // 3. Registrar Vacaciones
         [HttpPost]
+        [Escritura("Empleado", "Empleados")]
         [ValidateAntiForgeryToken]
         public JsonResult GuardarVacaciones(VacacionFormViewModel form)
         {
@@ -483,6 +484,7 @@ namespace WebApplication1.Controllers
         }
 
            
+        [EscrituraVista("Empleado", "Empleados")]
         public ActionResult Registrar(int id = 0, string tab = null)
         {
             var model = new EmpleadoFormViewModel();
@@ -501,6 +503,20 @@ namespace WebApplication1.Controllers
                         {
                             Id = Convert.ToInt32(re["Id"]),
                             Nombre = re["Nombre"].ToString()
+                        });
+                    }
+                }
+
+                // 1.1 Cargar tipos de documento (SP_LOADTiposDocumento)
+                DataTable dtTiposDoc = _inspectionsBo.CargarTiposDocumento();
+                if (dtTiposDoc != null)
+                {
+                    foreach (DataRow rt in dtTiposDoc.Rows)
+                    {
+                        model.TiposDocumentoCatalogo.Add(new CatalogoItem
+                        {
+                            Id = Convert.ToInt32(rt["Id"]),
+                            Nombre = rt["Nombre"].ToString()
                         });
                     }
                 }
@@ -532,12 +548,14 @@ namespace WebApplication1.Controllers
                         model.FotoUrl = ObtenerFotoEmpleado(id);
                         model.Nombres = r.Table.Columns.Contains("Nombres") && r["Nombres"] != DBNull.Value ? r["Nombres"].ToString() : string.Empty;
                         model.Apellidos = r.Table.Columns.Contains("Apellidos") && r["Apellidos"] != DBNull.Value ? r["Apellidos"].ToString() : string.Empty;
+                        model.EtiquetaEstado = r.Table.Columns.Contains("EtiquetaEstado") && r["EtiquetaEstado"] != DBNull.Value ? r["EtiquetaEstado"].ToString() : "Activo";
                         model.TipoIdentificacion = r.Table.Columns.Contains("TipoIdentificacion") && r["TipoIdentificacion"] != DBNull.Value ? r["TipoIdentificacion"].ToString() : "Cédula de Ciudadanía";
                         model.NumeroIdentificacion = r.Table.Columns.Contains("NumeroIdentificacion") && r["NumeroIdentificacion"] != DBNull.Value ? r["NumeroIdentificacion"].ToString() : string.Empty;
                         model.CorreoCorporativo = r.Table.Columns.Contains("CorreoCorporativo") && r["CorreoCorporativo"] != DBNull.Value ? r["CorreoCorporativo"].ToString() : string.Empty;
                         model.TelefonoParticular = r.Table.Columns.Contains("TelefonoParticular") && r["TelefonoParticular"] != DBNull.Value ? r["TelefonoParticular"].ToString() : string.Empty;
                         model.TelefonoOficina = r.Table.Columns.Contains("TelefonoOficina") && r["TelefonoOficina"] != DBNull.Value ? r["TelefonoOficina"].ToString() : string.Empty;
                         model.FechaNacimiento = r.Table.Columns.Contains("FechaNacimiento") && r["FechaNacimiento"] != DBNull.Value ? Convert.ToDateTime(r["FechaNacimiento"]) : DateTime.Today.AddYears(-25);
+                        model.CodigoPostal = _inspectionsBo.ObtenerCodigoPostal("Empleados", id);
                         model.Direccion = r.Table.Columns.Contains("Direccion") && r["Direccion"] != DBNull.Value ? r["Direccion"].ToString() : string.Empty;
                         model.FechaIngreso = r.Table.Columns.Contains("FechaIngreso") && r["FechaIngreso"] != DBNull.Value ? Convert.ToDateTime(r["FechaIngreso"]) : DateTime.Today;
                         model.Cargo = r.Table.Columns.Contains("Cargo") && r["Cargo"] != DBNull.Value ? r["Cargo"].ToString() : string.Empty;

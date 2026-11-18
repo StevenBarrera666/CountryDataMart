@@ -32,6 +32,7 @@ namespace WebApplication1.Models
 
         // Pestaña: Cobros
         public string TipoCobro { get; set; }
+        public int? DiaCierreFacturacion { get; set; }
         public List<ClienteTarifaItemViewModel> Tarifas { get; set; } = new List<ClienteTarifaItemViewModel>();
 
         // Pestaña: Datos Fiscales

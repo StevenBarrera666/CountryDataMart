@@ -1,0 +1,166 @@
+﻿@model System.Data.DataTable
+@using System.Data
+@using WebApplication1.Filters
+@using WebApplication1.Models
+@{
+    bool soloLectura = Permisos.EsSoloLectura(Session["SessionUser"] as SessionModels, "Viajero", "Viajeros");
+}
+@{
+    // Columnas a mostrar (en orden); solo se muestran las que devuelva sp_ListarViajeros
+    var deseadas = new[]
+    {
+        new KeyValuePair<string, string>("NombreCompleto", "Nombre"),
+        new KeyValuePair<string, string>("FichaCodigo", "Ficha"),
+        new KeyValuePair<string, string>("Amadeus_Nombre", "Nombre Amadeus"),
+        new KeyValuePair<string, string>("Identificacion_Tipo", "Tipo de Identificación"),
+        new KeyValuePair<string, string>("Identificacion_Numero", "Identificación"),
+        new KeyValuePair<string, string>("Cliente_Cuenta", "Cuenta"),
+        new KeyValuePair<string, string>("Pasajero_Cargo", "Cargo"),
+        new KeyValuePair<string, string>("Pasajero_Celular", "Celular"),
+        new KeyValuePair<string, string>("Pasajero_Correo", "Correo"),
+        new KeyValuePair<string, string>("Pasaporte_Numero", "Pasaporte"),
+        new KeyValuePair<string, string>("Pasaporte_FechaCaducidad", "Vence Pasaporte")
+    };
+    var columnas = Model == null
+        ? new List<KeyValuePair<string, string>>()
+        : deseadas.Where(d => Model.Columns.Contains(d.Key)).ToList();
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .btn-outline-custom {
+        border-radius: 20px;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 4px 16px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .btn-outline-custom:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+    #tablaViajeros {
+        width: 100% !important;
+        font-size: 0.85rem;
+    }
+
+        #tablaViajeros th, #tablaViajeros td {
+            padding: 0.5em 0.6em !important;
+            white-space: nowrap;
+        }
+
+    .table-responsive-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+</style>
+<div class="ui container fluid" style="padding: 15px;">
+    <div class="ui grid stackable middle aligned">
+        <div class="eight wide column">
+            <h3 class="ui header">
+                <i class="plane icon"></i>
+                <div class="content">
+                    Directorio de Viajeros
+                    <div class="sub header">Listado general de pasajeros</div>
+                </div>
+            </h3>
+        </div>
+        <div class="eight wide right aligned column">
+            @if (!soloLectura)
+            {
+                <a href="javascript:void(0)" class="btn-outline-custom" onclick="cargarElement('@Url.Action("Registrar", "Viajero")')">
+                <i class="bi bi-pencil me-1"></i> Crear/Modificar/Inactivar Viajero
+                </a>
+            }
+            else
+            {
+                <span class="ui small label"><i class="lock icon"></i> Modo consulta</span>
+            }
+        </div>
+    </div>
+
+    <div class="ui divider"></div>
+
+    <div class="table-responsive-container">
+        <table class="ui selectable celled table center aligned tablesInitial" id="tablaViajeros">
+            <thead>
+                <tr>
+                    @foreach (var c in columnas)
+                    {
+                        <th>@c.Value</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || Model.Rows.Count == 0)
+                {
+                    <tr>
+                        <td colspan="@Math.Max(columnas.Count, 1)" class="center aligned text-muted">No se encontraron viajeros.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (DataRow row in Model.Rows)
+                    {
+                        <tr>
+                            @foreach (var c in columnas)
+                            {
+                                if (c.Key == "NombreCompleto")
+                                {
+                                    <td class="left aligned fw-bold">
+                                        <a href="javascript:void(0)"
+                                           onclick="cargarElement('@Url.Action("Perfil", "Viajero", new { id = row["Id"].ToString() })')">
+                                            @row[c.Key]
+                                        </a>
+                                    </td>
+                                }
+                                else if (c.Key == "FichaCodigo")
+                                {
+                                    <td><span class="ui small label">@row[c.Key]</span></td>
+                                }
+                                else if (c.Key == "Pasajero_Celular")
+                                {
+                                    <td><a href="tel:@row[c.Key]">@row[c.Key]</a></td>
+                                }
+                                else if (c.Key == "Pasajero_Correo")
+                                {
+                                    <td class="left aligned"><a href="mailto:@row[c.Key]">@row[c.Key]</a></td>
+                                }
+                                else if (row[c.Key] is DateTime)
+                                {
+                                    <td>@(((DateTime)row[c.Key]).ToString("dd/MM/yyyy"))</td>
+                                }
+                                else
+                                {
+                                    <td class="left aligned">@row[c.Key]</td>
+                                }
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+</script>

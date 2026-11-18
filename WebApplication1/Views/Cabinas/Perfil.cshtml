@@ -1,0 +1,83 @@
+﻿@model WebApplication1.Models.CabinaVueloViewModel
+@using WebApplication1.Filters
+@using WebApplication1.Models
+@{
+    bool soloLectura = Permisos.EsSoloLectura(Session["SessionUser"] as SessionModels, "Cabinas", "Cabinas");
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Perfil de la Cabina";
+}
+
+<div class="ui container fluid" style="padding: 15px;">
+    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="@Url.Action("Cabinas", "Cabinas")" class="ui mini basic button" onclick="loadProceduresTable(this); return false;">
+            <i class="arrow left icon"></i> Volver a Cabinas
+        </a>
+        <span class="text-muted small">Cabina Id: <strong>@Model.Id</strong></span>
+    </div>
+
+    <div class="ui segment">
+        <h3 class="ui header">
+            <i class="plane icon"></i>
+            <div class="content">
+                @Model.Nombre
+                <div class="sub header">
+                    @if (!string.IsNullOrEmpty(Model.CodigoGDS))
+                    {
+                        <span class="ui small label">@Model.CodigoGDS</span>
+                    }
+                    <span class="ui small @(Model.Activo ? "green" : "grey") label">@(Model.Activo ? "Activo" : "Inactivo")</span>
+                </div>
+            </div>
+        </h3>
+
+        <table class="ui very basic table">
+            <tbody>
+                <tr>
+                    <td class="collapsing"><strong>Nombre</strong></td>
+                    <td>@Model.Nombre</td>
+                </tr>
+                <tr>
+                    <td class="collapsing"><strong>Nombre en Inglés</strong></td>
+                    <td>@Model.NombreIngles</td>
+                </tr>
+                <tr>
+                    <td class="collapsing"><strong>Código GDS</strong></td>
+                    <td>@Model.CodigoGDS</td>
+                </tr>
+                <tr>
+                    <td class="collapsing"><strong>Orden</strong></td>
+                    <td>@Model.Orden</td>
+                </tr>
+                <tr>
+                    <td class="collapsing"><strong>Estado</strong></td>
+                    <td>@(Model.Activo ? "Activo" : "Inactivo")</td>
+                </tr>
+            </tbody>
+        </table>
+
+        @if (!soloLectura)
+        {
+            <a href="javascript:void(0)" class="ui primary button" onclick="cargarElement('@Url.Action("Registrar", "Cabinas", new { id = Model.Id })')">
+            <i class="pencil icon"></i> Actualizar Datos
+            </a>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+</script>

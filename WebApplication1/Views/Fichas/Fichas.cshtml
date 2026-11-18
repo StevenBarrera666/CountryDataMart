@@ -1,0 +1,109 @@
+﻿@model System.Data.DataTable
+@using System.Data
+@using WebApplication1.Filters
+@using WebApplication1.Models
+@{
+    bool soloLectura = Permisos.EsSoloLectura(Session["SessionUser"] as SessionModels, "Fichas", "Fichas");
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .btn-outline-custom {
+        border-radius: 20px;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 4px 16px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .btn-outline-custom:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+</style>
+<div class="ui container fluid" style="padding: 15px;">
+    <div class="ui grid stackable middle aligned">
+        <div class="eight wide column">
+            <h3 class="ui header">
+                <i class="folder open outline icon"></i>
+                <div class="content">
+                    Directorio de Fichas
+                    <div class="sub header">Listado general de fichas</div>
+                </div>
+            </h3>
+        </div>
+        <div class="eight wide right aligned column">
+            @if (!soloLectura)
+            {
+                <a href="javascript:void(0)" class="btn-outline-custom" onclick="cargarElement('@Url.Action("Registrar", "Fichas")')">
+                <i class="bi bi-pencil me-1"></i> Crear/Modificar/Inactivar Ficha
+                </a>
+            }
+            else
+            {
+                <span class="ui small label"><i class="lock icon"></i> Modo consulta</span>
+            }
+        </div>
+    </div>
+
+    <div class="ui divider"></div>
+
+    <table class="ui selectable celled table center aligned tablesInitial" id="tablaFichas">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Fecha de Creación</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model == null || Model.Rows.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="center aligned text-muted">No se encontraron fichas.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (DataRow row in Model.Rows)
+                {
+                    bool activa = row["Activo"] == DBNull.Value || Convert.ToBoolean(row["Activo"]);
+                    <tr>
+                        <td><span class="ui small label">@row["Codigo"]</span></td>
+                        <td class="left aligned fw-bold">
+                            <a href="javascript:void(0)"
+                               onclick="cargarElement('@Url.Action("Perfil", "Fichas", new { id = row["Id"].ToString() })')">
+                                @row["Nombre"]
+                            </a>
+                        </td>
+                        <td class="left aligned">@row["Descripcion"]</td>
+                        <td>@(row["FechaCreacion"] == DBNull.Value ? "" : Convert.ToDateTime(row["FechaCreacion"]).ToString("dd/MM/yyyy"))</td>
+                        <td><span class="ui small @(activa ? "green" : "grey") label">@(activa ? "Activo" : "Inactivo")</span></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+</script>

@@ -1,0 +1,100 @@
+﻿@model WebApplication1.Models.CategoriaTarifaViewModel
+@{
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+    bool esEdicion = Model != null && Model.Id > 0;
+    ViewBag.Title = esEdicion ? "Actualizar Categoría de Tarifa" : "Registrar Categoría de Tarifa";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" />
+
+<div id="wrapRegistrar" style="padding: 15px;">
+    <h3 class="ui header dividing">
+        <i class="@(esEdicion ? "pencil alternate" : "tag") icon"></i>
+        <div class="content">
+            @(esEdicion ? "ACTUALIZAR CATEGORÍA DE TARIFA" : "REGISTRO DE NUEVA CATEGORÍA DE TARIFA")
+            <div class="sub header">Categorías disponibles para las tarifas administrativas de los clientes</div>
+        </div>
+    </h3>
+
+    <form id="formRegistrarCategoria" class="ui form" onsubmit="return false;">
+        @Html.HiddenFor(m => m.Id)
+        <div class="field required">
+            <label>Nombre</label>
+            @Html.TextBoxFor(m => m.Nombre, new { placeholder = "Nombre de la categoría", maxlength = "200", autocomplete = "off" })
+        </div>
+    </form>
+
+    <div style="margin-top: 25px;">
+        <button class="ui primary button" type="button" id="btnGuardarCategoria">
+            <i class="save icon"></i> @(esEdicion ? "Guardar Cambios" : "Registrar Categoría")
+        </button>
+        <button class="ui button" type="button"
+                onclick="cargarElement('@(esEdicion ? Url.Action("Perfil", "CategoriasTarifa", new { id = Model.Id }) : Url.Action("CategoriasTarifa", "CategoriasTarifa"))')">
+            Cancelar
+        </button>
+    </div>
+
+    <div class="ui floating warning message" style="width: 60%; margin: 20px auto; text-align: center; display: none;" id="messageRegistrarCategoria">
+        <div class="header">Atención</div>
+        <p id="textMessageRegistrarCategoria"></p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+
+    function mostrarNotificacion(mensaje, esExito) {
+        var $div = $('#messageRegistrarCategoria');
+        $div.removeClass("warning info").addClass(esExito ? "info" : "warning");
+        $('#textMessageRegistrarCategoria').text(mensaje);
+        $div.stop(true, true).fadeIn();
+    }
+
+    $('#btnGuardarCategoria').off('click').on('click', function (e) {
+        e.preventDefault();
+
+        if (!$.trim($('#Nombre').val())) {
+            mostrarNotificacion('Ingrese el nombre de la categoría.', false);
+            return;
+        }
+
+        $('#facadeContent').addClass("loading");
+        $.ajax({
+            url: '@Url.Action("GuardarCategoria", "CategoriasTarifa")',
+            type: 'POST',
+            data: $('#formRegistrarCategoria').serialize(),
+            success: function (data) {
+                $('#facadeContent').removeClass("loading");
+                var res = typeof data === "string" ? JSON.parse(data) : data;
+                if (res.result) {
+                    mostrarNotificacion("Categoría guardada con éxito. Redirigiendo a su ficha...", true);
+                    setTimeout(function () {
+                        cargarElement('@Url.Action("Perfil", "CategoriasTarifa")?id=' + res.idGenerado);
+                    }, 1000);
+                } else {
+                    mostrarNotificacion(res.message, false);
+                }
+            },
+            error: function (xhr, status, error) {
+                $('#facadeContent').removeClass("loading");
+                mostrarNotificacion("Error en la solicitud: " + error, false);
+            }
+        });
+    });
+</script>
+
+@Html.Partial("_SoloLectura", new ViewDataDictionary { { "controller", "CategoriasTarifa" }, { "action", "CategoriasTarifa" }, { "tabla", "#wrapRegistrar" } })

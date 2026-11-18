@@ -2,7 +2,10 @@
 @{
     var culturaCol = new CultureInfo("es-CO");
 }
+@using WebApplication1.Filters
+@using WebApplication1.Models
 @model WebApplication1.Models.ProveedorPerfilViewModel
+@{ bool soloLectura = Permisos.EsSoloLectura(Session["SessionUser"] as SessionModels, "Proveedor", "Proveedores"); }
 @{
     ViewBag.Title = Model.RazonSocial + " - Ficha de Proveedor";
     Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
@@ -205,11 +208,12 @@
 
                 <!-- Botón Actualizar Datos -->
                 <div class="mb-4">
-                    <a href="javascript:void(0)"
-                       class="btn-outline-custom"
-                       onclick="cargarElement('@Url.Action("Registrar", "Proveedor", new { id = Model.Id })')">
+                    @if (!soloLectura)
+                    {
+                        <a href="javascript:void(0)" class="btn-outline-custom" onclick="cargarElement('@Url.Action("Registrar", "Proveedor", new { id = Model.Id })')">
                         <i class="bi bi-pencil me-1"></i> Actualizar Datos
-                    </a>
+                        </a>
+                    }
                 </div>
 
                 <hr class="text-muted" style="opacity: 0.15;" />

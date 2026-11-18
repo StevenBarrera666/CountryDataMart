@@ -1,0 +1,66 @@
+﻿@model WebApplication1.Models.CategoriaTarifaViewModel
+@using WebApplication1.Filters
+@using WebApplication1.Models
+@{
+    bool soloLectura = Permisos.EsSoloLectura(Session["SessionUser"] as SessionModels, "CategoriasTarifa", "CategoriasTarifa");
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Categoría de Tarifa";
+}
+
+<div class="ui container fluid" style="padding: 15px;">
+    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="@Url.Action("CategoriasTarifa", "CategoriasTarifa")" class="ui mini basic button" onclick="loadProceduresTable(this); return false;">
+            <i class="arrow left icon"></i> Volver a Categorías
+        </a>
+        <span class="text-muted small">Categoría Id: <strong>@Model.Id</strong></span>
+    </div>
+
+    <div class="ui segment">
+        <h3 class="ui header">
+            <i class="tag icon"></i>
+            <div class="content">
+                @Model.Nombre
+                <div class="sub header">Categoría de tarifa administrativa</div>
+            </div>
+        </h3>
+
+        <table class="ui very basic table">
+            <tbody>
+                <tr>
+                    <td class="collapsing"><strong>Id</strong></td>
+                    <td>@Model.Id</td>
+                </tr>
+                <tr>
+                    <td class="collapsing"><strong>Nombre</strong></td>
+                    <td>@Model.Nombre</td>
+                </tr>
+            </tbody>
+        </table>
+
+        @if (!soloLectura)
+        {
+            <a href="javascript:void(0)" class="ui primary button"
+               onclick="cargarElement('@Url.Action("Registrar", "CategoriasTarifa", new { id = Model.Id })')">
+                <i class="pencil icon"></i> Actualizar Datos
+            </a>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+</script>

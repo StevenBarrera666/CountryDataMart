@@ -219,35 +219,7 @@
                     </div>
 
                     <!-- Enlaces del módulo de expedientes -->
-                    <nav class="sidebar-menu">
-                        <a href="@Url.Action("SearchProceduresT", "Inspections")"
-                           class="sidebar-link"
-                           onclick="loadProceduresTable(this); return false;">
-                            <i class="bi bi-clock-history"></i>
-                            <span>Traza AIRS</span>
-                        </a>
-
-                        <a href="@Url.Action("Documentacion", "Inspections")"
-                           class="sidebar-link"
-                           onclick="loadProceduresTable(this); return false;">
-                            <i class="bi bi-file-earmark-text"></i>
-                            <span>Documentación AIR</span>
-                        </a>
-
-                        <a href="@Url.Action("Autorizacion", "Inspections")"
-                           class="sidebar-link"
-                           onclick="loadProceduresTable(this); return false;">
-                            <i class="bi bi-shield-check"></i>
-                            <span>Autorización</span>
-                        </a>
-
-                        <a href="@Url.Action("Facturacion", "Inspections")"
-                           class="sidebar-link"
-                           onclick="loadProceduresTable(this); return false;">
-                            <i class="bi bi-receipt"></i>
-                            <span>Facturación</span>
-                        </a>
-                    </nav>
+                    @Html.Partial("_MenuOpciones", "TRAZA")
                 </div>
 
                 <!-- Botón Inferior de Regreso -->

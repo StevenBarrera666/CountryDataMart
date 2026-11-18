@@ -1,0 +1,99 @@
+﻿@using LogicBo
+@{
+    var usuarios = (List<SecurityBo.UsuarioModel>)ViewBag.Usuarios;
+    var roles = (List<SecurityBo.RolModel>)ViewBag.Roles;
+}
+
+<style>
+    .seg-panel { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:20px; }
+    .seg-panel h5 { margin:0 0 12px; font-weight:700; color:#0f2942; }
+    .seg-table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    .seg-table th, .seg-table td { padding:6px 8px; border-bottom:1px solid #edf2f7; text-align:left; }
+    .seg-form { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:8px; margin-top:12px; }
+    .seg-form input[type=text], .seg-form input[type=password], .seg-form input[type=email] { width:100%; padding:6px 8px; }
+    .seg-checks label { display:inline-block; margin-right:14px; }
+    .seg-msg { margin-top:8px; font-size:.85rem; }
+</style>
+
+<h3 class="titlesPages">ADMINISTRAR USUARIOS</h3>
+
+<div class="seg-panel">
+    <table class="seg-table">
+        <thead><tr><th>Usuario</th><th>Nombre</th><th>Email</th><th>Roles</th><th>Activo</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var u in usuarios)
+            {
+                <tr data-id="@u.Id" data-login="@u.Login" data-nombres="@u.Nombres" data-apellidos="@u.Apellidos"
+                    data-email="@u.Email" data-activo="@(u.Activo ? 1 : 0)" data-roles="@string.Join(",", u.RolIds)">
+                    <td>@u.Login</td>
+                    <td>@u.Nombres @u.Apellidos</td>
+                    <td>@u.Email</td>
+                    <td>@string.Join(", ", roles.Where(r => u.RolIds.Contains(r.Id)).Select(r => r.Descripcion))</td>
+                    <td>@(u.Activo ? "Sí" : "No")</td>
+                    <td><button type="button" class="seg-editar">Editar</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="seg-panel">
+    <h5>Datos del usuario</h5>
+    <div class="seg-form">
+        <input type="hidden" id="segUId" value="0" />
+        <input type="text" id="segULogin" placeholder="Usuario" maxlength="50" />
+        <input type="text" id="segUNombres" placeholder="Nombres" maxlength="50" />
+        <input type="text" id="segUApellidos" placeholder="Apellidos" maxlength="50" />
+        <input type="email" id="segUEmail" placeholder="Email" maxlength="50" />
+        <input type="password" id="segUPass" placeholder="Clave (vacía = no cambiar)" autocomplete="new-password" />
+        <label><input type="checkbox" id="segUActivo" checked /> Activo</label>
+    </div>
+    <div class="seg-checks" style="margin-top:10px">
+        @foreach (var r in roles)
+        {
+            <label><input type="checkbox" class="seg-urol" value="@r.Id" /> @r.Descripcion</label>
+        }
+    </div>
+    <button type="button" id="segUGuardar" style="margin-top:10px">Guardar usuario</button>
+    <button type="button" id="segULimpiar">Nuevo</button>
+    <div class="seg-msg" id="segUMsg"></div>
+    <small>Los cambios de roles se aplican cuando el usuario vuelve a iniciar sesión.</small>
+</div>
+
+<script>
+    (function () {
+        function recargar() { loadProceduresTable({ href: '@Url.Action("Usuarios", "UsersAndRoles")' }); }
+
+        $('.seg-editar').on('click', function () {
+            var d = $(this).closest('tr').data();
+            $('#segUId').val(d.id); $('#segULogin').val(d.login); $('#segUNombres').val(d.nombres);
+            $('#segUApellidos').val(d.apellidos); $('#segUEmail').val(d.email); $('#segUPass').val('');
+            $('#segUActivo').prop('checked', d.activo == 1);
+            var roles = String(d.roles).split(',');
+            $('.seg-urol').each(function () { this.checked = roles.indexOf(this.value) >= 0; });
+        });
+
+        $('#segULimpiar').on('click', function () {
+            $('#segUId').val(0);
+            $('#segULogin,#segUNombres,#segUApellidos,#segUEmail,#segUPass').val('');
+            $('#segUActivo').prop('checked', true);
+            $('.seg-urol').prop('checked', false);
+        });
+
+        $('#segUGuardar').on('click', function () {
+            $.ajax({
+                url: '@Url.Action("GuardarUsuario", "UsersAndRoles")', type: 'POST', traditional: true,
+                data: {
+                    id: $('#segUId').val(), login: $('#segULogin').val(), nombres: $('#segUNombres').val(),
+                    apellidos: $('#segUApellidos').val(), email: $('#segUEmail').val(),
+                    activo: $('#segUActivo').is(':checked'), password: $('#segUPass').val(),
+                    rolIds: $('.seg-urol:checked').map(function () { return parseInt(this.value, 10); }).get()
+                },
+                success: function (r) {
+                    if (r.result) recargar();
+                    else $('#segUMsg').css('color', 'crimson').text(r.message);
+                }
+            });
+        });
+    })();
+</script>

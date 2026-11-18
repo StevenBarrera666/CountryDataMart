@@ -1,25 +1,30 @@
 ﻿using LogicBo;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Web;
 using System.Web.Mvc;
+using WebApplication1.Filters;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
+    [Access]
     public class ClienteController : Controller
     {
         InspectionsBo _inspectionsBo = new InspectionsBo();
 
 
+        [EscrituraVista("Cliente", "Clientes")]
         public ActionResult Registrar(int? id)
         {
             Response.Charset = "utf-8";
             Response.ContentEncoding = System.Text.Encoding.UTF8;
 
             var model = new ClienteRegistroViewModel();
+            string paisNombre = null; // nombre del pais del perfil (dbo.Paises), para ubicarlo en dbo.Countries
 
             // 1. Carga de datos existentes o inicialización
             if (id.HasValue && id.Value > 0)
@@ -50,10 +55,13 @@ namespace WebApplication1.Controllers
                     model.CorreoPrincipal = row["CorreoPrincipal"].ToString();
                     model.Correo2 = row["Correo2"].ToString();
                     model.Direccion = row["Direccion"].ToString();
+                    model.CodigoPostal = _inspectionsBo.ObtenerCodigoPostal("Clientes", id.Value);
+                    model.DiaCierreFacturacion = _inspectionsBo.ObtenerDiaCierreFacturacion(id.Value);
 
                     // Ubicación
                     model.Origen = row["Origen"].ToString();
                     model.PaisId = Convert.ToInt32(row["PaisId"]);
+                    paisNombre = row.Table.Columns.Contains("Pais") && row["Pais"] != DBNull.Value ? row["Pais"].ToString() : null;
                     model.DepartamentoId = Convert.ToInt32(row["DepartamentoId"]);
                     model.CiudadId = Convert.ToInt32(row["CiudadId"]);
 
@@ -99,8 +107,8 @@ namespace WebApplication1.Controllers
 
             // 2. Catálogos Maestros (SelectLists)
             ViewBag.DdlNaturalezas = new SelectList(new[] {
-        new { Id = 1, Nombre = "Persona Jurídica" },
-        new { Id = 2, Nombre = "Persona Natural" }
+        new { Id = 1, Nombre = "Jurídica" },
+        new { Id = 2, Nombre = "Natural" }
     }, "Id", "Nombre", model.NaturalezaId);
 
             ViewBag.DdlTiposCliente = new SelectList(new[] {
@@ -110,17 +118,35 @@ namespace WebApplication1.Controllers
         new { Id = 4, Nombre = "Particular" }
     }, "Id", "Nombre", model.TipoId);
 
-            ViewBag.DdlTiposDoc = new SelectList(new[] {
-        new { Id = 1, Nombre = "NIT - Número Identificación Tributaria" },
-        new { Id = 2, Nombre = "CC - Cédula de Ciudadanía" },
-        new { Id = 3, Nombre = "CE - Cédula de Extranjería" }
-    }, "Id", "Nombre", model.TipoDocumentoId);
+            var tiposDoc = new List<object>();
+            DataTable dtTiposDoc = _inspectionsBo.CargarTiposDocumento();
+            if (dtTiposDoc != null)
+            {
+                foreach (DataRow rt in dtTiposDoc.Rows)
+                    tiposDoc.Add(new { Id = Convert.ToInt32(rt["Id"]), Nombre = rt["Nombre"].ToString() });
+            }
+            ViewBag.DdlTiposDoc = new SelectList(tiposDoc, "Id", "Nombre", model.TipoDocumentoId);
 
             ViewBag.DdlOrigen = new SelectList(new[] { "Nacional", "Internacional" }, model.Origen);
 
-            ViewBag.DdlPaises = new SelectList(new[] {
-        new { Id = 1, Nombre = "Colombia" }
-    }, "Id", "Nombre", model.PaisId);
+            // Paises desde dbo.Countries; al editar se ubica por nombre y, en un alta, se preselecciona Colombia
+            var paises = new List<object>();
+            int? idColombia = null, idPaisPerfil = null;
+            DataTable dtPaises = _inspectionsBo.ListarCountries();
+            if (dtPaises != null)
+            {
+                foreach (DataRow rp in dtPaises.Rows)
+                {
+                    int idPais = Convert.ToInt32(rp["ID"]);
+                    string nombrePais = rp["Name"].ToString().Trim();
+                    paises.Add(new { Id = idPais, Nombre = nombrePais });
+                    if (string.Equals(nombrePais, "Colombia", StringComparison.OrdinalIgnoreCase)) idColombia = idPais;
+                    if (paisNombre != null && string.Equals(nombrePais, paisNombre.Trim(), StringComparison.OrdinalIgnoreCase)) idPaisPerfil = idPais;
+                }
+            }
+            if (id.HasValue && id.Value > 0) { if (idPaisPerfil.HasValue) model.PaisId = idPaisPerfil.Value; }
+            else if (idColombia.HasValue) model.PaisId = idColombia.Value;
+            ViewBag.DdlPaises = new SelectList(paises, "Id", "Nombre", model.PaisId);
 
             ViewBag.DdlDepartamentos = new SelectList(new[] {
         new { Id = 1, Nombre = "Bogotá D.C." },
@@ -134,24 +160,33 @@ namespace WebApplication1.Controllers
         new { Id = 3, Nombre = "Cali" }
     }, "Id", "Nombre", model.CiudadId);
 
-            ViewBag.DdlTiposCobro = new SelectList(new[] {
-        new { Id = 1, Nombre = "Facturación Mensual Vencida" },
-        new { Id = 2, Nombre = "Pago Anticipado" },
-        new { Id = 3, Nombre = "Contra Entrega" }
-    }, "Id", "Nombre", model.TipoCobroId);
+            var tiposCobro = new List<object>();
+            DataTable dtTiposCobro = _inspectionsBo.CargarMetodosPago();
+            if (dtTiposCobro != null)
+            {
+                foreach (DataRow rp in dtTiposCobro.Rows)
+                    tiposCobro.Add(new { Id = Convert.ToInt32(rp["ID"]), Nombre = rp["name"].ToString() });
+            }
+            ViewBag.DdlTiposCobro = new SelectList(tiposCobro, "Id", "Nombre", model.TipoCobroId);
 
             // Lista para el dropdown temporal que agrega tarifas dinámicas
-            ViewBag.DdlCategoriasTarifa = new SelectList(new[] {
-        new { Id = 1, Nombre = "Tarifa Estándar" },
-        new { Id = 2, Nombre = "Tarifa Especial A" },
-        new { Id = 3, Nombre = "Tarifa Preferencial Corporativa" }
-    }, "Id", "Nombre");
+            var categoriasTarifa = new List<object>();
+            DataTable dtCategorias = _inspectionsBo.CargarCategoriasTarifa();
+            if (dtCategorias != null)
+            {
+                foreach (DataRow rc in dtCategorias.Rows)
+                    categoriasTarifa.Add(new { Id = Convert.ToInt32(rc["Id"]), Nombre = rc["Nombre"].ToString() });
+            }
+            ViewBag.DdlCategoriasTarifa = new SelectList(categoriasTarifa, "Id", "Nombre");
 
-            ViewBag.DdlActividades = new SelectList(new[] {
-        new { Id = 1, Nombre = "7110 - Arquitectura e ingeniería" },
-        new { Id = 2, Nombre = "6201 - Desarrollo informático" },
-        new { Id = 3, Nombre = "4690 - Comercio no especializado" }
-    }, "Id", "Nombre", model.ActividadEconomicaId);
+            var actividades = new List<object>();
+            DataTable dtActividades = _inspectionsBo.CargarActividades();
+            if (dtActividades != null)
+            {
+                foreach (DataRow ra in dtActividades.Rows)
+                    actividades.Add(new { Id = Convert.ToInt32(ra["Id"]), Nombre = ra["Nombre"].ToString() });
+            }
+            ViewBag.DdlActividades = new SelectList(actividades, "Id", "Nombre", model.ActividadEconomicaId);
 
             ViewBag.DdlIndustrias = new SelectList(new[] {
         new { Id = 1, Nombre = "Ingeniería y Construcción" },
@@ -168,6 +203,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        [Escritura("Cliente", "Clientes")]
         public JsonResult UploadLogoCliente()
         {
             try
@@ -196,6 +232,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        [Escritura("Cliente", "Clientes")]
         public JsonResult UploadDocumentoFiscal(string tipoDoc)
         {
             try
@@ -224,11 +261,17 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
+        [Escritura("Cliente", "Clientes")]
         public JsonResult GuardarCliente(ClienteRegistroViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return Json(new { result = false, message = "Por favor verifique los campos obligatorios." });
+            }
+
+            if (model.DiaCierreFacturacion.HasValue && (model.DiaCierreFacturacion < 1 || model.DiaCierreFacturacion > 31))
+            {
+                return Json(new { result = false, message = "La fecha de cierre debe ser un día del mes entre 1 y 31." });
             }
 
             string logoCargado = Session["ClienteLogoUrl"] as string;
@@ -244,6 +287,8 @@ namespace WebApplication1.Controllers
 
                     if (idGenerado > 0)
                     {
+                        _inspectionsBo.GuardarCodigoPostal("Clientes", idGenerado, model.CodigoPostal);
+                        _inspectionsBo.GuardarDiaCierreFacturacion(idGenerado, model.DiaCierreFacturacion);
                         Session.Remove("ClienteLogoUrl");
                         return Json(new { result = true, idGenerado = idGenerado });
                     }
@@ -305,6 +350,7 @@ namespace WebApplication1.Controllers
 
                 // 3. Cobros (General)
                 TipoCobro = row.Table.Columns.Contains("TipoCobro") ? row["TipoCobro"].ToString() : string.Empty,
+                DiaCierreFacturacion = _inspectionsBo.ObtenerDiaCierreFacturacion(id),
 
                 // 4. Datos Fiscales
                 ActividadEconomica = row.Table.Columns.Contains("ActividadEconomica") ? row["ActividadEconomica"].ToString() : string.Empty,
@@ -345,23 +391,20 @@ namespace WebApplication1.Controllers
             {
                 var result = _inspectionsBo.GetlistClientes();
 
-                // Si el listado no trae LogoUrl, se consulta el perfil de cada registro para obtenerlo
-                if (result != null && result.Columns.Contains("Id") && !result.Columns.Contains("LogoUrl"))
+                // La fecha de cierre no viene en el SP del listado: se consulta de una vez para todos los clientes
+                if (result != null && result.Columns.Contains("Id") && !result.Columns.Contains("DiaCierreFacturacion"))
                 {
-                    result.Columns.Add("LogoUrl", typeof(string));
+                    DataTable dtCierres = _inspectionsBo.ExecuteDataTable(
+                        "SELECT Id, DiaCierreFacturacion FROM dbo.Clientes", null, CommandType.Text);
+                    var cierres = new Dictionary<string, object>();
+                    if (dtCierres != null)
+                        foreach (DataRow rc in dtCierres.Rows) cierres[rc["Id"].ToString()] = rc["DiaCierreFacturacion"];
+
+                    result.Columns.Add("DiaCierreFacturacion", typeof(object));
                     foreach (DataRow r in result.Rows)
                     {
-                        try
-                        {
-                            int rid;
-                            if (!int.TryParse(r["Id"].ToString(), out rid)) continue;
-                            DataTable perfil = _inspectionsBo.ObtenerPerfilClienteDataTable(rid);
-                            if (perfil != null && perfil.Rows.Count > 0 && perfil.Columns.Contains("LogoUrl") && perfil.Rows[0]["LogoUrl"] != DBNull.Value)
-                            {
-                                r["LogoUrl"] = perfil.Rows[0]["LogoUrl"].ToString();
-                            }
-                        }
-                        catch (Exception) { /* sin logo para este registro */ }
+                        object dia;
+                        r["DiaCierreFacturacion"] = cierres.TryGetValue(r["Id"].ToString(), out dia) ? dia : DBNull.Value;
                     }
                 }
 

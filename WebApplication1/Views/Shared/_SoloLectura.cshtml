@@ -1,0 +1,42 @@
+﻿@* Modo consulta: deshabilita los controles de la tabla cuando el rol solo puede consultar la opcion.
+   ViewData: "action" = action de la opcion, "tabla" = selector de la tabla. *@
+@using WebApplication1.Filters
+@using WebApplication1.Models
+@{
+    var tabla = (string)ViewData["tabla"];
+    var accion = (string)ViewData["action"];
+    // "controller" es opcional: por defecto la opcion es de Inspections
+    var controlador = (string)ViewData["controller"] ?? "Inspections";
+    var soloLectura = Permisos.EsSoloLectura(Session["SessionUser"] as SessionModels, controlador, accion);
+}
+@if (soloLectura)
+{
+    <style>
+        @(tabla) input, @(tabla) select, @(tabla) textarea, @(tabla) button, @(tabla) .ui.dropdown {
+            pointer-events: none !important;
+            opacity: .6;
+        }
+        .aviso-solo-lectura { margin: 0 0 10px; padding: 8px 12px; background: #fff8e1; border: 1px solid #ffe08a; border-radius: 6px; font-size: .9rem; color: #7a5b00; }
+    </style>
+    <script>
+        (function () {
+            var sel = '@tabla';
+            function bloquear() {
+                var $t = $(sel);
+                $t.find('input, select, textarea, button').prop('disabled', true);
+                $t.find('.ui.dropdown').addClass('disabled');
+            }
+            bloquear();
+            var tabla = document.querySelector(sel);
+            if (tabla) {
+                // las filas pueden volver a pintarse (dynatable / semantic): se vuelve a bloquear
+                if (window.MutationObserver) {
+                    new MutationObserver(bloquear).observe(tabla, { childList: true, subtree: true });
+                }
+                var $cont = $(tabla).closest('.table-responsive-container');
+                ($cont.length ? $cont : $(tabla)).before(
+                    '<div class="aviso-solo-lectura"><i class="lock icon"></i> Modo consulta: su rol solo puede consultar esta opción.</div>');
+            }
+        })();
+    </script>
+}

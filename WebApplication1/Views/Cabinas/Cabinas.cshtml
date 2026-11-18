@@ -1,0 +1,109 @@
+﻿@model System.Data.DataTable
+@using System.Data
+@using WebApplication1.Filters
+@using WebApplication1.Models
+@{
+    bool soloLectura = Permisos.EsSoloLectura(Session["SessionUser"] as SessionModels, "Cabinas", "Cabinas");
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .btn-outline-custom {
+        border-radius: 20px;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 4px 16px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .btn-outline-custom:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+</style>
+<div class="ui container fluid" style="padding: 15px;">
+    <div class="ui grid stackable middle aligned">
+        <div class="eight wide column">
+            <h3 class="ui header">
+                <i class="plane icon"></i>
+                <div class="content">
+                    Cabinas de Vuelo
+                    <div class="sub header">Listado general de cabinas</div>
+                </div>
+            </h3>
+        </div>
+        <div class="eight wide right aligned column">
+            @if (!soloLectura)
+            {
+                <a href="javascript:void(0)" class="btn-outline-custom" onclick="cargarElement('@Url.Action("Registrar", "Cabinas")')">
+                <i class="bi bi-pencil me-1"></i> Crear/Modificar/Inactivar Cabina
+                </a>
+            }
+            else
+            {
+                <span class="ui small label"><i class="lock icon"></i> Modo consulta</span>
+            }
+        </div>
+    </div>
+
+    <div class="ui divider"></div>
+
+    <table class="ui selectable celled table center aligned tablesInitial" id="tablaCabinas">
+        <thead>
+            <tr>
+                <th>Orden</th>
+                <th>Nombre</th>
+                <th>Nombre en Inglés</th>
+                <th>Código GDS</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model == null || Model.Rows.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="center aligned text-muted">No se encontraron cabinas de vuelo.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (DataRow row in Model.Rows)
+                {
+                    bool activa = row["Activo"] == DBNull.Value || Convert.ToBoolean(row["Activo"]);
+                    <tr>
+                        <td>@row["Orden"]</td>
+                        <td class="left aligned fw-bold">
+                            <a href="javascript:void(0)"
+                               onclick="cargarElement('@Url.Action("Perfil", "Cabinas", new { id = row["Id"].ToString() })')">
+                                @row["Nombre"]
+                            </a>
+                        </td>
+                        <td class="left aligned">@row["NombreIngles"]</td>
+                        <td><span class="ui small label">@row["CodigoGDS"]</span></td>
+                        <td><span class="ui small @(activa ? "green" : "grey") label">@(activa ? "Activo" : "Inactivo")</span></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+</script>

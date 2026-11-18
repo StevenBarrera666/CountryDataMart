@@ -1,0 +1,99 @@
+﻿@using LogicBo
+@{
+    var roles = (List<SecurityBo.RolModel>)ViewBag.Roles;
+    var opciones = (List<SecurityBo.OpcionModel>)ViewBag.Opciones;
+}
+
+<style>
+    .seg-panel { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:20px; }
+    .seg-panel h5 { margin:0 0 12px; font-weight:700; color:#0f2942; }
+    .seg-table { width:100%; border-collapse:collapse; font-size:.9rem; margin-bottom:8px; }
+    .seg-table th, .seg-table td { padding:6px 8px; border-bottom:1px solid #edf2f7; text-align:left; }
+    .seg-msg { margin-top:8px; font-size:.85rem; }
+</style>
+
+<h3 class="titlesPages">ADMINISTRAR ROLES</h3>
+
+<div class="seg-panel">
+    <h5>Rol</h5>
+    <select id="segRolSel">
+        <option value="0">-- Nuevo rol --</option>
+        @foreach (var r in roles)
+        {
+            <option value="@r.Id">@r.Descripcion</option>
+        }
+    </select>
+    <input type="text" id="segRolDesc" placeholder="Descripción del rol" maxlength="50" />
+    <button type="button" id="segRolGuardar">Guardar rol</button>
+</div>
+
+<div class="seg-panel">
+    <h5>Opciones a las que accede el rol</h5>
+    <table class="seg-table">
+        <thead><tr><th>Acceso</th><th>Opción</th><th>Menú</th><th>Solo lectura</th></tr></thead>
+        <tbody>
+            @foreach (var o in opciones)
+            {
+                <tr>
+                    <td><input type="checkbox" class="seg-opcion" value="@o.id" /></td>
+                    <td>@o.Nombre</td>
+                    <td><small>@o.Menu</small></td>
+                    <td><input type="checkbox" class="seg-lectura" value="@o.id" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <small>"Solo lectura": el rol ve la opción, pero sus botones, listas y cuadros de texto quedan deshabilitados (aplica a Documentación, Autorización, Facturación, Clientes, Empleados, Proveedores, Categorías de Tarifas, Viajeros, Fichas y Cabinas de Vuelo).</small>
+    <button type="button" id="segOpcionesGuardar" style="margin-top:10px">Guardar opciones del rol</button>
+    <div class="seg-msg" id="segRolMsg"></div>
+    <small>Los cambios se aplican cuando los usuarios del rol vuelven a iniciar sesión.</small>
+</div>
+
+<script>
+    (function () {
+        function msg(ok, text) { $('#segRolMsg').css('color', ok ? 'green' : 'crimson').text(text); }
+
+        $('#segRolSel').on('change', function () {
+            var id = parseInt(this.value, 10);
+            $('#segRolDesc').val(id ? $(this).find('option:selected').text() : '');
+            $('.seg-opcion, .seg-lectura').prop('checked', false);
+            if (!id) return;
+            $.post('@Url.Action("GetOpcionesRol", "UsersAndRoles")', { rolId: id }, function (filas) {
+                $.each(filas, function (_, f) {
+                    $('.seg-opcion[value=' + f.OpcionId + ']').prop('checked', true);
+                    $('.seg-lectura[value=' + f.OpcionId + ']').prop('checked', f.SoloLectura);
+                });
+            });
+        });
+
+        // Solo lectura implica acceso; quitar el acceso quita tambien el solo lectura
+        $(document).on('change', '.seg-lectura', function () {
+            if (this.checked) $('.seg-opcion[value=' + this.value + ']').prop('checked', true);
+        });
+        $(document).on('change', '.seg-opcion', function () {
+            if (!this.checked) $('.seg-lectura[value=' + this.value + ']').prop('checked', false);
+        });
+
+        $('#segRolGuardar').on('click', function () {
+            $.post('@Url.Action("GuardarRol", "UsersAndRoles")',
+                { id: $('#segRolSel').val(), descripcion: $('#segRolDesc').val() }, function (r) {
+                    if (r.result) loadProceduresTable({ href: '@Url.Action("Roles", "UsersAndRoles")' });
+                    else msg(false, r.message);
+                });
+        });
+
+        $('#segOpcionesGuardar').on('click', function () {
+            var rolId = parseInt($('#segRolSel').val(), 10);
+            if (!rolId) { msg(false, 'Seleccione un rol existente'); return; }
+            var ids = $('.seg-opcion:checked').map(function () { return parseInt(this.value, 10); }).get();
+            $.ajax({
+                url: '@Url.Action("GuardarOpcionesRol", "UsersAndRoles")', type: 'POST', traditional: true,
+                data: {
+                    rolId: rolId, opcionIds: ids,
+                    soloLecturaIds: $('.seg-lectura:checked').map(function () { return parseInt(this.value, 10); }).get()
+                },
+                success: function (r) { msg(r.result, r.result ? 'Opciones guardadas' : r.message); }
+            });
+        });
+    })();
+</script>

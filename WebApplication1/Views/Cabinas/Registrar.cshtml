@@ -1,0 +1,135 @@
+﻿@model WebApplication1.Models.CabinaVueloViewModel
+@{
+    Layout = Request.IsAjaxRequest() ? null : "~/Views/Shared/_Layout.cshtml";
+    bool esEdicion = Model != null && Model.Id > 0;
+    ViewBag.Title = esEdicion ? "Actualizar Cabina de Vuelo" : "Registrar Cabina de Vuelo";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css" />
+
+<div id="wrapRegistrar" style="padding: 15px;">
+    <h3 class="ui header dividing">
+        <i class="@(esEdicion ? "pencil alternate" : "plane") icon"></i>
+        <div class="content">
+            @(esEdicion ? "ACTUALIZAR CABINA DE VUELO" : "REGISTRO DE NUEVA CABINA DE VUELO")
+            <div class="sub header">Cabinas disponibles para los pasajeros</div>
+        </div>
+    </h3>
+
+    <form id="formRegistrarCabina" class="ui form" onsubmit="return false;">
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.Activo, new { id = "hdnActivo" })
+
+        <div class="field">
+            <label>Estado</label>
+            <div class="ui toggle checkbox" id="chkActivo">
+                <input type="checkbox" @(Model.Activo ? "checked" : "") />
+                <label id="lblActivo">@(Model.Activo ? "Activo" : "Inactivo")</label>
+            </div>
+        </div>
+
+        <div class="two fields">
+            <div class="field required">
+                <label>Nombre</label>
+                @Html.TextBoxFor(m => m.Nombre, new { placeholder = "Ej. Clase Ejecutiva", maxlength = "100", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Nombre en Inglés</label>
+                @Html.TextBoxFor(m => m.NombreIngles, new { placeholder = "Ej. Business Class", maxlength = "100", autocomplete = "off" })
+            </div>
+        </div>
+
+        <div class="two fields">
+            <div class="field">
+                <label>Código GDS</label>
+                @Html.TextBoxFor(m => m.CodigoGDS, new { placeholder = "Ej. C", maxlength = "5", autocomplete = "off" })
+            </div>
+            <div class="field">
+                <label>Orden</label>
+                @Html.TextBoxFor(m => m.Orden, new { type = "number", min = "0", step = "1", autocomplete = "off" })
+            </div>
+        </div>
+    </form>
+
+    <div style="margin-top: 25px;">
+        <button class="ui primary button" type="button" id="btnGuardarCabina">
+            <i class="save icon"></i> @(esEdicion ? "Guardar Cambios" : "Registrar Cabina")
+        </button>
+        <button class="ui button" type="button"
+                onclick="cargarElement('@(esEdicion ? Url.Action("Perfil", "Cabinas", new { id = Model.Id }) : Url.Action("Cabinas", "Cabinas"))')">
+            Cancelar
+        </button>
+    </div>
+
+    <div class="ui floating warning message" style="width: 60%; margin: 20px auto; text-align: center; display: none;" id="messageRegistrarCabina">
+        <div class="header">Atención</div>
+        <p id="textMessageRegistrarCabina"></p>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function cargarElement(url) {
+        $.ajax({
+            url: url,
+            beforeSend: function () {
+                $('#facadeContent').html('').addClass("loading").css("height", 500);
+            },
+            success: function (data) {
+                $('#facadeContent').html(data);
+            },
+            complete: function () {
+                $('#facadeContent').removeClass("loading").css("height", "inherit");
+                LoadElementsDefaultPartial('#facadeContent');
+            }
+        });
+    }
+
+    function mostrarNotificacion(mensaje, esExito) {
+        var $div = $('#messageRegistrarCabina');
+        $div.removeClass("warning info").addClass(esExito ? "info" : "warning");
+        $('#textMessageRegistrarCabina').text(mensaje);
+        $div.stop(true, true).fadeIn();
+    }
+
+    $(document).ready(function () {
+        $('#chkActivo input').on('change', function () {
+            // HiddenFor(bool) envía "True"/"False"
+            $('#hdnActivo').val(this.checked ? 'True' : 'False');
+            $('#lblActivo').text(this.checked ? 'Activo' : 'Inactivo');
+        }).trigger('change');
+    });
+
+    $('#btnGuardarCabina').off('click').on('click', function (e) {
+        e.preventDefault();
+
+        if (!$.trim($('#Nombre').val())) {
+            mostrarNotificacion('Ingrese el nombre de la cabina.', false);
+            return;
+        }
+
+        $('#facadeContent').addClass("loading");
+        $.ajax({
+            url: '@Url.Action("GuardarCabina", "Cabinas")',
+            type: 'POST',
+            data: $('#formRegistrarCabina').serialize(),
+            success: function (data) {
+                $('#facadeContent').removeClass("loading");
+                var res = typeof data === "string" ? JSON.parse(data) : data;
+                if (res.result) {
+                    mostrarNotificacion("Cabina guardada con éxito. Redirigiendo a su ficha...", true);
+                    setTimeout(function () {
+                        cargarElement('@Url.Action("Perfil", "Cabinas")?id=' + res.idGenerado);
+                    }, 1000);
+                } else {
+                    mostrarNotificacion(res.message, false);
+                }
+            },
+            error: function (xhr, status, error) {
+                $('#facadeContent').removeClass("loading");
+                mostrarNotificacion("Error en la solicitud: " + error, false);
+            }
+        });
+    });
+</script>
+
+@Html.Partial("_SoloLectura", new ViewDataDictionary { { "controller", "Cabinas" }, { "action", "Cabinas" }, { "tabla", "#wrapRegistrar" } })

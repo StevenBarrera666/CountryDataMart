@@ -1,0 +1,94 @@
+﻿@using LogicBo
+@{
+    var opciones = (List<SecurityBo.OpcionModel>)ViewBag.Opciones;
+}
+
+<style>
+    .seg-panel { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:20px; }
+    .seg-panel h5 { margin:0 0 12px; font-weight:700; color:#0f2942; }
+    .seg-table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    .seg-table th, .seg-table td { padding:6px 8px; border-bottom:1px solid #edf2f7; text-align:left; }
+    .seg-form { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:8px; margin-top:12px; }
+    .seg-form input[type=text], .seg-form input[type=number], .seg-form select { width:100%; padding:6px 8px; }
+    .seg-msg { margin-top:8px; font-size:.85rem; }
+</style>
+
+<h3 class="titlesPages">ADMINISTRAR OPCIONES</h3>
+
+<div class="seg-panel">
+    <table class="seg-table">
+        <thead><tr><th>Nombre</th><th>Controller</th><th>Action(s)</th><th>Menú</th><th>Orden</th><th>Activa</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var o in opciones)
+            {
+                <tr data-id="@o.id" data-nombre="@o.Nombre" data-controller="@o.Controller" data-action="@o.Action"
+                    data-menu="@o.Menu" data-icono="@o.Icono" data-ajax="@(o.Ajax ? 1 : 0)" data-orden="@o.Orden" data-activo="@(o.Activo ? 1 : 0)">
+                    <td>@o.Nombre</td>
+                    <td>@o.Controller</td>
+                    <td>@o.Action</td>
+                    <td>@o.Menu</td>
+                    <td>@o.Orden</td>
+                    <td>@(o.Activo ? "Sí" : "No")</td>
+                    <td><button type="button" class="seg-editar">Editar</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="seg-panel">
+    <h5>Datos de la opción</h5>
+    <div class="seg-form">
+        <input type="hidden" id="segOId" value="0" />
+        <input type="text" id="segONombre" placeholder="Nombre" maxlength="100" />
+        <input type="text" id="segOController" placeholder="Controller" maxlength="100" />
+        <input type="text" id="segOAction" placeholder="Action (vacío = todo el controller)" maxlength="100" />
+        <select id="segOMenu">
+            <option value="PRINCIPAL">PRINCIPAL</option>
+            <option value="ADMIN" selected>ADMIN</option>
+            <option value="TRAZA">TRAZA</option>
+        </select>
+        <input type="text" id="segOIcono" placeholder="Icono (ej. bi-people)" maxlength="50" />
+        <input type="number" id="segOOrden" placeholder="Orden" value="0" />
+        <label><input type="checkbox" id="segOAjax" checked /> Cargar en el panel</label>
+        <label><input type="checkbox" id="segOActivo" checked /> Activa</label>
+    </div>
+    <button type="button" id="segOGuardar" style="margin-top:10px">Guardar opción</button>
+    <button type="button" id="segOLimpiar">Nueva</button>
+    <div class="seg-msg" id="segOMsg"></div>
+    <small>
+        En Action puede indicar varias separadas por coma (la primera es la del menú; las demás quedan protegidas por la misma opción).
+        Después de crearla asígnela a los roles en Administrar Roles.
+    </small>
+</div>
+
+<script>
+    (function () {
+        $('.seg-editar').on('click', function () {
+            var d = $(this).closest('tr').data();
+            $('#segOId').val(d.id); $('#segONombre').val(d.nombre); $('#segOController').val(d.controller);
+            $('#segOAction').val(d.action); $('#segOMenu').val(d.menu); $('#segOIcono').val(d.icono);
+            $('#segOOrden').val(d.orden);
+            $('#segOAjax').prop('checked', d.ajax == 1); $('#segOActivo').prop('checked', d.activo == 1);
+        });
+
+        $('#segOLimpiar').on('click', function () {
+            $('#segOId').val(0);
+            $('#segONombre,#segOController,#segOAction,#segOIcono').val('');
+            $('#segOMenu').val('ADMIN'); $('#segOOrden').val(0);
+            $('#segOAjax,#segOActivo').prop('checked', true);
+        });
+
+        $('#segOGuardar').on('click', function () {
+            $.post('@Url.Action("GuardarOpcion", "UsersAndRoles")', {
+                id: $('#segOId').val(), nombre: $('#segONombre').val(), controller: $('#segOController').val(),
+                action: $('#segOAction').val(), menu: $('#segOMenu').val(), icono: $('#segOIcono').val(),
+                ajax: $('#segOAjax').is(':checked'), orden: parseInt($('#segOOrden').val(), 10) || 0,
+                activo: $('#segOActivo').is(':checked')
+            }, function (r) {
+                if (r.result) loadProceduresTable({ href: '@Url.Action("AdministrarOpciones", "UsersAndRoles")' });
+                else $('#segOMsg').css('color', 'crimson').text(r.message);
+            });
+        });
+    })();
+</script>

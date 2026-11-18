@@ -34,6 +34,7 @@ namespace LogicBo
         public string Correo2 { get; set; }
         [Required]
         public string Direccion { get; set; }
+        public string CodigoPostal { get; set; }
 
         // 2. Datos Ubicación
         [Required]
@@ -48,6 +49,7 @@ namespace LogicBo
         // 3. Cobros
         [Required]
         public int TipoCobroId { get; set; }
+        public int? DiaCierreFacturacion { get; set; }
         [Required]
         public int CategoriaTarifaId { get; set; }
         public decimal TarifaAdministrativa { get; set; }
